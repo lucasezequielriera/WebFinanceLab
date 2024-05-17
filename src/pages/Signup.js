@@ -12,7 +12,7 @@ export default function Signup() {
   const lastNameRef = useRef();
   const { signup } = useAuth();
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Estado de carga
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
@@ -20,15 +20,21 @@ export default function Signup() {
 
     try {
       setError('');
-      setLoading(true);
-      const userCredential = await signup(emailRef.current.value, passwordRef.current.value);
+      // Leer los valores de las referencias antes de cambiar el estado de loading
+      const firstName = firstNameRef.current.value;
+      const lastName = lastNameRef.current.value;
+      const email = emailRef.current.value;
+      const password = passwordRef.current.value;
+
+      setLoading(true); // Iniciar la carga
+      const userCredential = await signup(email, password);
       await updateProfile(userCredential.user, {
-        displayName: `${firstNameRef.current.value} ${lastNameRef.current.value}`
+        displayName: `${firstName} ${lastName}`
       });
       await setDoc(doc(db, "users", userCredential.user.uid), {
-        firstName: firstNameRef.current.value,
-        lastName: lastNameRef.current.value,
-        email: emailRef.current.value,
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
         age: '',
         city: '',
         gender: '',
@@ -38,26 +44,29 @@ export default function Signup() {
     } catch (err) {
       console.error('Error during signup:', err);
       setError('Failed to create an account');
+      setLoading(false); // Terminar la carga en caso de error
     }
-
-    setLoading(false);
   }
 
   return (
     <div>
       <h2>Sign Up</h2>
       {error && <div>{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <label>First Name</label>
-        <input type="text" ref={firstNameRef} required />
-        <label>Last Name</label>
-        <input type="text" ref={lastNameRef} required />
-        <label>Email</label>
-        <input type="email" ref={emailRef} required />
-        <label>Password</label>
-        <input type="password" ref={passwordRef} required />
-        <button disabled={loading} type="submit">Sign Up</button>
-      </form>
+      {loading ? (
+        <div>Loading...</div> // Mostrar "Loading..." mientras se realiza el signup
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <label>First Name</label>
+          <input type="text" ref={firstNameRef} required />
+          <label>Last Name</label>
+          <input type="text" ref={lastNameRef} required />
+          <label>Email</label>
+          <input type="email" ref={emailRef} required />
+          <label>Password</label>
+          <input type="password" ref={passwordRef} required />
+          <button disabled={loading} type="submit">Sign Up</button>
+        </form>
+      )}
       <div>
         Already have an account? <Link to="/login">Log In</Link>
       </div>

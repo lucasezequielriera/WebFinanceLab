@@ -42,7 +42,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children} {/* Renderizar hijos solo cuando la autenticación se haya completado */}
+      {loading ? <div>Loading...</div> : children} {/* Mostrar "Loading..." mientras se verifica la autenticación */}
     </AuthContext.Provider>
   );
 }
