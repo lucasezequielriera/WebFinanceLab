@@ -19,10 +19,10 @@ export default function AddExpense() {
 
     try {
       setError('');
-      await addDoc(collection(db, 'expenses'), {
+      const userExpensesCollection = collection(db, `users/${currentUser.uid}/expenses`);
+      await addDoc(userExpensesCollection, {
         description: descriptionRef.current.value,
         amount: parseFloat(amountRef.current.value),
-        uid: currentUser.uid, // Asociar el expense con el uid del usuario
         createdAt: new Date()
       });
       // Limpiar campos después de agregar el expense

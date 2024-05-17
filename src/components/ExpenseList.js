@@ -11,7 +11,8 @@ export default function ExpenseList() {
   useEffect(() => {
     if (!currentUser) return;
 
-    const q = query(collection(db, "expenses"), where("uid", "==", currentUser.uid));
+    const userExpensesCollection = collection(db, `users/${currentUser.uid}/expenses`);
+    const q = query(userExpensesCollection);
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const expensesData = [];
       snapshot.forEach((doc) => {
@@ -26,7 +27,8 @@ export default function ExpenseList() {
 
   const handleDeleteExpense = async (expenseId) => {
     try {
-      await deleteDoc(doc(db, "expenses", expenseId));
+      const userExpensesCollection = collection(db, `users/${currentUser.uid}/expenses`);
+      await deleteDoc(doc(userExpensesCollection, expenseId));
     } catch (error) {
       console.error("Error deleting expense: ", error);
     }
