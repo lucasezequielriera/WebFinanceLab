@@ -1,26 +1,80 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { Layout, Menu } from 'antd';
+import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import PrivateRoute from './components/PrivateRoute';
-import Navbar from './components/Navbar';
-import UserProfile from './components/UserProfile'; // Importar UserProfile
-import { AuthProvider } from './contexts/AuthContext';
+import UserProfile from './pages/UserProfile';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import './index.css';
+
+const { Header, Sider, Content } = Layout;
+
+const AppLayout = () => {
+  const { currentUser, logout } = useAuth();
+  const [collapsed, setCollapsed] = useState(false);
+
+  const toggle = () => {
+    setCollapsed(!collapsed);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch {
+      console.error('Failed to logout');
+    }
+  };
+
+  return (
+    <Layout style={{ minHeight: '100vh' }}>
+      <Sider trigger={null} collapsible collapsed={collapsed}>
+        <div className="user-greeting" style={{ color: 'white', padding: '16px', textAlign: 'center' }}>
+          {collapsed ? <UserOutlined /> : currentUser ? `Hi, ${currentUser.displayName || 'User'}` : 'Hi, User'}
+        </div>
+        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
+          <Menu.Item key="1" icon={<DashboardOutlined />}>
+            <Link to="/dashboard">Dashboard</Link>
+          </Menu.Item>
+          <Menu.Item key="2" icon={<UserOutlined />}>
+            <Link to="/profile">Profile</Link>
+          </Menu.Item>
+          {currentUser && (
+            <Menu.Item key="3" icon={<LogoutOutlined />} onClick={handleLogout}>
+              Logout
+            </Menu.Item>
+          )}
+        </Menu>
+      </Sider>
+      <Layout className="site-layout">
+        <Header className="site-layout-background" style={{ padding: 0 }}>
+          {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+            className: 'trigger',
+            onClick: toggle,
+          })}
+        </Header>
+        <Content style={{ margin: '24px 16px', padding: 24, minHeight: 280 }}>
+          <Routes>
+            <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
+          </Routes>
+        </Content>
+      </Layout>
+    </Layout>
+  );
+};
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <Navbar />
-        <Routes>
-          <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} /> {/* Añadir ruta para UserProfile */}
-        </Routes>
-      </AuthProvider>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppLayout />
+      </Router>
+    </AuthProvider>
   );
 }
 
