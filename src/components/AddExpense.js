@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const { Option } = Select;
 
-const AddExpense = () => {
+const AddExpense = ({ onExpenseAdded }) => {
   const { currentUser } = useAuth();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -21,14 +21,18 @@ const AddExpense = () => {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      await addDoc(collection(db, `users/${currentUser.uid}/expenses`), {
+      const newExpense = {
         amount: parseFloat(values.amount),
+        currency: values.currency,
         category: values.category,
         description: values.description,
         timestamp: new Date(),
-      });
+      };
+      const docRef = await addDoc(collection(db, `users/${currentUser.uid}/expenses`), newExpense);
+      newExpense.id = docRef.id; // Agregar el id del documento al nuevo gasto
       form.resetFields();
       openNotification();
+      onExpenseAdded(newExpense); // Notificar al padre sobre el nuevo gasto
     } catch (e) {
       console.error('Error adding document: ', e);
       notification.error({
@@ -54,6 +58,17 @@ const AddExpense = () => {
           rules={[{ required: true, message: 'Please input the amount!' }]}
         >
           <Input type="number" placeholder="Enter amount" />
+        </Form.Item>
+
+        <Form.Item
+          name="currency"
+          label="Currency"
+          rules={[{ required: true, message: 'Please select the currency!' }]}
+        >
+          <Select placeholder="Select currency">
+            <Option value="USD">USD</Option>
+            <Option value="ARS">ARS</Option>
+          </Select>
         </Form.Item>
 
         <Form.Item

@@ -4,6 +4,7 @@ import ExpenseList from '../components/ExpenseList';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
+import '../styles/ExpensesPage.css';
 
 const ExpensesPage = () => {
   const { currentUser } = useAuth();
@@ -31,12 +32,15 @@ const ExpensesPage = () => {
   }, [currentUser]);
 
   if (loading) {
-    return <Spin tip="Loading..." size="large" />;
+    return (
+        <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div style={{ height: '100vh' }} />
+    </Spin>
+    );
   }
 
   return (
     <div>
-      <h1>Expense List</h1>
       <ExpenseList expenses={expenses} />
     </div>
   );

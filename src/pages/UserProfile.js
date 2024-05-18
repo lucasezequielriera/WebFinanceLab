@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { PlusOutlined } from '@ant-design/icons';
 import { notification, Button, Input, Select, Table, Modal, Form, Spin } from 'antd';
 import "../index.css"
+import "../styles/UserProfile.css"; // Importa el archivo CSS
 
 const { Option } = Select;
 
@@ -230,10 +231,9 @@ export default function UserProfile() {
     ];
 
     if (loading || imageLoading) {
-        return (
-                <Spin tip="Loading..." size="large">
-                    <div style={{ height: '100vh' }} />
-                </Spin>)
+        return <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div style={{ height: '100vh' }} />
+    </Spin>
     }
 
     return (

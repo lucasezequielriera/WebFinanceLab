@@ -132,3 +132,35 @@ code {
 .trigger:hover {
   color: #1890ff;
 }
+
+/* DASHBOARD*/
+
+.sidebar-tags {
+  position: absolute;
+  bottom: 16px;
+  width: 100%;
+  padding: 0 16px;
+}
+
+.sidebar-tag {
+  display: block;
+  text-align: center;
+  width: 100%;
+  padding: 8px 0;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.sidebar-tag:hover {
+  opacity: 0.8;
+}
+
+/* LOADING */
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}
+

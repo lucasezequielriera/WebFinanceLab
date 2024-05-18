@@ -1,0 +1,55 @@
+.expense-list h2 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.custom-table .ant-table {
+  font-size: 0.8rem;
+}
+
+.custom-table .ant-table-thead > tr > th {
+  padding: 8px;
+}
+
+.custom-table .ant-table-tbody > tr > td {
+  padding: 8px;
+}
+
+.custom-table .editable-cell-value-wrap {
+  margin: 0;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.custom-table .editable-row:hover .editable-cell-value-wrap {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+}
+
+.expense-list {
+  width: 100%;
+}
+
+.custom-table .ant-table {
+  table-layout: fixed; /* Asegurarse de que las columnas tengan el mismo ancho */
+}
+
+.custom-table .ant-table-thead > tr > th,
+.custom-table .ant-table-tbody > tr > td {
+  padding: 8px;
+}
+
+.custom-table .editable-cell-value-wrap {
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.custom-table .editable-row:hover .editable-cell-value-wrap {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+}
+
+.total-row {
+  font-weight: bold;
+  background-color: #f6f6f6;
+}
