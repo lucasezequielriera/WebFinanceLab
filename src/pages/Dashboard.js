@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Spin, Row, Col } from 'antd';
 import AddExpense from '../components/AddExpense';
-import ExpenseList from '../components/ExpenseList';
 import MonthlyChart from '../components/MonthlyChart';
 import DollarExpenseCounter from '../components/DollarExpenseCounter';
 import PesoExpenseCounter from '../components/PesoExpenseCounter';
@@ -38,7 +37,7 @@ const Dashboard = () => {
         incomesData.push({ id: doc.id, ...doc.data() });
       });
       setIncomes(incomesData);
-      setLoading(false); // Set loading to false when incomes data is fetched
+      setLoading(false);
     });
 
     return () => {
@@ -54,19 +53,24 @@ const Dashboard = () => {
   return (
     <div>
       <h1>Dashboard</h1>
-      <Row gutter={16}>
-        <Col span={8}>
-          <ExpenseList expenses={expenses} />
-          <AddExpense />
-        </Col>
-        <Col span={8}>
+      <Row className="margin-top-large margin-bottom-large" gutter={16}>
+        <Col span={12}>
           <PesoExpenseCounter expenses={expenses} />
         </Col>
-        <Col span={8}>
+        <Col span={12}>
           <DollarExpenseCounter expenses={expenses} />
         </Col>
       </Row>
-      <MonthlyChart incomes={incomes} />
+      <Row className="margin-bottom-large" gutter={16}>
+        <Col span={24}>
+          <AddExpense />
+        </Col>
+      </Row>
+      <Row gutter={16}>
+        <Col span={24}>
+          <MonthlyChart incomes={incomes} />
+        </Col>
+      </Row>
     </div>
   );
 };
