@@ -1,8 +1,6 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'system-ui';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -10,4 +8,105 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* PAGES */
+
+/* User Profile */
+
+.user-profile {
+  margin: 20px;
+}
+
+.user-profile .title {
+  display: flex;
+  justify-content: flex-start;
+  font-size: 30px;
+  font-weight: 300;
+}
+
+/* MARGINS */
+
+.margin-top-small {
+  margin-top: 8px;
+}
+
+.margin-top-medium {
+  margin-top: 16px;
+}
+
+.margin-top-large {
+  margin-top: 24px;
+}
+
+.margin-bottom-small {
+  margin-bottom: 8px;
+}
+
+.margin-bottom-medium {
+  margin-bottom: 16px;
+}
+
+.margin-bottom-large {
+  margin-bottom: 24px;
+}
+
+.margin-left-small {
+  margin-left: 8px;
+}
+
+.margin-left-medium {
+  margin-left: 16px;
+}
+
+.margin-left-large {
+  margin-left: 24px;
+}
+
+.margin-right-small {
+  margin-right: 8px;
+}
+
+.margin-right-medium {
+  margin-right: 16px;
+}
+
+.margin-right-large {
+  margin-right: 24px;
+}
+
+/* GRID */
+
+.display-flex {
+  display: flex;
+}
+
+.left {
+  justify-content: flex-start;
+}
+
+.center {
+  justify-content: center;
+}
+
+.right {
+  justify-content: flex-end;
+}
+
+/* WIDTH */
+
+.w-200 {
+  width: 350px;
+}
+
+/* FONTS */
+
+.label-small {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.label {
+  font-size: 13px;
 }
