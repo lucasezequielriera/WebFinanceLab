@@ -1,32 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const MonthlyChart = ({ incomes }) => {
   const [data, setData] = useState([]);
-  const monthsOrder = [
+
+  const monthsOrder = useMemo(() => [
     'January', 'February', 'March', 'April', 'May', 'June', 
     'July', 'August', 'September', 'October', 'November', 'December'
-  ];
+  ], []);
 
   useEffect(() => {
-    const incomesData = {};
+    console.log("Incomes received in MonthlyChart:", incomes);
+
+    const incomesData = monthsOrder.reduce((acc, month) => {
+      acc[month] = 0;
+      return acc;
+    }, {});
+
     incomes.forEach((income) => {
-      const month = income.month;
-      if (!incomesData[month]) {
-        incomesData[month] = 0;
-      }
-      incomesData[month] += income.amount;
+      monthsOrder.forEach(month => {
+        const monthKey = month.toLowerCase();
+        if (income[monthKey] !== undefined) {
+          incomesData[month] += Number(income[monthKey]) || 0;
+        }
+      });
     });
 
-    const chartData = Object.keys(incomesData).map((month) => ({
+    const chartData = monthsOrder.map((month) => ({
       name: month,
       income: incomesData[month],
-    }));
+    })).filter(data => data.income !== 0);
 
-    chartData.sort((a, b) => monthsOrder.indexOf(a.name) - monthsOrder.indexOf(b.name));
-
+    console.log("ChartData prepared for LineChart:", chartData);
     setData(chartData);
-  }, [incomes]);
+  }, [incomes, monthsOrder]);
 
   return (
     <ResponsiveContainer width="100%" height={400}>

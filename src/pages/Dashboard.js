@@ -5,7 +5,6 @@ import ExpenseList from '../components/ExpenseList';
 import MonthlyChart from '../components/MonthlyChart';
 import DollarExpenseCounter from '../components/DollarExpenseCounter';
 import PesoExpenseCounter from '../components/PesoExpenseCounter';
-import AddIncome from '../components/AddIncome';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
