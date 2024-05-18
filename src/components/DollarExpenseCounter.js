@@ -1,16 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Statistic } from 'antd';
+import { Card, Statistic, Spin } from 'antd';
 import { DollarOutlined } from '@ant-design/icons';
+import { db } from '../firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { useAuth } from '../contexts/AuthContext';
 
-const DollarExpenseCounter = ({ expenses }) => {
+const DollarExpenseCounter = () => {
+  const { currentUser } = useAuth();
   const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const totalExpenses = expenses
-      .filter(expense => expense.currency === 'USD')
-      .reduce((sum, expense) => sum + expense.amount, 0);
-    setTotal(totalExpenses);
-  }, [expenses]);
+    if (!currentUser) return;
+
+    const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
+    const qExpenses = query(expensesRef, where('currency', '==', 'USD'));
+
+    const unsubscribeExpenses = onSnapshot(qExpenses, (snapshot) => {
+      const totalExpenses = snapshot.docs.reduce((sum, doc) => sum + doc.data().amount, 0);
+      setTotal(totalExpenses);
+      setLoading(false);
+    });
+
+    return () => unsubscribeExpenses();
+  }, [currentUser]);
+
+  if (loading) {
+    return <Spin spinning={loading} />;
+  }
 
   return (
     <Card>
