@@ -36,6 +36,8 @@ const MonthlyChart = () => {
             <Legend />
             <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
             <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
+            <Line type="monotone" dataKey="amt" stroke="#009999" />
+
         </LineChart>
         </ResponsiveContainer>
     </div>);
