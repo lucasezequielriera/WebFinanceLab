@@ -10,12 +10,12 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true); // Nuevo estado para indicar si se está cargando la autenticación
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
-      setLoading(false); // Cuando la autenticación se completa, se establece loading en false
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -42,7 +42,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {loading ? <div>Loading...</div> : children} {/* Mostrar "Loading..." mientras se verifica la autenticación */}
+      {loading ? <div>Loading...</div> : children}
     </AuthContext.Provider>
   );
 }

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Layout, Menu } from 'antd';
-import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
+import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, AccountBookOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import PrivateRoute from './components/PrivateRoute';
 import UserProfile from './pages/UserProfile';
+import Accounting from './pages/Accounting'; // Importa la nueva página Accounting
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
 
@@ -38,11 +39,14 @@ const AppLayout = () => {
           <Menu.Item key="1" icon={<DashboardOutlined />}>
             <Link to="/dashboard">Dashboard</Link>
           </Menu.Item>
+          <Menu.Item key="3" icon={<AccountBookOutlined />}>
+            <Link to="/accounting">Accounting</Link>
+          </Menu.Item>
           <Menu.Item key="2" icon={<UserOutlined />}>
             <Link to="/profile">Profile</Link>
           </Menu.Item>
           {currentUser && (
-            <Menu.Item key="3" icon={<LogoutOutlined />} onClick={handleLogout}>
+            <Menu.Item key="4" icon={<LogoutOutlined />} onClick={handleLogout}>
               Logout
             </Menu.Item>
           )}
@@ -61,6 +65,7 @@ const AppLayout = () => {
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
+            <Route path="/accounting" element={<PrivateRoute><Accounting /></PrivateRoute>} /> {/* Añadir ruta para Accounting */}
           </Routes>
         </Content>
       </Layout>
