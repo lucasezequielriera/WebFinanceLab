@@ -55,28 +55,37 @@ const AppLayout = () => {
     setIsModalVisible(false);
   };
 
+  const menuItems = [
+    {
+      key: '1',
+      icon: <DashboardOutlined />,
+      label: <Link to="/dashboard">Dashboard</Link>
+    },
+    {
+      key: '5',
+      icon: <UnorderedListOutlined />,
+      label: <Link to="/expenses">Expenses</Link>
+    },
+    {
+      key: '2',
+      icon: <UserOutlined />,
+      label: <Link to="/profile">Profile</Link>
+    },
+    currentUser && {
+      key: '4',
+      icon: <LogoutOutlined />,
+      label: 'Logout',
+      onClick: handleLogout
+    }
+  ].filter(Boolean); // Filtrar valores nulos
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider trigger={null} collapsible collapsed={collapsed}>
         <div className="user-greeting" style={{ color: 'white', padding: '16px', textAlign: 'center' }}>
           {collapsed ? <UserOutlined /> : currentUser ? `Hi, ${currentUser.displayName || 'User'}` : 'Hi, User'}
         </div>
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
-          <Menu.Item key="1" icon={<DashboardOutlined />}>
-            <Link to="/dashboard">Dashboard</Link>
-          </Menu.Item>
-          <Menu.Item key="5" icon={<UnorderedListOutlined />}>
-            <Link to="/expenses">Expenses</Link>
-          </Menu.Item>
-          <Menu.Item key="2" icon={<UserOutlined />}>
-            <Link to="/profile">Profile</Link>
-          </Menu.Item>
-          {currentUser && (
-            <Menu.Item key="4" icon={<LogoutOutlined />} onClick={handleLogout}>
-              Logout
-            </Menu.Item>
-          )}
-        </Menu>
+        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']} items={menuItems} />
         <div className="sidebar-tags">
           <Tag color="blue" className="sidebar-tag">
             Add Stock
@@ -102,7 +111,7 @@ const AppLayout = () => {
             <Route path="/expenses" element={<PrivateRoute><ExpensesPage /></PrivateRoute>} />
           </Routes>
         </Content>
-        <Modal title="Add Expense" visible={isModalVisible} onCancel={handleCancel} footer={null}>
+        <Modal title="Add Expense" open={isModalVisible} onCancel={handleCancel} footer={null}>
           <AddExpense onExpenseAdded={handleExpenseAdded} />
         </Modal>
       </Layout>
