@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, Select, notification, Spin } from 'antd';
 import { db } from '../firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 
 const { Option } = Select;
@@ -26,7 +26,7 @@ const AddExpense = ({ onExpenseAdded }) => {
         currency: values.currency,
         category: values.category,
         description: values.description,
-        timestamp: new Date(),
+        timestamp: Timestamp.now(), // Utilizar Timestamp.now() para agregar la fecha y hora actuales
       };
       const docRef = await addDoc(collection(db, `users/${currentUser.uid}/expenses`), newExpense);
       newExpense.id = docRef.id; // Agregar el id del documento al nuevo gasto

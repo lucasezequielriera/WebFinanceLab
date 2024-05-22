@@ -7,8 +7,9 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import PrivateRoute from './components/PrivateRoute';
 import UserProfile from './pages/UserProfile';
-import DetailedExpenses from './pages/DetailedExpenses'; // Asegúrate de que este componente esté correctamente importado
-import GeneralExpenses from './pages/GeneralExpenses'; // Asegúrate de que este componente esté correctamente importado
+import DetailedExpenses from './pages/DetailedExpenses';
+import GeneralExpenses from './pages/GeneralExpenses';
+import MonthlyExpensesPage from './pages/MonthlyExpensesPage';
 import AddExpense from './components/AddExpense';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
@@ -67,8 +68,8 @@ const AppLayout = () => {
       label: 'Expenses',
       children: [
         {
-          key: 'detail-expenses',
-          label: <Link to="/detailed-expenses">Detail Expenses</Link>
+          key: 'detailed-expenses',
+          label: <Link to="/detailed-expenses">Detailed Expenses</Link>
         },
         {
           key: 'general-expenses',
@@ -120,6 +121,7 @@ const AppLayout = () => {
             <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
             <Route path="/detailed-expenses" element={<PrivateRoute><DetailedExpenses /></PrivateRoute>} />
             <Route path="/general-expenses" element={<PrivateRoute><GeneralExpenses /></PrivateRoute>} />
+            <Route path="/monthly-expenses/:month" element={<PrivateRoute><MonthlyExpensesPage /></PrivateRoute>} />
           </Routes>
         </Content>
         <Modal title="Add Expense" open={isModalVisible} onCancel={handleCancel} footer={null}>
