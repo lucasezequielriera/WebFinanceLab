@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const MonthlyChart = ({ incomes }) => {
+const MonthlyChart = ({ incomes = [] }) => {
   const [data, setData] = useState([]);
 
   const monthsOrder = useMemo(() => [

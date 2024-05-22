@@ -7,7 +7,8 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import PrivateRoute from './components/PrivateRoute';
 import UserProfile from './pages/UserProfile';
-import ExpensesPage from './pages/ExpensesPage';
+import DetailedExpenses from './pages/DetailedExpenses'; // Asegúrate de que este componente esté correctamente importado
+import GeneralExpenses from './pages/GeneralExpenses'; // Asegúrate de que este componente esté correctamente importado
 import AddExpense from './components/AddExpense';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
@@ -43,7 +44,6 @@ const AppLayout = () => {
   const handleExpenseAdded = (newExpense) => {
     setExpenses((prevExpenses) => {
       const updatedExpenses = [...prevExpenses, newExpense];
-      // Eliminar posibles duplicados
       const uniqueExpenses = updatedExpenses.reduce((acc, expense) => {
         if (!acc.find(e => e.id === expense.id)) {
           acc.push(expense);
@@ -64,7 +64,17 @@ const AppLayout = () => {
     {
       key: '5',
       icon: <UnorderedListOutlined />,
-      label: <Link to="/expenses">Expenses</Link>
+      label: 'Expenses',
+      children: [
+        {
+          key: 'detail-expenses',
+          label: <Link to="/detailed-expenses">Detail Expenses</Link>
+        },
+        {
+          key: 'general-expenses',
+          label: <Link to="/general-expenses">General Expenses</Link>
+        }
+      ]
     },
     {
       key: '2',
@@ -108,7 +118,8 @@ const AppLayout = () => {
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
-            <Route path="/expenses" element={<PrivateRoute><ExpensesPage /></PrivateRoute>} />
+            <Route path="/detailed-expenses" element={<PrivateRoute><DetailedExpenses /></PrivateRoute>} />
+            <Route path="/general-expenses" element={<PrivateRoute><GeneralExpenses /></PrivateRoute>} />
           </Routes>
         </Content>
         <Modal title="Add Expense" open={isModalVisible} onCancel={handleCancel} footer={null}>
