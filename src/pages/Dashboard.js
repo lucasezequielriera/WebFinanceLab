@@ -33,9 +33,11 @@ const Dashboard = ({ expenses, handleExpenseAdded }) => {
   }, [currentUser]);
 
   if (loading) {
-    return <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-    <div style={{ height: '100vh' }} />
-</Spin>;
+    return (
+      <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div style={{ height: '100vh' }} />
+      </Spin>
+    );
   }
 
   return (
@@ -43,10 +45,10 @@ const Dashboard = ({ expenses, handleExpenseAdded }) => {
       <h1>Hi, {currentUser?.displayName || 'User'}!</h1>
       <Row className="margin-bottom-large" gutter={16}>
         <Col span={12}>
-          <PesoExpenseCounter expenses={expenses.filter(expense => expense.currency === 'ARS')} />
+          <PesoExpenseCounter />
         </Col>
         <Col span={12}>
-          <DollarExpenseCounter expenses={expenses.filter(expense => expense.currency === 'USD')} />
+          <DollarExpenseCounter />
         </Col>
       </Row>
       <Row gutter={16}>
