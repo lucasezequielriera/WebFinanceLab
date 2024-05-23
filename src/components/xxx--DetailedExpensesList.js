@@ -93,33 +93,34 @@ const DetailedExpensesList = ({ expenses }) => {
     return acc;
   }, {});
 
-  const dataSource = Object.entries(groupedExpenses).map(([category, expenses], index) => ({
-    key: index,
-    category,
-    expenses,
-    total: expenses.reduce((sum, expense) => sum + (Number(expense.amount) || 0), 0),
-  }));
+  const dataSource = Object.entries(groupedExpenses).map(([category, expenses], index) => {
+    const totalPesos = expenses
+      .filter(expense => expense.currency === 'ARS')
+      .reduce((sum, expense) => sum + (Number(expense.amount) || 0), 0);
+    const totalDollars = expenses
+      .filter(expense => expense.currency === 'USD')
+      .reduce((sum, expense) => sum + (Number(expense.amount) || 0), 0);
+
+    return {
+      key: index,
+      category,
+      expenses,
+      totalPesos,
+      totalDollars,
+    };
+  });
 
   return (
     <div className="expense-list">
       <Row gutter={[16, 16]}>
-        {dataSource.map(({ category, expenses, total }, index) => (
+        {dataSource.map(({ category, expenses, totalPesos, totalDollars }, index) => (
           <Col span={12} key={category}>
             <h2>{category}</h2>
+            hola
             <Table
               className="custom-table"
               bordered
-              dataSource={[
-                ...expenses,
-                {
-                  id: 'total',
-                  description: 'Total',
-                  amount: total,
-                  currency: '',
-                  category: '',
-                  timestamp: { seconds: 0 },
-                },
-              ]}
+              dataSource={expenses}
               columns={columns}
               rowClassName={(record) => (record.id === 'total' ? 'total-row' : '')}
               pagination={{ pageSize: 4 }}
@@ -128,6 +129,10 @@ const DetailedExpensesList = ({ expenses }) => {
                 emptyText: 'No Data',
               }}
             />
+            <div style={{ marginTop: 10, fontWeight: 'bold', borderTop: '2px solid #1890ff', padding: '10px', backgroundColor: '#e6f7ff' }}>
+              Total in Pesos: ${totalPesos.toFixed(2)} <br />
+              Total in Dollars: USD{totalDollars.toFixed(2)}
+            </div>
           </Col>
         ))}
       </Row>

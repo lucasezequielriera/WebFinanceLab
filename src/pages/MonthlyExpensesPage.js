@@ -87,7 +87,10 @@ const MonthlyExpensesPage = () => {
       dataIndex: 'amount',
       key: 'amount',
       width: '15%',
-      render: (text) => `$${Number(text).toFixed(2)}`,
+      render: (text, record) => {
+        const amount = Number(text);
+        return record.currency === 'ARS' ? `$${amount.toFixed(2)}` : `USD${amount.toFixed(2)}`;
+      },
     },
     {
       title: 'Currency',
@@ -144,18 +147,33 @@ const MonthlyExpensesPage = () => {
       </Button>
       <h1>Expenses for {month}</h1>
       <Row gutter={[16, 16]}>
-        {Object.entries(groupedExpenses).map(([category, expenses], index) => (
-          <Col span={12} key={category}>
-            <h2>{category}</h2>
-            <Table
-              bordered
-              dataSource={expenses}
-              columns={columns}
-              pagination={{ pageSize: 5 }}
-              rowKey="id"
-            />
-          </Col>
-        ))}
+        {Object.entries(groupedExpenses).map(([category, expenses], index) => {
+          const totalPesos = expenses
+            .filter(expense => expense.currency === 'ARS')
+            .reduce((sum, expense) => sum + (Number(expense.amount) || 0), 0);
+          const totalDollars = expenses
+            .filter(expense => expense.currency === 'USD')
+            .reduce((sum, expense) => sum + (Number(expense.amount) || 0), 0);
+
+          return (
+            <Col span={12} key={category}>
+              <h2>{category}</h2>
+              <Table
+                bordered
+                dataSource={expenses}
+                columns={columns}
+                pagination={{ pageSize: 5 }}
+                rowKey="id"
+              />
+              <div style={{ fontWeight: 'bold', borderTop: '1px solid #1890ff', padding: '10px', backgroundColor: '#e6f7ff' }}>
+                <div style={{ display: 'flex', flexFlow: 'column' }}>
+                <p style={{ marginBottom: '5px' }}>Total in Pesos: ${totalPesos.toFixed(2)}</p>
+                <p style={{ margin: 0 }}>Total in Dollars: USD{totalDollars.toFixed(2)}</p>
+                </div>
+              </div>
+            </Col>
+          );
+        })}
       </Row>
     </div>
   );
