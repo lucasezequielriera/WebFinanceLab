@@ -61,36 +61,28 @@ const GeneralExpenses = () => {
 
   const monthlyData = useMemo(() => calculateMonthlyTotals(expenses), [expenses]);
 
-  const generateColumns = (data) => {
-    const sampleRow = data[0] || {};
-    const dynamicColumns = Object.keys(sampleRow)
-      .filter(key => key !== 'key' && key !== 'month' && key !== 'year' && key !== 'totalPesos' && key !== 'totalDollars')
-      .map(category => ({
-        title: category,
-        dataIndex: category,
-        key: category,
-      }));
-
-    return [
-      {
-        title: 'Category',
-        dataIndex: 'category',
-        key: 'category',
-      },
-      {
-        title: 'Total (Pesos)',
-        dataIndex: 'totalPesos',
-        key: 'totalPesos',
-        render: (text) => text ? `$${parseFloat(text).toFixed(2)}` : '$0.00',
-      },
-      {
-        title: 'Total (Dollars)',
-        dataIndex: 'totalDollars',
-        key: 'totalDollars',
-        render: (text) => text ? `USD${parseFloat(text).toFixed(2)}` : 'USD0.00',
-      },
-    ];
-  };
+  const generateColumns = () => [
+    {
+      title: 'Category',
+      dataIndex: 'category',
+      key: 'category',
+      width: '60%',
+    },
+    {
+      title: 'Total (Pesos)',
+      dataIndex: 'totalPesos',
+      key: 'totalPesos',
+      width: '20%',
+      render: (text) => text ? `$${parseFloat(text).toFixed(2)}` : '$0.00',
+    },
+    {
+      title: 'Total (Dollars)',
+      dataIndex: 'totalDollars',
+      key: 'totalDollars',
+      width: '20%',
+      render: (text) => text ? `USD${parseFloat(text).toFixed(2)}` : 'USD0.00',
+    },
+  ];
 
   if (loading) {
     return (
@@ -105,7 +97,7 @@ const GeneralExpenses = () => {
       <h1>General Expenses</h1>
       <Row gutter={[16, 16]}>
         {Object.entries(monthlyData).map(([key, data]) => {
-          const columns = generateColumns([data]);
+          const columns = generateColumns();
           const dataSource = Object.entries(data.expenses).map(([category, totals]) => ({
             category,
             totalPesos: totals.amountPesos,
@@ -126,7 +118,7 @@ const GeneralExpenses = () => {
 
                   return (
                     <Table.Summary fixed>
-                      <Table.Summary.Row>
+                      <Table.Summary.Row style={{ backgroundColor: '#e6f7ff', fontWeight: 'bold', borderTop: '2px solid #1890ff' }}>
                         <Table.Summary.Cell index={0}>Total</Table.Summary.Cell>
                         <Table.Summary.Cell index={1}>
                           ${totalPesos.toFixed(2)}
