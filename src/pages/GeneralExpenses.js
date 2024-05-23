@@ -164,12 +164,12 @@ const GeneralExpenses = () => {
                 return (
                   <Table.Summary fixed>
                     <Table.Summary.Row style={{ backgroundColor: '#e6f7ff', fontWeight: 'bold', borderTop: '2px solid #1890ff' }}>
-                      <Table.Summary.Cell index={0}>Total</Table.Summary.Cell>
+                      <Table.Summary.Cell index={0}>TOTAL</Table.Summary.Cell>
                       <Table.Summary.Cell index={1}>
                         ${totalPesos.toFixed(2)}
                       </Table.Summary.Cell>
                       <Table.Summary.Cell index={2}>
-                        USD{totalDollars.toFixed(2)}
+                        USD {totalDollars.toFixed(2)}
                       </Table.Summary.Cell>
                     </Table.Summary.Row>
                   </Table.Summary>
