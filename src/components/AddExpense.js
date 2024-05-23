@@ -21,18 +21,25 @@ const AddExpense = ({ onExpenseAdded }) => {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
+      const timestamp = Timestamp.now();
+      const date = timestamp.toDate();
+      const month = date.toLocaleString('default', { month: 'long' });
+      const year = date.getFullYear();
+
       const newExpense = {
         amount: parseFloat(values.amount),
         currency: values.currency,
         category: values.category,
         description: values.description,
-        timestamp: Timestamp.now(), // Utilizar Timestamp.now() para agregar la fecha y hora actuales
+        timestamp: timestamp,
+        month: month,
+        year: year,
       };
       const docRef = await addDoc(collection(db, `users/${currentUser.uid}/expenses`), newExpense);
-      newExpense.id = docRef.id; // Agregar el id del documento al nuevo gasto
+      newExpense.id = docRef.id;
       form.resetFields();
       openNotification();
-      onExpenseAdded(newExpense); // Notificar al padre sobre el nuevo gasto
+      onExpenseAdded(newExpense);
     } catch (e) {
       console.error('Error adding document: ', e);
       notification.error({
