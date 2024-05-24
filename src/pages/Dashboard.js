@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Spin, Row, Col } from 'antd';
+import { Spin, Row, Col, Card, Statistic } from 'antd';
+import { DollarOutlined } from '@ant-design/icons';
 import MonthlyChart from '../components/MonthlyChart';
 import DollarExpenseCounter from '../components/DollarExpenseCounter';
 import PesoExpenseCounter from '../components/PesoExpenseCounter';
@@ -49,6 +50,32 @@ const Dashboard = ({ expenses, handleExpenseAdded }) => {
         </Col>
         <Col span={12}>
           <DollarExpenseCounter />
+        </Col>
+      </Row>
+      <Row className="margin-bottom-large" gutter={16}>
+        <Col span={12}>
+          <Card>
+            <Statistic
+              title="Remaining Pesos"
+              value={0}  // Este valor se actualizará con la lógica adecuada
+              precision={2}
+              valueStyle={{ color: '#3f8600' }}
+              prefix={<DollarOutlined />}
+              suffix="ARS"
+            />
+          </Card>
+        </Col>
+        <Col span={12}>
+          <Card>
+            <Statistic
+              title="Remaining Dollars"
+              value={0}  // Este valor se actualizará con la lógica adecuada
+              precision={2}
+              valueStyle={{ color: '#3f8600' }}
+              prefix={<DollarOutlined />}
+              suffix="USD"
+            />
+          </Card>
         </Col>
       </Row>
       <Row gutter={16}>
