@@ -328,7 +328,7 @@ export default function UserProfile() {
                 </div>
                 <div className="display-flex center">
                 <Table className="margin-bottom-large" pagination={false} style={{width: 900 }} columns={columns} dataSource={userData.jobs} rowKey={(record) => record.title} />
-                <Modal title="Add New Job" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+                <Modal title="Add New Job" open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
                     <Form layout="vertical">
                     <Form.Item label="Title">
                         <Input name="title" value={newJobData.title} onChange={handleNewJobChange} />

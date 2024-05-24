@@ -101,7 +101,7 @@ const AppLayout = () => {
           <Tag color="red" className="sidebar-tag" onClick={showModal}>
             Add Expense
           </Tag>
-          <Tooltip title="Coming Soon">
+          <Tooltip title="Coming Soon" placement="right" style={{ marginRight: '30px'}}>
             <Tag color="blue" className="sidebar-tag disabled-tag" style={{ marginTop: '10px' }}>
               Add Stock
             </Tag>
