@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Layout, Menu, Tag, Modal } from 'antd';
+import { Layout, Menu, Tag, Modal, Tooltip } from 'antd';
 import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
@@ -98,12 +98,14 @@ const AppLayout = () => {
         </div>
         <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']} items={menuItems} />
         <div className="sidebar-tags">
-          <Tag color="blue" className="sidebar-tag">
-            Add Stock
-          </Tag>
-          <Tag color="red" className="sidebar-tag" style={{ marginTop: '10px' }} onClick={showModal}>
+          <Tag color="red" className="sidebar-tag" onClick={showModal}>
             Add Expense
           </Tag>
+          <Tooltip title="Coming Soon">
+            <Tag color="blue" className="sidebar-tag disabled-tag" style={{ marginTop: '10px' }}>
+              Add Stock
+            </Tag>
+          </Tooltip>
         </div>
       </Sider>
       <Layout className="site-layout">
