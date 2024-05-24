@@ -7,6 +7,8 @@ import PesoExpenseCounter from '../components/PesoExpenseCounter';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
+import RemainingPesosCounter from '../components/RemainingPesosCounter'
+import RemainingDollarsCounter from '../components/RemainingDollarsCounter'
 
 const Dashboard = ({ expenses, handleExpenseAdded }) => {
   const { currentUser } = useAuth();
@@ -54,28 +56,10 @@ const Dashboard = ({ expenses, handleExpenseAdded }) => {
       </Row>
       <Row className="margin-bottom-large" gutter={16}>
         <Col span={12}>
-          <Card>
-            <Statistic
-              title="Remaining Pesos"
-              value={0}  // Este valor se actualizará con la lógica adecuada
-              precision={2}
-              valueStyle={{ color: '#3f8600' }}
-              prefix={<DollarOutlined />}
-              suffix="ARS"
-            />
-          </Card>
+          <RemainingPesosCounter /> {/* Agregamos el nuevo componente */}
         </Col>
         <Col span={12}>
-          <Card>
-            <Statistic
-              title="Remaining Dollars"
-              value={0}  // Este valor se actualizará con la lógica adecuada
-              precision={2}
-              valueStyle={{ color: '#3f8600' }}
-              prefix={<DollarOutlined />}
-              suffix="USD"
-            />
-          </Card>
+          <RemainingDollarsCounter /> {/* Agregamos el nuevo componente */}
         </Col>
       </Row>
       <Row gutter={16}>
