@@ -4,7 +4,7 @@ import { updateProfile } from "firebase/auth";
 import { db, storage } from "../firebase"; // Importa db y storage
 import { doc, getDoc, updateDoc } from "firebase/firestore"; // Importa Firestore
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Importa Storage
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { PlusOutlined } from '@ant-design/icons';
 import { notification, Button, Input, Select, Table, Modal, Form, Spin } from 'antd';
 import "../index.css"
@@ -28,14 +28,14 @@ export default function UserProfile() {
         jobs: [],
     });
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [newJobData, setNewJobData] = useState({ title: '', salary: '', type: 'employed' });
+    const [newJobData, setNewJobData] = useState({ title: '', salary: '', type: 'employed', currency: 'ARS' });
     const [editJobIndex, setEditJobIndex] = useState(null); // Índice del trabajo en edición
-    const [editJobData, setEditJobData] = useState({ title: '', salary: '', type: 'employed' }); // Datos del trabajo en edición
+    const [editJobData, setEditJobData] = useState({ title: '', salary: '', type: 'employed', currency: 'ARS' }); // Datos del trabajo en edición
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true); // Estado de carga
     const [previewURL, setPreviewURL] = useState(DEFAULT_PROFILE_PICTURE_URL); // Imagen preestablecida
     const [imageLoading, setImageLoading] = useState(true); // Estado de carga de la imagen
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const photoRef = useRef(null);
 
     useEffect(() => {
@@ -97,7 +97,7 @@ export default function UserProfile() {
                 jobs: userData.jobs,
             });
             setLoading(false);
-            navigate("/dashboard");
+            // navigate("/dashboard");
             openNotificationWithIcon('success', 'Profile Updated', 'Your profile has been successfully updated.');
         } catch (err) {
             console.error("Error updating profile:", err);
@@ -118,28 +118,32 @@ export default function UserProfile() {
 
     const showModal = () => {
         setIsModalVisible(true);
-      };
-      
-      const handleOk = () => {
+    };
+    
+    const handleOk = () => {
         const updatedJobs = [...userData.jobs, newJobData];
         setUserData(prevData => ({ ...prevData, jobs: updatedJobs }));
         setIsModalVisible(false);
-        setNewJobData({ title: '', salary: '', type: 'employed' });
-      };
-      
-      const handleCancel = () => {
+        setNewJobData({ title: '', salary: '', type: 'employed', currency: 'ARS' });
+    };
+    
+    const handleCancel = () => {
         setIsModalVisible(false);
-        setNewJobData({ title: '', salary: '', type: 'employed' });
-      };
-      
-      const handleNewJobChange = (e) => {
+        setNewJobData({ title: '', salary: '', type: 'employed', currency: 'ARS' });
+    };
+    
+    const handleNewJobChange = (e) => {
         const { name, value } = e.target;
         setNewJobData(prevJob => ({ ...prevJob, [name]: value }));
-      };
-      
-      const handleNewJobTypeChange = (value) => {
+    };
+    
+    const handleNewJobTypeChange = (value) => {
         setNewJobData(prevJob => ({ ...prevJob, type: value }));
-      };
+    };
+
+    const handleNewJobCurrencyChange = (value) => {
+        setNewJobData(prevJob => ({ ...prevJob, currency: value }));
+    };
 
     const handleEditJob = (index) => {
         setEditJobData(userData.jobs[index]); // Inicializa editJobData con los datos del trabajo seleccionado
@@ -154,6 +158,10 @@ export default function UserProfile() {
     const handleEditJobChange = (e) => {
         const { name, value } = e.target;
         setEditJobData(prevJob => ({ ...prevJob, [name]: value }));
+    };
+
+    const handleEditJobCurrencyChange = (value) => {
+        setEditJobData(prevJob => ({ ...prevJob, currency: value }));
     };
     
     const handleConfirmEditJob = () => {
@@ -187,9 +195,24 @@ export default function UserProfile() {
             title: 'Job Title',
             dataIndex: 'title',
             key: 'title',
+            width: '40%',
             render: (text, record, index) => (
-            editJobIndex === index ? 
+                editJobIndex === index ? 
                 <Input name="title" value={editJobData.title} onChange={handleEditJobChange} /> :
+                text
+            ),
+        },
+        {
+            title: 'Currency',
+            dataIndex: 'currency',
+            key: 'currency',
+            width: '15%',
+            render: (text, record, index) => (
+                editJobIndex === index ? 
+                <Select value={editJobData.currency} onChange={handleEditJobCurrencyChange}>
+                    <Option value="ARS">ARS</Option>
+                    <Option value="USD">USD</Option>
+                </Select> :
                 text
             ),
         },
@@ -197,6 +220,7 @@ export default function UserProfile() {
             title: 'Salary',
             dataIndex: 'salary',
             key: 'salary',
+            width: '15%',
             render: (text, record, index) => (
                 editJobIndex === index ? 
                 <Input name="salary" value={editJobData.salary} onChange={handleEditJobChange} /> :
@@ -207,6 +231,7 @@ export default function UserProfile() {
             title: 'Contract Type',
             dataIndex: 'type',
             key: 'type',
+            width: '15%',
             render: (text, record, index) => (
                 editJobIndex === index ? 
                 <Select name="type" value={editJobData.type} onChange={(value) => setEditJobData(prevData => ({ ...prevData, type: value }))}>
@@ -219,6 +244,7 @@ export default function UserProfile() {
         {
             title: 'Actions',
             key: 'actions',
+            width: '15%',
             render: (_, record, index) => (
                 editJobIndex === index ? 
                 <Button type="link" onClick={handleConfirmEditJob} style={{ backgroundColor: 'green', color: 'white'}}>Confirm Changes</Button> :
@@ -327,21 +353,27 @@ export default function UserProfile() {
                 <Button type="primary" size="small" shape="circle" icon={<PlusOutlined />} onClick={showModal} />
                 </div>
                 <div className="display-flex center">
-                <Table className="margin-bottom-large" pagination={false} style={{width: 900 }} columns={columns} dataSource={userData.jobs} rowKey={(record) => record.title} />
+                <Table className="margin-bottom-large" pagination={false} style={{width: 1200 }} columns={columns} dataSource={userData.jobs} rowKey={(record) => record.title} />
                 <Modal title="Add New Job" open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
                     <Form layout="vertical">
-                    <Form.Item label="Title">
-                        <Input name="title" value={newJobData.title} onChange={handleNewJobChange} />
-                    </Form.Item>
-                    <Form.Item label="Salary">
-                        <Input name="salary" type="number" value={newJobData.salary} onChange={handleNewJobChange} />
-                    </Form.Item>
-                    <Form.Item label="Type">
-                        <Select value={newJobData.type} onChange={handleNewJobTypeChange}>
-                        <Option value="employed">Employed</Option>
-                        <Option value="self-employed">Self-Employed</Option>
-                        </Select>
-                    </Form.Item>
+                        <Form.Item label="Title">
+                            <Input name="title" value={newJobData.title} onChange={handleNewJobChange} />
+                        </Form.Item>
+                        <Form.Item label="Salary">
+                            <Input name="salary" type="number" value={newJobData.salary} onChange={handleNewJobChange} />
+                        </Form.Item>
+                        <Form.Item label="Type">
+                            <Select value={newJobData.type} onChange={handleNewJobTypeChange}>
+                            <Option value="employed">Employed</Option>
+                            <Option value="self-employed">Self-Employed</Option>
+                            </Select>
+                        </Form.Item>
+                        <Form.Item label="Currency">
+                            <Select value={newJobData.currency} onChange={handleNewJobCurrencyChange}>
+                                <Option value="ARS">ARS</Option>
+                                <Option value="USD">USD</Option>
+                            </Select>
+                        </Form.Item>
                     </Form>
                 </Modal>
                 </div>

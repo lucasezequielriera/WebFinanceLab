@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Spin, Row, Col, Card, Statistic } from 'antd';
-import { DollarOutlined } from '@ant-design/icons';
+import { Spin, Row, Col } from 'antd';
 import MonthlyChart from '../components/MonthlyChart';
 import DollarExpenseCounter from '../components/DollarExpenseCounter';
 import PesoExpenseCounter from '../components/PesoExpenseCounter';

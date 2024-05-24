@@ -1,64 +1,83 @@
-// RemainingDollarsCounter.js
-import React, { useState, useEffect } from 'react';
-import { Card, Statistic, Spin } from 'antd';
+import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
+import { collection, query, onSnapshot, where, doc, getDoc, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import { Spin, Card, Statistic } from 'antd';
+import { DollarOutlined } from '@ant-design/icons';
 
 const RemainingDollarsCounter = () => {
   const { currentUser } = useAuth();
-  const [remainingDollars, setRemainingDollars] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [totalIncome, setTotalIncome] = useState(0);
+  const [totalExpenses, setTotalExpenses] = useState(0);
 
   useEffect(() => {
     if (!currentUser) return;
 
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    const startOfMonth = new Date(currentYear, currentMonth, 1);
-    const endOfMonth = new Date(currentYear, currentMonth + 1, 1);
+    // Obtener ingresos en dólares desde el array jobs dentro del documento del usuario
+    const userDocRef = doc(db, "users", currentUser.uid);
+
+    getDoc(userDocRef).then((docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const userData = docSnapshot.data();
+        let income = 0;
+        if (userData.jobs) {
+          userData.jobs.forEach((job) => {
+            if (job.currency === 'USD') {
+              income += Number(job.salary);
+            }
+          });
+        }
+        console.log('Total Income (Dollars):', income);
+        setTotalIncome(income);
+      }
+    });
+
+    // Calcular fechas de inicio y fin del mes actual
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
     const startTimestamp = Timestamp.fromDate(startOfMonth);
     const endTimestamp = Timestamp.fromDate(endOfMonth);
 
+    // Obtener expenses en dólares del mes actual
     const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
-    const incomesRef = collection(db, `users/${currentUser.uid}/incomes`);
-
-    const qExpenses = query(expensesRef, where('timestamp', '>=', startTimestamp), where('timestamp', '<', endTimestamp), where('currency', '==', 'USD'));
-    const qIncomes = query(incomesRef, where('currency', '==', 'USD'));
-
-    let totalExpenses = 0;
-    let totalIncomes = 0;
+    const qExpenses = query(expensesRef, where('currency', '==', 'USD'), where('timestamp', '>=', startTimestamp), where('timestamp', '<', endTimestamp));
 
     const unsubscribeExpenses = onSnapshot(qExpenses, (snapshot) => {
-      totalExpenses = snapshot.docs.reduce((sum, doc) => sum + doc.data().amount, 0);
-      setRemainingDollars(totalIncomes - totalExpenses);
-      setLoading(false);
-    });
-
-    const unsubscribeIncomes = onSnapshot(qIncomes, (snapshot) => {
-      totalIncomes = snapshot.docs.reduce((sum, doc) => sum + doc.data().amount, 0);
-      setRemainingDollars(totalIncomes - totalExpenses);
+      let expenses = 0;
+      snapshot.forEach((doc) => {
+        console.log('Expense Document Data:', doc.data());
+        expenses += Number(doc.data().amount);
+      });
+      console.log('Total Expenses (Dollars) for Current Month:', expenses);
+      setTotalExpenses(expenses);
       setLoading(false);
     });
 
     return () => {
       unsubscribeExpenses();
-      unsubscribeIncomes();
     };
   }, [currentUser]);
 
+  const remaining = totalIncome - totalExpenses;
+  console.log('Remaining (Dollars):', remaining);
+
   if (loading) {
-    return <Spin spinning={loading} />;
+    return <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div style={{ height: '100vh' }} />
+    </Spin>
   }
 
   return (
     <Card>
       <Statistic
-        title="Remaining Dollars"
-        value={remainingDollars}
+        title="Remaining in USD"
+        value={remaining}
         precision={2}
-        valueStyle={{ color: '#3f8600' }}
+        valueStyle={{ color: '#cf1322' }}
+        prefix={<DollarOutlined />}
         suffix="USD"
       />
     </Card>
