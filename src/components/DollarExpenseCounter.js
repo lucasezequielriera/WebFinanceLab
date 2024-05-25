@@ -41,7 +41,7 @@ const DollarExpenseCounter = () => {
         title="Total Expenses in USD"
         value={total}
         precision={2}
-        valueStyle={{ color: '#3f8600' }}
+        valueStyle={{ color: '#cf1322' }}
         prefix={<DollarOutlined />}
         suffix="USD"
       />

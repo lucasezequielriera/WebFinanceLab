@@ -76,7 +76,7 @@ const RemainingDollarsCounter = () => {
         title="Remaining in USD"
         value={remaining}
         precision={2}
-        valueStyle={{ color: '#cf1322' }}
+        valueStyle={{ color: remaining < 50 ? '#cf1322' : '#3f8600' }}
         prefix={<DollarOutlined />}
         suffix="USD"
       />

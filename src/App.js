@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Layout, Menu, Tag, Modal, Tooltip } from 'antd';
-import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { Layout, Menu, Tag, Modal, Tooltip, Button } from 'antd';
+import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, UnorderedListOutlined, PlusOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -14,7 +14,7 @@ import AddExpense from './components/AddExpense';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
 
-const { Header, Sider, Content } = Layout;
+const { Header, Sider, Content, Footer } = Layout;
 
 const AppLayout = () => {
   const { currentUser, logout } = useAuth();
@@ -92,7 +92,7 @@ const AppLayout = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider trigger={null} collapsible collapsed={collapsed}>
+      <Sider trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
         <div className="user-greeting" style={{ color: 'white', padding: '16px', textAlign: 'center' }}>
           {collapsed ? <UserOutlined /> : currentUser ? `Hi, ${currentUser.displayName || 'User'}` : 'Hi, User'}
         </div>
@@ -126,9 +126,21 @@ const AppLayout = () => {
             <Route path="/monthly-expenses/:month" element={<PrivateRoute><MonthlyExpensesPage /></PrivateRoute>} />
           </Routes>
         </Content>
+        <Footer className="mobile-footer-menu">
+          <Menu mode="horizontal" defaultSelectedKeys={['1']} items={menuItems} />
+        </Footer>
         <Modal title="Add Expense" open={isModalVisible} onCancel={handleCancel} footer={null}>
           <AddExpense onExpenseAdded={handleExpenseAdded} />
         </Modal>
+        {/* Botón fijo para agregar gasto en dispositivos móviles */}
+        <Button 
+          type="primary" 
+          shape="circle" 
+          icon={<PlusOutlined />} 
+          size="large" 
+          onClick={showModal} 
+          className="add-expense-button" 
+        />
       </Layout>
     </Layout>
   );

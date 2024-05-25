@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Spin, Row, Col } from 'antd';
+import { Spin, Row, Col, Card } from 'antd';
 import MonthlyChart from '../components/MonthlyChart';
 import DollarExpenseCounter from '../components/DollarExpenseCounter';
 import PesoExpenseCounter from '../components/PesoExpenseCounter';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
-import RemainingPesosCounter from '../components/RemainingPesosCounter'
-import RemainingDollarsCounter from '../components/RemainingDollarsCounter'
+import RemainingPesosCounter from '../components/RemainingPesosCounter';
+import RemainingDollarsCounter from '../components/RemainingDollarsCounter';
+import '../styles/Dashboard.css'; // Importa el archivo CSS para los estilos
 
 const Dashboard = ({ expenses, handleExpenseAdded }) => {
   const { currentUser } = useAuth();
@@ -43,25 +44,33 @@ const Dashboard = ({ expenses, handleExpenseAdded }) => {
   }
 
   return (
-    <div>
-      <h1>Hi, {currentUser?.displayName || 'User'}!</h1>
-      <Row className="margin-bottom-large" gutter={16}>
-        <Col span={12}>
-          <PesoExpenseCounter />
+    <div className="dashboard-container">
+      <h1 className="dashboard-title">Hi, {currentUser?.displayName || 'User'}!</h1>
+      <Row className="margin-bottom-large" gutter={[16, 16]}>
+        <Col xs={24} sm={12}>
+          <Card className="equal-height-card">
+            <PesoExpenseCounter />
+          </Card>
         </Col>
-        <Col span={12}>
-          <DollarExpenseCounter />
-        </Col>
-      </Row>
-      <Row className="margin-bottom-large" gutter={16}>
-        <Col span={12}>
-          <RemainingPesosCounter /> {/* Agregamos el nuevo componente */}
-        </Col>
-        <Col span={12}>
-          <RemainingDollarsCounter /> {/* Agregamos el nuevo componente */}
+        <Col xs={24} sm={12}>
+          <Card className="equal-height-card">
+            <DollarExpenseCounter />
+          </Card>
         </Col>
       </Row>
-      <Row gutter={16}>
+      <Row className="margin-bottom-large" gutter={[16, 16]}>
+        <Col xs={24} sm={12}>
+          <Card className="equal-height-card">
+            <RemainingPesosCounter />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12}>
+          <Card className="equal-height-card">
+            <RemainingDollarsCounter />
+          </Card>
+        </Col>
+      </Row>
+      <Row className="dashboard-chart" gutter={[50, 50]}>
         <Col span={24}>
           <MonthlyChart incomes={incomes} />
         </Col>

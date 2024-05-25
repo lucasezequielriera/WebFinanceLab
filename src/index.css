@@ -170,3 +170,37 @@ code {
   color: #c8c7c7 !important;
   cursor: not-allowed !important;
 }
+
+.mobile-footer-menu {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-footer-menu {
+    display: block;
+  }
+  .ant-layout-sider {
+    display: none;
+  }
+  .ant-layout-header {
+    display: none;
+  }
+  .ant-menu-horizontal {
+    justify-content: center;
+  }
+}
+
+/* Botón fijo para agregar gastos en dispositivos móviles */
+.add-expense-button {
+  position: fixed;
+  bottom: 80px;
+  right: 24px;
+  z-index: 1000;
+  display: none !important; /* Ocultar por defecto */
+}
+
+@media (max-width: 768px) {
+  .add-expense-button {
+    display: block !important; /* Mostrar en dispositivos móviles */
+  }
+}
