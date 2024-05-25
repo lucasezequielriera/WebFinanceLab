@@ -1,5 +1,6 @@
 body {
   margin: 0;
+  padding-bottom: 20px;
   font-family: 'system-ui';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -173,6 +174,12 @@ code {
 
 .mobile-footer-menu {
   display: none;
+  position: fixed;
+  background-color: transparent;
+  width: 100%;
+  padding: 0;
+  bottom: 0;
+  box-shadow: 0px 0px 10px #00000029;
 }
 
 @media (max-width: 768px) {

@@ -49,18 +49,6 @@ const Dashboard = ({ expenses, handleExpenseAdded }) => {
       <Row className="margin-bottom-large" gutter={[16, 16]}>
         <Col xs={24} sm={12}>
           <Card className="equal-height-card">
-            <PesoExpenseCounter />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12}>
-          <Card className="equal-height-card">
-            <DollarExpenseCounter />
-          </Card>
-        </Col>
-      </Row>
-      <Row className="margin-bottom-large" gutter={[16, 16]}>
-        <Col xs={24} sm={12}>
-          <Card className="equal-height-card">
             <RemainingPesosCounter />
           </Card>
         </Col>
@@ -70,7 +58,19 @@ const Dashboard = ({ expenses, handleExpenseAdded }) => {
           </Card>
         </Col>
       </Row>
-      <Row className="dashboard-chart" gutter={[50, 50]}>
+      <Row className="margin-bottom-large" gutter={[16, 16]}>
+        <Col xs={24} sm={12}>
+          <Card className="equal-height-card">
+            <PesoExpenseCounter />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12}>
+          <Card className="equal-height-card">
+            <DollarExpenseCounter />
+          </Card>
+        </Col>
+      </Row>
+      <Row className="dashboard-chart" gutter={[0, 0]}>
         <Col span={24}>
           <MonthlyChart incomes={incomes} />
         </Col>
