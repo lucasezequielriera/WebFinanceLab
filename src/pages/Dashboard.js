@@ -46,7 +46,7 @@ const Dashboard = ({ expenses, handleExpenseAdded }) => {
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Hi, {currentUser?.displayName || 'User'}!</h1>
-      <Row className="margin-bottom-large" gutter={[16, 16]}>
+      <Row className="expenses-counters margin-bottom-large" gutter={[16, 16]}>
         <Col xs={24} sm={12}>
           <Card className="equal-height-card">
             <RemainingPesosCounter />
@@ -58,7 +58,7 @@ const Dashboard = ({ expenses, handleExpenseAdded }) => {
           </Card>
         </Col>
       </Row>
-      <Row className="margin-bottom-large" gutter={[16, 16]}>
+      <Row className="remainings-counters margin-bottom-large" gutter={[16, 16]}>
         <Col xs={24} sm={12}>
           <Card className="equal-height-card">
             <PesoExpenseCounter />

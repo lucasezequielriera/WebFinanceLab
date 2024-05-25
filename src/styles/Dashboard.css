@@ -42,5 +42,8 @@
     .equal-height-card {
       text-align: center;
     }
+    .expenses-counters {
+        margin-bottom: 16px !important;
+    }
   }
   
