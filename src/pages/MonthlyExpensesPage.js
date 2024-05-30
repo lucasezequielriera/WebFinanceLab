@@ -1,3 +1,4 @@
+// MonthlyExpensesPage.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Spin, Table, notification, Popconfirm, Tag, Row, Col, Button } from 'antd';
@@ -5,21 +6,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
 import { doc, deleteDoc } from 'firebase/firestore';
-
-const monthMap = {
-  'enero': 0,
-  'febrero': 1,
-  'marzo': 2,
-  'abril': 3,
-  'mayo': 4,
-  'junio': 5,
-  'julio': 6,
-  'agosto': 7,
-  'septiembre': 8,
-  'octubre': 9,
-  'noviembre': 10,
-  'diciembre': 11
-};
+import { parse, format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 const MonthlyExpensesPage = () => {
   const { currentUser } = useAuth();
@@ -32,8 +20,9 @@ const MonthlyExpensesPage = () => {
     if (!currentUser) return;
 
     const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
-    const [monthName, year] = month.split(' de ');
-    const monthIndex = monthMap[monthName.toLowerCase()];
+    const parsedDate = parse(month, 'MMMM yyyy', new Date(), { locale: es });
+    const monthIndex = parsedDate.getMonth();
+    const year = parsedDate.getFullYear();
     const start = new Date(year, monthIndex, 1);
     const end = new Date(year, monthIndex + 1, 1);
 

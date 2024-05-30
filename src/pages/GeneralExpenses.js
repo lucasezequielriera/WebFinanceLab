@@ -3,6 +3,8 @@ import { Table, Spin, Row, Col, Select } from 'antd';
 import { db } from '../firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 const { Option } = Select;
 
@@ -36,14 +38,14 @@ const GeneralExpenses = () => {
 
   const getCurrentMonthYear = () => {
     const date = new Date();
-    const month = date.toLocaleString('default', { month: 'long' });
+    const month = format(date, 'MMMM', { locale: es });
     const year = date.getFullYear();
     return `${month} ${year}`;
   };
 
   useEffect(() => {
     const currentMonthYear = getCurrentMonthYear();
-    if (expenses.some(expense => `${expense.month} ${expense.year}` === currentMonthYear)) {
+    if (expenses.some(expense => `${format(new Date(expense.timestamp.seconds * 1000), 'MMMM', { locale: es })} ${expense.year}` === currentMonthYear)) {
       setSelectedMonth(currentMonthYear);
     }
   }, [expenses]);
@@ -51,7 +53,7 @@ const GeneralExpenses = () => {
   const filteredExpenses = useMemo(() => {
     if (!selectedMonth) return [];
     const [month, year] = selectedMonth.split(' ');
-    return expenses.filter(expense => expense.month === month && expense.year === parseInt(year, 10));
+    return expenses.filter(expense => format(new Date(expense.timestamp.seconds * 1000), 'MMMM', { locale: es }) === month && expense.year === parseInt(year, 10));
   }, [selectedMonth, expenses]);
 
   const calculateMonthlyTotals = (expenses) => {
@@ -115,7 +117,7 @@ const GeneralExpenses = () => {
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
 
-    const sortedMonths = Array.from(new Set(expenses.map(expense => `${expense.month} ${expense.year}`)))
+    const sortedMonths = Array.from(new Set(expenses.map(expense => `${format(new Date(expense.timestamp.seconds * 1000), 'MMMM', { locale: es })} ${expense.year}`)))
       .sort((a, b) => {
         const [monthA, yearA] = a.split(' ');
         const [monthB, yearB] = b.split(' ');

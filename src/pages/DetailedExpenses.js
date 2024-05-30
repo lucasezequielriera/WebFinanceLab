@@ -1,9 +1,12 @@
+// DetailedExpenses.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Spin, List } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import '../styles/ExpensesPage.css';
 
 const DetailedExpenses = () => {
@@ -20,8 +23,9 @@ const DetailedExpenses = () => {
     const unsubscribeExpenses = onSnapshot(qExpenses, (snapshot) => {
       const monthsSet = new Set();
       snapshot.forEach((doc) => {
-        const date = new Date(doc.data().timestamp.seconds * 1000);
-        const month = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+        const data = doc.data();
+        const date = new Date(data.timestamp.seconds * 1000);
+        const month = format(date, 'MMMM yyyy', { locale: es });
         monthsSet.add(month);
       });
       setMonths(Array.from(monthsSet));

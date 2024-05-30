@@ -1,9 +1,10 @@
+// AddExpense.js
 import React, { useState } from 'react';
 import { Form, Input, Button, Select, notification, Spin } from 'antd';
 import { db } from '../firebase';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
-import { formatMonthToSpanish } from '../utils/dateUtils'; // Importa la utilidad
+import { format } from 'date-fns';
 
 const { Option } = Select;
 
@@ -24,7 +25,8 @@ const AddExpense = ({ onExpenseAdded }) => {
     try {
       const timestamp = Timestamp.now();
       const date = timestamp.toDate();
-      const month = formatMonthToSpanish(date); // Usa la función para obtener el mes en español
+      const day = date.getDate();
+      const month = date.getMonth() + 1; // Obtener el mes como número
       const year = date.getFullYear();
 
       const newExpense = {
@@ -33,6 +35,7 @@ const AddExpense = ({ onExpenseAdded }) => {
         category: values.category,
         description: values.description,
         timestamp: timestamp,
+        day: day,
         month: month,
         year: year,
       };
@@ -42,8 +45,7 @@ const AddExpense = ({ onExpenseAdded }) => {
       form.resetFields();
       openNotification();
       onExpenseAdded(newExpense);
-      console.log(month)
-    
+      console.log(newExpense);
     } catch (e) {
       console.error('Error adding document: ', e);
       notification.error({
