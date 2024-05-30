@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 const MonthlyChart = ({ incomes = [] }) => {
   const [data, setData] = useState([]);
@@ -18,12 +20,13 @@ const MonthlyChart = ({ incomes = [] }) => {
     }, {});
 
     incomes.forEach((income) => {
-      monthsOrder.forEach(month => {
-        const monthKey = month.toLowerCase();
-        if (income[monthKey] !== undefined) {
-          incomesData[month] += Number(income[monthKey]) || 0;
-        }
-      });
+      const date = new Date(income.timestamp.seconds * 1000);
+      const month = format(date, 'MMMM', { locale: es }); // Utilizar el formato español para la comparación
+      const monthIndex = monthsOrder.indexOf(month.charAt(0).toUpperCase() + month.slice(1)); // Convertir el primer carácter a mayúsculas para coincidir con el formato de monthsOrder
+
+      if (monthIndex !== -1) {
+        incomesData[monthsOrder[monthIndex]] += Number(income.amount) || 0;
+      }
     });
 
     const chartData = monthsOrder.map((month) => ({
