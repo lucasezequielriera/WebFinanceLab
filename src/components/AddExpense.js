@@ -35,11 +35,14 @@ const AddExpense = ({ onExpenseAdded }) => {
         month: month,
         year: year,
       };
+
       const docRef = await addDoc(collection(db, `users/${currentUser.uid}/expenses`), newExpense);
       newExpense.id = docRef.id;
       form.resetFields();
       openNotification();
       onExpenseAdded(newExpense);
+      console.log(month)
+    
     } catch (e) {
       console.error('Error adding document: ', e);
       notification.error({
