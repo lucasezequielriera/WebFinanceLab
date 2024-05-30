@@ -3,6 +3,7 @@ import { Form, Input, Button, Select, notification, Spin } from 'antd';
 import { db } from '../firebase';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import { formatMonthToSpanish } from '../utils/dateUtils'; // Importa la utilidad
 
 const { Option } = Select;
 
@@ -23,7 +24,7 @@ const AddExpense = ({ onExpenseAdded }) => {
     try {
       const timestamp = Timestamp.now();
       const date = timestamp.toDate();
-      const month = date.toLocaleString('default', { month: 'long' });
+      const month = formatMonthToSpanish(date); // Usa la función para obtener el mes en español
       const year = date.getFullYear();
 
       const newExpense = {
