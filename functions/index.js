@@ -3,14 +3,18 @@ const admin = require('firebase-admin');
 
 admin.initializeApp();
 
-exports.updateDailyResults = functions.pubsub.schedule('every 24 hours').onRun(async (context) => {
+exports.updateDailyResults = functions.pubsub.schedule('59 23 * * *').timeZone('America/Argentina/Buenos_Aires').onRun(async (context) => {
   const db = admin.firestore();
   const usersSnapshot = await db.collection('users').get();
-  
+
   const now = new Date();
-  const currentMonth = now.toLocaleString('default', { month: 'long' });
+  const currentMonthEnglish = now.toLocaleString('default', { month: 'long', locale: 'en-US' });
+  const currentMonthSpanish = now.toLocaleString('default', { month: 'long', locale: 'es-ES' });
   const currentYear = now.getFullYear();
-  const monthYear = `${currentMonth} ${currentYear}`;
+  const day = now.getDate();
+  const dayString = day < 10 ? `0${day}` : `${day}`;
+  const monthYearEnglish = `${currentMonthEnglish} ${currentYear}`;
+  const monthYearSpanish = `${currentMonthSpanish} ${currentYear}`;
 
   usersSnapshot.forEach(async (userDoc) => {
     const userId = userDoc.id;
@@ -36,14 +40,20 @@ exports.updateDailyResults = functions.pubsub.schedule('every 24 hours').onRun(a
 
     // Add your logic to calculate totalIncome and earningsInStocks here
 
-    const resultsRef = db.collection('users').doc(userId).collection('results').doc(monthYear);
-    await resultsRef.set({
+    const dayResults = {
       totalIncome,
       totalExpenses,
       earningsInPesos,
       earningsInDollars,
-      earningsInStocks
-    }, { merge: true });
+      earningsInStocks,
+      date: now.toISOString() // Include the date for reference
+    };
+
+    const resultsRefEnglish = db.collection('users').doc(userId).collection('results').doc(monthYearEnglish).collection('days').doc(dayString);
+    const resultsRefSpanish = db.collection('users').doc(userId).collection('results').doc(monthYearSpanish).collection('days').doc(dayString);
+    
+    await resultsRefEnglish.set(dayResults, { merge: true });
+    await resultsRefSpanish.set(dayResults, { merge: true });
   });
 
   return null;
