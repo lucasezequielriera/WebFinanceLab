@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-import { Layout, Menu, Tag, Modal, Tooltip, Button } from 'antd';
+import { Layout, Menu, Tag, Modal, Tooltip, Button, Dropdown } from 'antd';
 import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, UnorderedListOutlined, PlusOutlined, LoginOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
@@ -129,6 +129,17 @@ const AppLayout = () => {
 
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/forgot-password';
 
+  const servicesMenu = (
+    <Menu>
+      <Menu.Item key="detailed-expenses">
+        <Link to="/detailed-expenses">Detailed Expenses</Link>
+      </Menu.Item>
+      <Menu.Item key="general-expenses">
+        <Link to="/general-expenses">General Expenses</Link>
+      </Menu.Item>
+    </Menu>
+  );
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
@@ -177,13 +188,15 @@ const AppLayout = () => {
         </Modal>
         {currentUser && (
           <div className="mobile-nav">
-            <Button type="link" icon={<DashboardOutlined />}><Link to="/dashboard">Inicio</Link></Button>
-            <Button type="link" icon={<UnorderedListOutlined />}><Link to="/detailed-expenses">Mis servicios</Link></Button>
+            <Button type="link" icon={<DashboardOutlined />}><Link to="/dashboard">Dashboard</Link></Button>
+            <Dropdown overlay={servicesMenu} trigger={['click']}>
+              <Button type="link" icon={<UnorderedListOutlined />}>Expenses</Button>
+            </Dropdown>
             <div className="add-expense-button-mobile">
               <Button type="primary" shape="circle" icon={<PlusOutlined />} size="large" onClick={showModal} />
             </div>
-            <Button type="link" icon={<UserOutlined />}><Link to="/profile">Beneficios</Link></Button>
-            <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} className="logout">Más</Button>
+            <Button type="link" icon={<UserOutlined />}><Link to="/profile">Profile</Link></Button>
+            <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} className="logout">Logout</Button>
           </div>
         )}
       </Layout>
