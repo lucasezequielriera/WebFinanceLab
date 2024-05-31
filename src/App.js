@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Layout, Menu, Tag, Modal, Tooltip, Button } from 'antd';
-import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, UnorderedListOutlined, PlusOutlined } from '@ant-design/icons';
+import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, UnorderedListOutlined, PlusOutlined, LoginOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -25,7 +25,6 @@ const AppLayout = () => {
   const [selectedKey, setSelectedKey] = useState('1');
 
   useEffect(() => {
-    // Update the selected menu item based on the current location
     const path = location.pathname;
     if (path.startsWith('/dashboard')) {
       setSelectedKey('1');
@@ -35,6 +34,10 @@ const AppLayout = () => {
       setSelectedKey('general-expenses');
     } else if (path.startsWith('/profile')) {
       setSelectedKey('2');
+    } else if (path.startsWith('/signup')) {
+      setSelectedKey('signup');
+    } else if (path.startsWith('/login')) {
+      setSelectedKey('login');
     } else {
       setSelectedKey('');
     }
@@ -74,7 +77,7 @@ const AppLayout = () => {
     setIsModalVisible(false);
   };
 
-  const menuItems = [
+  const menuItems = currentUser ? [
     {
       key: '1',
       icon: <DashboardOutlined />,
@@ -100,13 +103,30 @@ const AppLayout = () => {
       icon: <UserOutlined />,
       label: <Link to="/profile">Profile</Link>
     },
-    currentUser && {
+    {
       key: '4',
       icon: <LogoutOutlined />,
       label: 'Logout',
       onClick: handleLogout
     }
-  ].filter(Boolean); // Filtrar valores nulos
+  ] : [
+    {
+      key: 'signup',
+      icon: <UserOutlined />,
+      label: <Link to="/signup">Sign Up</Link>,
+      hidden: location.pathname === '/signup',
+    },
+    {
+      key: 'login',
+      icon: <LoginOutlined />,
+      label: <Link to="/login">Log In</Link>,
+      hidden: location.pathname === '/login',
+    }
+  ];
+
+  const filteredMenuItems = menuItems.filter(item => !item.hidden);
+
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -114,17 +134,19 @@ const AppLayout = () => {
         <div className="user-greeting" style={{ color: 'white', padding: '16px', textAlign: 'center' }}>
           {collapsed ? <UserOutlined /> : currentUser ? `Hi, ${currentUser.displayName || 'User'}` : 'Hi, User'}
         </div>
-        <Menu theme="dark" mode="inline" selectedKeys={[selectedKey]} items={menuItems} />
-        <div className="sidebar-tags">
-          <Tag color="red" className="sidebar-tag" onClick={showModal}>
-            Add Expense
-          </Tag>
-          <Tooltip title="Coming Soon" placement="right" style={{ marginRight: '30px'}}>
-            <Tag color="blue" className="sidebar-tag disabled-tag" style={{ marginTop: '10px' }}>
-              Add Stock
+        <Menu theme="dark" mode="inline" selectedKeys={[selectedKey]} items={filteredMenuItems} />
+        {currentUser && (
+          <div className="sidebar-tags">
+            <Tag color="red" className="sidebar-tag" onClick={showModal}>
+              Add Expense
             </Tag>
-          </Tooltip>
-        </div>
+            <Tooltip title="Coming Soon" placement="right" style={{ marginRight: '30px'}}>
+              <Tag color="blue" className="sidebar-tag disabled-tag" style={{ marginTop: '10px' }}>
+                Add Stock
+              </Tag>
+            </Tooltip>
+          </div>
+        )}
       </Sider>
       <Layout className="site-layout">
         <Header className="site-layout-background" style={{ padding: 0 }}>
@@ -133,7 +155,7 @@ const AppLayout = () => {
             onClick: toggle,
           })}
         </Header>
-        <Content style={{ margin: '24px 16px', padding: 24, minHeight: 280 }}>
+        <Content style={{ margin: isAuthPage ? '0' : '24px 16px', padding: isAuthPage ? '0' : '24px', minHeight: 280 }}>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard expenses={expenses} handleExpenseAdded={handleExpenseAdded} /></PrivateRoute>} />
@@ -146,20 +168,21 @@ const AppLayout = () => {
           </Routes>
         </Content>
         <Footer className="mobile-footer-menu">
-          <Menu mode="horizontal" selectedKeys={[selectedKey]} items={menuItems} />
+          <Menu mode="horizontal" selectedKeys={[selectedKey]} items={filteredMenuItems} />
         </Footer>
         <Modal title="Add Expense" open={isModalVisible} onCancel={handleCancel} footer={null}>
           <AddExpense onExpenseAdded={handleExpenseAdded} />
         </Modal>
-        {/* Botón fijo para agregar gasto en dispositivos móviles */}
-        <Button 
-          type="primary" 
-          shape="circle" 
-          icon={<PlusOutlined />} 
-          size="large" 
-          onClick={showModal} 
-          className="add-expense-button" 
-        />
+        {currentUser && (
+          <Button 
+            type="primary" 
+            shape="circle" 
+            icon={<PlusOutlined />} 
+            size="large" 
+            onClick={showModal} 
+            className="add-expense-button" 
+          />
+        )}
       </Layout>
     </Layout>
   );

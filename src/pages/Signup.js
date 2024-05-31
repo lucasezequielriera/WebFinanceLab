@@ -4,29 +4,24 @@ import { useNavigate, Link } from 'react-router-dom';
 import { updateProfile } from "firebase/auth"; 
 import { db } from '../firebase'; // Importa db
 import { setDoc, doc } from "firebase/firestore"; // Importa Firestore
+import { Form, Input, Button, Typography, Alert, Card } from 'antd';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import '../styles/Auth.css';
+
+const { Title, Text } = Typography;
 
 export default function Signup() {
-  const emailRef = useRef();
-  const passwordRef = useRef();
-  const firstNameRef = useRef();
-  const lastNameRef = useRef();
   const { signup } = useAuth();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false); // Estado de carga
   const navigate = useNavigate();
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-
+  async function handleSubmit(values) {
     try {
       setError('');
-      // Leer los valores de las referencias antes de cambiar el estado de loading
-      const firstName = firstNameRef.current.value;
-      const lastName = lastNameRef.current.value;
-      const email = emailRef.current.value;
-      const password = passwordRef.current.value;
-
       setLoading(true); // Iniciar la carga
+      const { firstName, lastName, email, password } = values;
+
       const userCredential = await signup(email, password);
       await updateProfile(userCredential.user, {
         displayName: `${firstName} ${lastName}`
@@ -49,27 +44,36 @@ export default function Signup() {
   }
 
   return (
-    <div>
-      <h2>Sign Up</h2>
-      {error && <div>{error}</div>}
-      {loading ? (
-        <div>Loading...</div> // Mostrar "Loading..." mientras se realiza el signup
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <label>First Name</label>
-          <input type="text" ref={firstNameRef} required />
-          <label>Last Name</label>
-          <input type="text" ref={lastNameRef} required />
-          <label>Email</label>
-          <input type="email" ref={emailRef} required />
-          <label>Password</label>
-          <input type="password" ref={passwordRef} required />
-          <button disabled={loading} type="submit">Sign Up</button>
-        </form>
-      )}
-      <div>
-        Already have an account? <Link to="/login">Log In</Link>
-      </div>
+    <div className="auth-container">
+      <Card className="auth-card">
+        <div className="auth-avatar">
+          <UserOutlined style={{ fontSize: '48px', color: '#1890ff' }} />
+        </div>
+        <Title level={3} className="auth-title">Sign Up</Title>
+        {error && <Alert message={error} type="error" showIcon />}
+        <Form onFinish={handleSubmit} className="auth-form">
+          <Form.Item name="firstName" rules={[{ required: true, message: 'Please input your first name!' }]}>
+            <Input prefix={<UserOutlined />} placeholder="First Name" />
+          </Form.Item>
+          <Form.Item name="lastName" rules={[{ required: true, message: 'Please input your last name!' }]}>
+            <Input prefix={<UserOutlined />} placeholder="Last Name" />
+          </Form.Item>
+          <Form.Item name="email" rules={[{ required: true, message: 'Please input your email!' }]}>
+            <Input prefix={<UserOutlined />} placeholder="Email" />
+          </Form.Item>
+          <Form.Item name="password" rules={[{ required: true, message: 'Please input your password!' }]}>
+            <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" className="auth-button" loading={loading}>
+              Sign Up
+            </Button>
+          </Form.Item>
+        </Form>
+        <div className="auth-links">
+          <Text>Already have an account? <Link to="/login">Log In</Link></Text>
+        </div>
+      </Card>
     </div>
   );
 }
