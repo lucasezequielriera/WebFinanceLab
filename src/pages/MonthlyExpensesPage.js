@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
 import { doc, deleteDoc } from 'firebase/firestore';
-import { parse, format } from 'date-fns';
+import { parse } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 const MonthlyExpensesPage = () => {

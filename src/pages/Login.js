@@ -1,11 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { Form, Input, Button, Typography, Alert, Card, Checkbox } from 'antd';
+import { Form, Input, Button, Typography, Alert, Card } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import '../styles/Auth.css';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 export default function Login() {
   const { login } = useAuth();
@@ -18,7 +18,7 @@ export default function Login() {
       setError('');
       setLoading(true);
       const { email, password } = values;
-      await login(email, password);
+      await login(email, password );
       navigate('/dashboard');
     } catch {
       setError('Failed to log in');
@@ -40,9 +40,6 @@ export default function Login() {
           </Form.Item>
           <Form.Item name="password" rules={[{ required: true, message: 'Please input your password!' }]}>
             <Input.Password prefix={<LockOutlined />} placeholder="Password" />
-          </Form.Item>
-          <Form.Item name="remember" valuePropName="checked" noStyle>
-            <Checkbox className="auth-remember-me">Remember me</Checkbox>
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" className="auth-button" loading={loading}>

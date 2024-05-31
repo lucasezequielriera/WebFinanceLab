@@ -26,11 +26,18 @@ export function AuthProvider({ children }) {
   };
 
   const login = (email, password) => {
-    return signInWithEmailAndPassword(auth, email, password);
+    return signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
+      const user = userCredential.user;
+      setCurrentUser(user);
+      return userCredential;
+    });
   };
 
   const logout = () => {
-    return signOut(auth);
+    return signOut(auth).catch(error => {
+      console.error("Error during logout:", error);
+      throw error;
+    });
   };
 
   const value = {

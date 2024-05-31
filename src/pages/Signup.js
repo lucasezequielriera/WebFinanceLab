@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { updateProfile } from "firebase/auth"; 
 import { db } from '../firebase'; // Importa db
 import { setDoc, doc } from "firebase/firestore"; // Importa Firestore
@@ -8,7 +8,7 @@ import { Form, Input, Button, Typography, Alert, Card } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import '../styles/Auth.css';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 export default function Signup() {
   const { signup } = useAuth();
@@ -70,9 +70,9 @@ export default function Signup() {
             </Button>
           </Form.Item>
         </Form>
-        <div className="auth-links">
+        {/* <div className="auth-links">
           <Text>Already have an account? <Link to="/login">Log In</Link></Text>
-        </div>
+        </div> */}
       </Card>
     </div>
   );
