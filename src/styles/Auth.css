@@ -3,8 +3,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #001123, #4094e9);
+    height: calc(100% - 46px);
 }
   
   .auth-card {
@@ -67,6 +66,9 @@
   
 /* Ajuste específico para dispositivos móviles */
 @media (max-width: 768px) {
+    .auth-container {
+        height: calc(100% - 46px);
+    }
     .ant-notification-notice {
         max-width: 90%;
         font-size: 14px; /* Ajusta el tamaño de la fuente según sea necesario */
