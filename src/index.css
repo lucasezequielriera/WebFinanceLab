@@ -196,6 +196,9 @@ code {
     flex-flow: column nowrap;
     justify-content: center;
     align-items: center;
+    min-width: 85px;
+    padding: 30px 0;
+    font-size: 13px;
   }
 
   .ant-btn-link .ant-btn-icon {
@@ -206,10 +209,18 @@ code {
 
   .ant-btn-link a {
     font-size: 12px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    text-decoration: none;
+    color: inherit;
   }
 
   .logout span:nth-of-type(2) {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .mobile-footer-menu {
@@ -225,7 +236,6 @@ code {
     left: 0;
     width: 100%;
     background: #000c17;
-    padding: 15px 0;
     border-top: 1px solid #ccc;
     z-index: 1000;
   }
@@ -233,7 +243,7 @@ code {
   .add-expense-button-mobile {
     position: relative;
     min-width: 50px;
-    height: 30px;
+    height: 20px;
     text-align: center;
   }
 

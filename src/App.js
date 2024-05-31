@@ -188,15 +188,15 @@ const AppLayout = () => {
         </Modal>
         {currentUser && (
           <div className="mobile-nav">
-            <Button type="link" icon={<DashboardOutlined />}><Link to="/dashboard">Dashboard</Link></Button>
+            <Button type="link" icon={<DashboardOutlined />}><Link to="/dashboard"></Link>Dashboard</Button>
             <Dropdown overlay={servicesMenu} trigger={['click']}>
-              <Button type="link" icon={<UnorderedListOutlined />}>Expenses</Button>
+              <Button type="link" size="large" icon={<UnorderedListOutlined />}>Expenses</Button>
             </Dropdown>
             <div className="add-expense-button-mobile">
               <Button type="primary" shape="circle" icon={<PlusOutlined />} size="large" onClick={showModal} />
             </div>
-            <Button type="link" icon={<UserOutlined />}><Link to="/profile">Profile</Link></Button>
-            <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} className="logout">Logout</Button>
+            <Button type="link" icon={<UserOutlined />}><Link to="/profile"></Link>Profile</Button>
+            <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} size="large" className="logout">Logout</Button>
           </div>
         )}
       </Layout>
