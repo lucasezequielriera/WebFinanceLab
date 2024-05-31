@@ -186,6 +186,9 @@ code {
 }
 
 @media (max-width: 768px) {
+  .site-layout-background {
+    display: none;
+  }
   .ant-layout-sider {
     display: none !important;
   }
