@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+
+/* Ajuste específico para dispositivos móviles */
+@media (max-width: 768px) {
+  .ant-notification-notice {
+  max-width: 90%;
+  font-size: 14px; /* Ajusta el tamaño de la fuente según sea necesario */
+  }
+}
