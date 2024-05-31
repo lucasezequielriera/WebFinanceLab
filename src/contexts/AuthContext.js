@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { auth } from '../firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "firebase/auth";
 
 const AuthContext = React.createContext();
 
@@ -33,6 +33,10 @@ export function AuthProvider({ children }) {
     });
   };
 
+  const resetPassword = (email) => {
+    return sendPasswordResetEmail(auth, email);
+  };
+
   const logout = () => {
     return signOut(auth).catch(error => {
       console.error("Error during logout:", error);
@@ -44,6 +48,7 @@ export function AuthProvider({ children }) {
     currentUser,
     login,
     signup,
+    resetPassword,
     logout
   };
 

@@ -5,6 +5,7 @@ import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, Me
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
 import PrivateRoute from './components/PrivateRoute';
 import UserProfile from './pages/UserProfile';
 import DetailedExpenses from './pages/DetailedExpenses';
@@ -126,7 +127,7 @@ const AppLayout = () => {
 
   const filteredMenuItems = menuItems.filter(item => !item.hidden);
 
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/forgot-password';
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -161,6 +162,7 @@ const AppLayout = () => {
             <Route path="/dashboard" element={<PrivateRoute><Dashboard expenses={expenses} handleExpenseAdded={handleExpenseAdded} /></PrivateRoute>} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
             <Route path="/detailed-expenses" element={<PrivateRoute><DetailedExpenses /></PrivateRoute>} />
             <Route path="/general-expenses" element={<PrivateRoute><GeneralExpenses /></PrivateRoute>} />

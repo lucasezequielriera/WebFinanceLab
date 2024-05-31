@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Typography, Card, notification } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { UserOutlined } from '@ant-design/icons';
 import '../styles/Auth.css';
 
 const { Title } = Typography;
 
-export default function Login() {
-  const { login } = useAuth();
+export default function ForgotPassword() {
+  const { resetPassword } = useAuth();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -22,13 +22,15 @@ export default function Login() {
   async function handleSubmit(values) {
     try {
       setLoading(true);
-      const { email, password } = values;
-      await login(email, password );
-      navigate('/dashboard');
+      await resetPassword(values.email);
+      openNotificationWithIcon('success', 'Success', 'Check your inbox for further instructions');
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000); // Redirige a la página de inicio de sesión después de 3 segundos
     } catch {
-      openNotificationWithIcon('error', 'Error', 'Failed to log in');
-      setLoading(false);
+        openNotificationWithIcon('error', 'Error', 'Failed to reset password');
     }
+    setLoading(false);
   }
 
   return (
@@ -37,23 +39,17 @@ export default function Login() {
         <div className="auth-avatar">
           <UserOutlined style={{ fontSize: '48px', color: '#1890ff' }} />
         </div>
-        <Title level={3} className="auth-title">Log In</Title>
+        <Title level={3} className="auth-title">Password Reset</Title>
         <Form onFinish={handleSubmit} className="auth-form">
           <Form.Item name="email" rules={[{ required: true, message: 'Please input your email!' }]}>
             <Input prefix={<UserOutlined />} placeholder="Email" />
           </Form.Item>
-          <Form.Item name="password" rules={[{ required: true, message: 'Please input your password!' }]}>
-            <Input.Password prefix={<LockOutlined />} placeholder="Password" />
-          </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" className="auth-button" loading={loading}>
-              Log In
+              Reset Password
             </Button>
           </Form.Item>
         </Form>
-        <div className="auth-links">
-          <Link to="/forgot-password">Forgot password?</Link>
-        </div>
       </Card>
     </div>
   );
