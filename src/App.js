@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Layout, Menu, Tag, Modal, Tooltip, Button } from 'antd';
 import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, UnorderedListOutlined, PlusOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
@@ -21,6 +21,24 @@ const AppLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [expenses, setExpenses] = useState([]);
+  const location = useLocation();
+  const [selectedKey, setSelectedKey] = useState('1');
+
+  useEffect(() => {
+    // Update the selected menu item based on the current location
+    const path = location.pathname;
+    if (path.startsWith('/dashboard')) {
+      setSelectedKey('1');
+    } else if (path.startsWith('/detailed-expenses')) {
+      setSelectedKey('detailed-expenses');
+    } else if (path.startsWith('/general-expenses')) {
+      setSelectedKey('general-expenses');
+    } else if (path.startsWith('/profile')) {
+      setSelectedKey('2');
+    } else {
+      setSelectedKey('');
+    }
+  }, [location]);
 
   const toggle = () => {
     setCollapsed(!collapsed);
@@ -96,7 +114,7 @@ const AppLayout = () => {
         <div className="user-greeting" style={{ color: 'white', padding: '16px', textAlign: 'center' }}>
           {collapsed ? <UserOutlined /> : currentUser ? `Hi, ${currentUser.displayName || 'User'}` : 'Hi, User'}
         </div>
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']} items={menuItems} />
+        <Menu theme="dark" mode="inline" selectedKeys={[selectedKey]} items={menuItems} />
         <div className="sidebar-tags">
           <Tag color="red" className="sidebar-tag" onClick={showModal}>
             Add Expense
@@ -117,6 +135,7 @@ const AppLayout = () => {
         </Header>
         <Content style={{ margin: '24px 16px', padding: 24, minHeight: 280 }}>
           <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard expenses={expenses} handleExpenseAdded={handleExpenseAdded} /></PrivateRoute>} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
@@ -127,7 +146,7 @@ const AppLayout = () => {
           </Routes>
         </Content>
         <Footer className="mobile-footer-menu">
-          <Menu mode="horizontal" defaultSelectedKeys={['1']} items={menuItems} />
+          <Menu mode="horizontal" selectedKeys={[selectedKey]} items={menuItems} />
         </Footer>
         <Modal title="Add Expense" open={isModalVisible} onCancel={handleCancel} footer={null}>
           <AddExpense onExpenseAdded={handleExpenseAdded} />
