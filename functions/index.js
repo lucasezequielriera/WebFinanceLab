@@ -7,12 +7,16 @@ exports.updateDailyResults = functions.pubsub.schedule('59 23 * * *').timeZone('
   const db = admin.firestore();
   const usersSnapshot = await db.collection('users').get();
 
+  // Obtener la fecha actual en la zona horaria correcta
   const now = new Date();
-  const currentMonthEnglish = now.toLocaleString('default', { month: 'long', locale: 'en-US' });
-  const currentMonthSpanish = now.toLocaleString('default', { month: 'long', locale: 'es-ES' });
-  const currentYear = now.getFullYear();
-  const day = now.getDate();
-  const dayString = day < 10 ? `0${day}` : `${day}`;
+  const currentDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000); // Ajustar para el huso horario
+
+  // Obtener el día, mes y año actuales
+  const currentDay = currentDate.getDate();
+  const dayString = currentDay < 10 ? `0${currentDay}` : `${currentDay}`;
+  const currentMonthEnglish = currentDate.toLocaleString('en-US', { month: 'long' });
+  const currentMonthSpanish = currentDate.toLocaleString('es-ES', { month: 'long' });
+  const currentYear = currentDate.getFullYear();
   const monthYearEnglish = `${currentMonthEnglish} ${currentYear}`;
   const monthYearSpanish = `${currentMonthSpanish} ${currentYear}`;
 
@@ -46,7 +50,7 @@ exports.updateDailyResults = functions.pubsub.schedule('59 23 * * *').timeZone('
       earningsInPesos,
       earningsInDollars,
       earningsInStocks,
-      date: now.toISOString() // Include the date for reference
+      date: currentDate.toISOString() // Include the date for reference
     };
 
     const resultsRefEnglish = db.collection('users').doc(userId).collection('results').doc(monthYearEnglish).collection('days').doc(dayString);
