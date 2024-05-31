@@ -171,31 +171,6 @@ code {
   cursor: not-allowed !important;
 }
 
-.mobile-footer-menu {
-  display: none;
-  position: fixed;
-  background-color: transparent;
-  width: 100%;
-  padding: 0;
-  bottom: 0;
-  box-shadow: 0px 0px 10px #00000029;
-}
-
-@media (max-width: 768px) {
-  .mobile-footer-menu {
-    display: block;
-  }
-  .ant-layout-sider {
-    display: none;
-  }
-  .ant-layout-header {
-    display: none;
-  }
-  .ant-menu-horizontal {
-    justify-content: center;
-  }
-}
-
 /* Botón fijo para agregar gastos en dispositivos móviles */
 .add-expense-button {
   position: fixed;
@@ -205,8 +180,84 @@ code {
   display: none !important; /* Ocultar por defecto */
 }
 
+/* Menu horizontal para mobile */
+.mobile-nav {
+  display: none;
+}
+
 @media (max-width: 768px) {
-  .add-expense-button {
-    display: block !important; /* Mostrar en dispositivos móviles */
+  .ant-layout-sider {
+    display: none !important;
+  }
+
+  .ant-btn-link {
+    color: #80b4ff;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .ant-btn-link .ant-btn-icon {
+    margin: 0 !important;
+    font-size: 25px;
+    padding-bottom: 2px;
+  }
+
+  .ant-btn-link a {
+    font-size: 12px;
+  }
+
+  .logout span:nth-of-type(2) {
+    font-size: 12px;
+  }
+
+  .mobile-footer-menu {
+    display: none !important;
+  }
+
+  .mobile-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #000c17;
+    padding: 15px 0;
+    border-top: 1px solid #ccc;
+    z-index: 1000;
+  }
+
+  .add-expense-button-mobile {
+    position: relative;
+    min-width: 50px;
+    height: 30px;
+    text-align: center;
+  }
+
+  .add-expense-button-mobile button {
+    background-color: #005fb8;
+    border: none;
+    box-shadow: 0px 0px 0px 7px rgb(245 245 245);
+    position: absolute;
+    left: 50%;
+    right: 50%;
+    bottom: 0;
+    transform: translate(-50%, -50%);
+  }
+
+  .ant-notification-notice {
+    max-width: 90%;
+    font-size: 14px; /* Ajusta el tamaño de la fuente según sea necesario */
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-footer-menu,
+  .mobile-nav,
+  .add-expense-button-mobile {
+    display: none;
   }
 }

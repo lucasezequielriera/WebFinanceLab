@@ -131,7 +131,7 @@ const AppLayout = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
+      <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
         <div className="user-greeting" style={{ color: 'white', padding: '16px', textAlign: 'center' }}>
           {collapsed ? <UserOutlined /> : currentUser ? `Hi, ${currentUser.displayName || 'User'}` : 'Hi, User'}
         </div>
@@ -176,14 +176,15 @@ const AppLayout = () => {
           <AddExpense onExpenseAdded={handleExpenseAdded} />
         </Modal>
         {currentUser && (
-          <Button 
-            type="primary" 
-            shape="circle" 
-            icon={<PlusOutlined />} 
-            size="large" 
-            onClick={showModal} 
-            className="add-expense-button" 
-          />
+          <div className="mobile-nav">
+            <Button type="link" icon={<DashboardOutlined />}><Link to="/dashboard">Inicio</Link></Button>
+            <Button type="link" icon={<UnorderedListOutlined />}><Link to="/detailed-expenses">Mis servicios</Link></Button>
+            <div className="add-expense-button-mobile">
+              <Button type="primary" shape="circle" icon={<PlusOutlined />} size="large" onClick={showModal} />
+            </div>
+            <Button type="link" icon={<UserOutlined />}><Link to="/profile">Beneficios</Link></Button>
+            <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} className="logout">Más</Button>
+          </div>
         )}
       </Layout>
     </Layout>
