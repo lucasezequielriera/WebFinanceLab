@@ -1,4 +1,3 @@
-// MonthlyExpensesPage.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Spin, Table, notification, Popconfirm, Tag, Row, Col, Button } from 'antd';
@@ -8,6 +7,7 @@ import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firest
 import { doc, deleteDoc } from 'firebase/firestore';
 import { parse } from 'date-fns';
 import { es } from 'date-fns/locale';
+import '../styles/ExpensesPage.css';
 
 const MonthlyExpensesPage = () => {
   const { currentUser } = useAuth();
@@ -70,6 +70,7 @@ const MonthlyExpensesPage = () => {
       dataIndex: 'description',
       key: 'description',
       width: '50%',
+      ellipsis: true, // Truncate text in mobile view
     },
     {
       title: 'Amount',
@@ -80,18 +81,21 @@ const MonthlyExpensesPage = () => {
         const amount = Number(text);
         return record.currency === 'ARS' ? `$${amount.toFixed(2)}` : `USD${amount.toFixed(2)}`;
       },
+      // responsive: ['sm'], // Hide column in extra-small view
     },
-    {
-      title: 'Currency',
-      dataIndex: 'currency',
-      key: 'currency',
-      width: '5%',
-    },
+    // {
+    //   title: 'Currency',
+    //   dataIndex: 'currency',
+    //   key: 'currency',
+    //   width: '5%',
+    //   responsive: ['sm'], // Hide column in extra-small view
+    // },
     {
       title: 'Category',
       dataIndex: 'category',
       key: 'category',
       width: '15%',
+      // responsive: ['md'], // Hide column in small and extra-small view
     },
     {
       title: 'Date',
@@ -99,6 +103,7 @@ const MonthlyExpensesPage = () => {
       key: 'timestamp',
       width: '10%',
       render: (text) => new Date(text.seconds * 1000).toLocaleDateString(),
+      responsive: ['md'], // Hide column in small and extra-small view
     },
     {
       title: 'Action',
@@ -145,7 +150,7 @@ const MonthlyExpensesPage = () => {
             .reduce((sum, expense) => sum + (Number(expense.amount) || 0), 0);
 
           return (
-            <Col span={12} key={category}>
+            <Col xs={24} md={12} key={category}>
               <h2>{category}</h2>
               <Table
                 bordered
@@ -153,11 +158,12 @@ const MonthlyExpensesPage = () => {
                 columns={columns}
                 pagination={{ pageSize: 5 }}
                 rowKey="id"
+                scroll={{ x: true }} // Enable horizontal scrolling in mobile view
               />
               <div style={{ fontWeight: 'bold', borderTop: '1px solid #1890ff', padding: '10px', backgroundColor: '#e6f7ff' }}>
                 <div style={{ display: 'flex', flexFlow: 'column' }}>
-                <p style={{ marginBottom: '5px' }}>Total in Pesos: ${totalPesos.toFixed(2)}</p>
-                <p style={{ margin: 0 }}>Total in Dollars: USD{totalDollars.toFixed(2)}</p>
+                  <p style={{ marginBottom: '5px' }}>Total in Pesos: ${totalPesos.toFixed(2)}</p>
+                  <p style={{ margin: 0 }}>Total in Dollars: USD{totalDollars.toFixed(2)}</p>
                 </div>
               </div>
             </Col>

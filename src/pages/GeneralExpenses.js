@@ -5,6 +5,7 @@ import { collection, query, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import '../styles/ExpensesPage.css'
 
 const { Option } = Select;
 
@@ -86,6 +87,7 @@ const GeneralExpenses = () => {
       dataIndex: 'category',
       key: 'category',
       width: '60%',
+      ellipsis: true, // Truncate text in mobile view
     },
     {
       title: 'Total (Pesos)',
@@ -159,6 +161,7 @@ const GeneralExpenses = () => {
               columns={columns}
               pagination={false}
               rowKey="category"
+              scroll={{ x: true }} // Enable horizontal scrolling in mobile view
               summary={pageData => {
                 const totalPesos = pageData.reduce((sum, record) => sum + (parseFloat(record.totalPesos) || 0), 0);
                 const totalDollars = pageData.reduce((sum, record) => sum + (parseFloat(record.totalDollars) || 0), 0);

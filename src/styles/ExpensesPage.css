@@ -12,3 +12,17 @@
   font-size: 14px; /* Ajusta el tamaño de la fuente según sea necesario */
   }
 }
+
+@media (max-width: 768px) {
+
+  /* Estilos para hacer la tabla más compacta */
+  :where(.css-dev-only-do-not-override-j9bb5n).ant-table-wrapper .ant-table.ant-table-bordered >.ant-table-container >.ant-table-content >table >thead>tr>th, :where(.css-dev-only-do-not-override-j9bb5n).ant-table-wrapper .ant-table.ant-table-bordered >.ant-table-container >.ant-table-content >table >tbody .ant-table-row td {
+    padding: 8px 8px !important; /* Reduce el padding de las celdas */
+    font-size: 12px !important; /* Reduce el tamaño de la fuente */
+  }
+
+  :where(.css-dev-only-do-not-override-j9bb5n).ant-table-wrapper .ant-table-cell, :where(.css-dev-only-do-not-override-j9bb5n).ant-table-wrapper .ant-table-cell {
+    padding: 8px 8px !important;
+  }
+
+}
