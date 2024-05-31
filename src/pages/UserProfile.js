@@ -195,7 +195,8 @@ export default function UserProfile() {
             title: 'Job Title',
             dataIndex: 'title',
             key: 'title',
-            width: '40%',
+            width: '20%',
+            ellipsis: true, // Truncate text in mobile view
             render: (text, record, index) => (
                 editJobIndex === index ? 
                 <Input name="title" value={editJobData.title} onChange={handleEditJobChange} /> :
@@ -206,10 +207,10 @@ export default function UserProfile() {
             title: 'Currency',
             dataIndex: 'currency',
             key: 'currency',
-            width: '15%',
+            width: '20%',
             render: (text, record, index) => (
                 editJobIndex === index ? 
-                <Select value={editJobData.currency} onChange={handleEditJobCurrencyChange}>
+                <Select value={editJobData.currency} onChange={handleEditJobCurrencyChange} style={{ minWidth: 50 }}>
                     <Option value="ARS">ARS</Option>
                     <Option value="USD">USD</Option>
                 </Select> :
@@ -220,7 +221,7 @@ export default function UserProfile() {
             title: 'Salary',
             dataIndex: 'salary',
             key: 'salary',
-            width: '15%',
+            width: '20%',
             render: (text, record, index) => (
                 editJobIndex === index ? 
                 <Input name="salary" value={editJobData.salary} onChange={handleEditJobChange} /> :
@@ -231,7 +232,7 @@ export default function UserProfile() {
             title: 'Contract Type',
             dataIndex: 'type',
             key: 'type',
-            width: '15%',
+            width: '20%',
             render: (text, record, index) => (
                 editJobIndex === index ? 
                 <Select name="type" value={editJobData.type} onChange={(value) => setEditJobData(prevData => ({ ...prevData, type: value }))}>
@@ -240,19 +241,21 @@ export default function UserProfile() {
                 </Select> :
                 text
             ),
+            responsive: ['md'], // Hide column in extra-small view
         },
         {
             title: 'Actions',
             key: 'actions',
-            width: '15%',
+            width: '20%',
             render: (_, record, index) => (
                 editJobIndex === index ? 
-                <Button type="link" onClick={handleConfirmEditJob} style={{ backgroundColor: 'green', color: 'white'}}>Confirm Changes</Button> :
-                <>
-                    <Button type="link" onClick={() => handleEditJob(index)}>Edit</Button>
-                    <Button type="primary" onClick={() => handleDeleteJob(index)} danger ghost>Delete</Button>
-                </>
+                <div style={{ textAlign: 'center' }}><Button type="link" onClick={handleConfirmEditJob} style={{ color: 'green', border: '1px solid green' }}>Confirm</Button></div> :
+                    <div style={{ textAlign: 'center' }}>
+                        <Button type="link" onClick={() => handleEditJob(index)}>Edit</Button>
+                        <Button type="primary" onClick={() => handleDeleteJob(index)} danger ghost>Delete</Button>
+                    </div>
             ),
+            responsive: ['md'], // Hide column in extra-small view
         },
     ];
 
