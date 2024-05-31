@@ -156,7 +156,7 @@ const AppLayout = () => {
             onClick: toggle,
           })}
         </Header>
-        <Content style={{ margin: isAuthPage ? '0' : '24px 16px', padding: isAuthPage ? '0' : '24px', background: isAuthPage ? 'linear-gradient(135deg, #001123, #4094e9)' : 'aliceblue', minHeight: 280 }}>
+        <Content style={{ margin: isAuthPage ? '0' : '24px 16px', padding: isAuthPage ? '0' : '24px', background: isAuthPage ? 'linear-gradient(135deg, #001123, #4094e9)' : 'transparent', minHeight: 280 }}>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard expenses={expenses} handleExpenseAdded={handleExpenseAdded} /></PrivateRoute>} />
