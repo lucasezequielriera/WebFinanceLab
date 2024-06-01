@@ -169,7 +169,7 @@ const MonthlyExpensesPage = () => {
                 columns={columns}
                 pagination={{ pageSize: 5 }}
                 rowKey="id"
-                scroll={{ x: true }} // Enable horizontal scrolling in mobile view
+                scroll={{ x: true }} // Enable horizontal scrolling in mobile view 
               />
               <div style={{ fontWeight: 'bold', borderTop: '1px solid #1890ff', padding: '10px', backgroundColor: '#e6f7ff' }}>
                 <div style={{ display: 'flex', flexFlow: 'column' }}>
