@@ -17,6 +17,14 @@ import './index.css';
 
 const { Header, Sider, Content, Footer } = Layout;
 
+const RedirectIfAuthenticated = ({ children }) => {
+  const { currentUser } = useAuth();
+  if (currentUser) {
+    return <Navigate to="/dashboard" />;
+  }
+  return children;
+};
+
 const AppLayout = () => {
   const { currentUser, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
@@ -144,8 +152,7 @@ const AppLayout = () => {
     <Layout style={{ minHeight: '100vh' }}>
       <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
         <div className="user-greeting" style={{ color: 'white', padding: '16px', textAlign: 'center' }}>
-          <img src="https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/projectImages%2Fmanager-money-image.webp?alt=media&token=f9e1658d-1bc3-4455-b883-ab05e3e621a5" alt="app-icon" width={'100%'} height={'100px'}/>
-          {/* {collapsed ? <UserOutlined /> : currentUser ? `Hi, ${currentUser.displayName || 'User'}` : 'Hi, User'} */}
+          <img src="https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/projectImages%2Fmanager-money-image.webp?alt=media&token=f9e1658d-1bc3-4455-b883-ab05e3e621a5" alt="app-icon" width={'100%'} height={'50px'}/>
         </div>
         <Menu theme="dark" mode="inline" selectedKeys={[selectedKey]} items={filteredMenuItems} />
         {currentUser && (
@@ -172,13 +179,14 @@ const AppLayout = () => {
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard expenses={expenses} handleExpenseAdded={handleExpenseAdded} /></PrivateRoute>} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<RedirectIfAuthenticated><Signup /></RedirectIfAuthenticated>} />
+            <Route path="/login" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
             <Route path="/detailed-expenses" element={<PrivateRoute><DetailedExpenses /></PrivateRoute>} />
             <Route path="/general-expenses" element={<PrivateRoute><GeneralExpenses /></PrivateRoute>} />
             <Route path="/monthly-expenses/:month" element={<PrivateRoute><MonthlyExpensesPage /></PrivateRoute>} />
+            <Route path="*" element={<Navigate to="/dashboard" />} /> {/* Catch-all route */}
           </Routes>
         </Content>
         <Footer className="mobile-footer-menu">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Statistic, Spin } from 'antd';
+import { Card, Statistic } from 'antd';
 import { DollarOutlined } from '@ant-design/icons';
 import { db } from '../firebase';
 import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
@@ -31,12 +31,12 @@ const PesoExpenseCounter = () => {
     return () => unsubscribeExpenses();
   }, [currentUser]);
 
-  if (loading) {
-    return <Spin spinning={loading} />;
-  }
+  // if (loading) {
+  //   return <Spin spinning={loading} />;
+  // }
 
   return (
-    <Card>
+    <Card loading={loading}>
       <Statistic
         title="Total Expenses in ARS"
         value={total}

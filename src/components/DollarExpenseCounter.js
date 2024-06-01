@@ -31,12 +31,12 @@ const DollarExpenseCounter = () => {
     return () => unsubscribeExpenses();
   }, [currentUser]);
 
-  if (loading) {
-    return <Spin spinning={loading} />;
-  }
+  // if (loading) {
+  //   return <Spin spinning={loading} />;
+  // }
 
   return (
-    <Card>
+    <Card loading={loading}>
       <Statistic
         title="Total Expenses in USD"
         value={total}

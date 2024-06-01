@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Spin, Table, notification, Popconfirm, Tag, Row, Col, Button } from 'antd';
+import { Spin, Table, notification, Popconfirm, Tag, Row, Col, Button, Tooltip } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
@@ -41,6 +41,10 @@ const MonthlyExpensesPage = () => {
       snapshot.forEach((doc) => {
         expensesData.push({ id: doc.id, ...doc.data() });
       });
+
+      // Ordenar las expenses por timestamp descendente
+      expensesData.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
+
       setExpenses(expensesData);
       setLoading(false);
     });
@@ -102,7 +106,14 @@ const MonthlyExpensesPage = () => {
       dataIndex: 'timestamp',
       key: 'timestamp',
       width: '10%',
-      render: (text) => new Date(text.seconds * 1000).toLocaleDateString(),
+      render: (text) => {
+        const date = new Date(text.seconds * 1000);
+        return (
+          <Tooltip title={date.toLocaleTimeString()}>
+            <span>{date.toLocaleDateString()}</span>
+          </Tooltip>
+        );
+      },
       responsive: ['md'], // Hide column in small and extra-small view
     },
     {

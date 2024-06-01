@@ -64,14 +64,14 @@ const RemainingDollarsCounter = () => {
   const remaining = totalIncome - totalExpenses;
   console.log('Remaining (Dollars):', remaining);
 
-  if (loading) {
-    return <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <div style={{ height: '100vh' }} />
-    </Spin>
-  }
+  // if (loading) {
+  //   return <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+  //     <div style={{ height: '100vh' }} />
+  //   </Spin>
+  // }
 
   return (
-    <Card>
+    <Card loading={loading}>
       <Statistic
         title="Remaining in USD"
         value={remaining}

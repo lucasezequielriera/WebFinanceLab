@@ -64,16 +64,16 @@ const RemainingPesosCounter = () => {
     fetchData();
   }, [currentUser]);
 
-  if (loading) {
-    return (
-      <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div style={{ height: '100vh' }} />
-      </Spin>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+  //       <div style={{ height: '100vh' }} />
+  //     </Spin>
+  //   );
+  // }
 
   return (
-    <Card>
+    <Card loading={loading}>
       <Statistic
         title="Remaining in ARS"
         value={remaining}
