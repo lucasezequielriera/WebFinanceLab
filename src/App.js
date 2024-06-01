@@ -148,6 +148,12 @@ const AppLayout = () => {
     </Menu>
   );
 
+  console.log(servicesMenu)
+  console.log({ items: [
+    { key: 'detailed-expenses', label: <Link to="/detailed-expenses">Detailed Expenses</Link> },
+    { key: 'general-expenses', label: <Link to="/general-expenses">General Expenses</Link> }
+  ] })
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
@@ -198,7 +204,10 @@ const AppLayout = () => {
         {currentUser && (
           <div className="mobile-nav">
             <Button type="link" icon={<DashboardOutlined />}><Link to="/dashboard"></Link>Dashboard</Button>
-            <Dropdown menu={servicesMenu} trigger={['click']}>
+            <Dropdown menu={{ items: [
+                { key: 'detailed-expenses', label: <Link to="/detailed-expenses">Detailed Expenses</Link> },
+                { key: 'general-expenses', label: <Link to="/general-expenses">General Expenses</Link> }
+              ] }} trigger={['click']}>
               <Button type="link" size="large" icon={<UnorderedListOutlined />}>Expenses</Button>
             </Dropdown>
             <div className="add-expense-button-mobile">
