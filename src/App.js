@@ -144,7 +144,8 @@ const AppLayout = () => {
     <Layout style={{ minHeight: '100vh' }}>
       <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
         <div className="user-greeting" style={{ color: 'white', padding: '16px', textAlign: 'center' }}>
-          {collapsed ? <UserOutlined /> : currentUser ? `Hi, ${currentUser.displayName || 'User'}` : 'Hi, User'}
+          <img src="https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/projectImages%2Fmanager-money-image.webp?alt=media&token=f9e1658d-1bc3-4455-b883-ab05e3e621a5" alt="app-icon" width={'100%'} height={'100px'}/>
+          {/* {collapsed ? <UserOutlined /> : currentUser ? `Hi, ${currentUser.displayName || 'User'}` : 'Hi, User'} */}
         </div>
         <Menu theme="dark" mode="inline" selectedKeys={[selectedKey]} items={filteredMenuItems} />
         {currentUser && (
@@ -167,7 +168,7 @@ const AppLayout = () => {
             onClick: toggle,
           })}
         </Header>
-        <Content style={{ margin: isAuthPage ? '0' : '24px 16px', padding: isAuthPage ? '0' : '24px', background: isAuthPage ? 'linear-gradient(135deg, #001123, #4094e9)' : 'transparent', minHeight: 280 }}>
+        <Content style={{ padding: isAuthPage ? '0' : '24px', background: isAuthPage ? 'linear-gradient(135deg, #001123, #4094e9)' : 'transparent', minHeight: 280 }}>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard expenses={expenses} handleExpenseAdded={handleExpenseAdded} /></PrivateRoute>} />
@@ -189,7 +190,7 @@ const AppLayout = () => {
         {currentUser && (
           <div className="mobile-nav">
             <Button type="link" icon={<DashboardOutlined />}><Link to="/dashboard"></Link>Dashboard</Button>
-            <Dropdown overlay={servicesMenu} trigger={['click']}>
+            <Dropdown menu={servicesMenu} trigger={['click']}>
               <Button type="link" size="large" icon={<UnorderedListOutlined />}>Expenses</Button>
             </Dropdown>
             <div className="add-expense-button-mobile">

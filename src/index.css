@@ -118,6 +118,7 @@ code {
 
 .site-layout-background {
   background: #fff;
+  display: none;
 }
 
 .trigger {

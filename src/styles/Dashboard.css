@@ -1,11 +1,7 @@
-.dashboard-container {
-    padding: 0 16px;
-}
-  
 .dashboard-title {
-    font-size: 24px;
-    text-align: center;
-    margin-bottom: 24px;
+  font-size: 24px;
+  text-align: left;
+  margin-bottom: 24px;
 }
 
 .dashboard-chart {
@@ -36,6 +32,14 @@
   .ant-card-body {
     padding: 0 !important;
     margin: 0 !important;
+  }
+
+  .loading-cards .equal-height-card {
+    height: auto;
+  }
+
+  .loading-cards .equal-height-card h2 {
+   font-size: 15px
   }
 
   @media (max-width: 768px) {
