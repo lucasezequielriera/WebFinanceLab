@@ -60,7 +60,7 @@
     color: white;
   }
 
-  :where(.css-dev-only-do-not-override-j9bb5n).ant-input-affix-wrapper {
+  .auth-container :where(.css-dev-only-do-not-override-j9bb5n).ant-input-affix-wrapper {
     padding: 10px;
   }
   

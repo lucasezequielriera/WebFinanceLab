@@ -15,7 +15,7 @@ import AddExpense from './components/AddExpense';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
 
-const { Header, Sider, Content, Footer } = Layout;
+const { Header, Sider, Content } = Layout;
 
 const RedirectIfAuthenticated = ({ children }) => {
   const { currentUser } = useAuth();
@@ -195,9 +195,6 @@ const AppLayout = () => {
             <Route path="*" element={<Navigate to="/dashboard" />} /> {/* Catch-all route */}
           </Routes>
         </Content>
-        <Footer className="mobile-footer-menu">
-          <Menu mode="horizontal" selectedKeys={[selectedKey]} items={filteredMenuItems} />
-        </Footer>
         <Modal title="Add Expense" open={isModalVisible} onCancel={handleCancel} footer={null}>
           <AddExpense onExpenseAdded={handleExpenseAdded} />
         </Modal>

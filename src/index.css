@@ -172,20 +172,6 @@ code {
   cursor: not-allowed !important;
 }
 
-/* Botón fijo para agregar gastos en dispositivos móviles */
-.add-expense-button {
-  position: fixed;
-  bottom: 80px;
-  right: 24px;
-  z-index: 1000;
-  display: none !important; /* Ocultar por defecto */
-}
-
-/* Menu horizontal para mobile */
-.mobile-nav {
-  display: none;
-}
-
 @media (max-width: 768px) {
   .site-layout-background {
     display: none;
@@ -227,10 +213,9 @@ code {
     font-size: 13px;
   }
 
-  .mobile-footer-menu {
-    display: none !important;
-  }
+  /* NAVBAR IN MOBILE */
 
+  /* Navbar */
   .mobile-nav {
     display: flex;
     justify-content: space-around;
@@ -244,6 +229,7 @@ code {
     z-index: 1000;
   }
 
+  /* Button Navbar */
   .add-expense-button-mobile {
     position: relative;
     min-width: 50px;
@@ -262,6 +248,8 @@ code {
     transform: translate(-50%, -50%);
   }
 
+  /* NOTIFICATIONs */
+
   .ant-notification-notice {
     max-width: 90%;
     font-size: 14px; /* Ajusta el tamaño de la fuente según sea necesario */
@@ -269,7 +257,6 @@ code {
 }
 
 @media (min-width: 769px) {
-  .mobile-footer-menu,
   .mobile-nav,
   .add-expense-button-mobile {
     display: none;

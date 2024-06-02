@@ -1,0 +1,35 @@
+.add-expense-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+  }
+  
+  .add-expense-title {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .add-expense-description {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .add-expense-button {
+    width: 100%;
+  }
+  
+  @media (max-width: 576px) {
+    .add-expense-container {
+      padding: 10px;
+    }
+  
+    .add-expense-title {
+      font-size: 24px;
+    }
+  
+    .add-expense-description {
+      font-size: 14px;
+    }
+  }
+  

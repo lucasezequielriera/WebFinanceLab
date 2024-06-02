@@ -1,11 +1,13 @@
-// AddExpense.js
 import React, { useState } from 'react';
-import { Form, Input, Button, Select, notification, Spin } from 'antd';
+import { Form, Input, Button, Select, notification, Spin, Typography, Row, Col } from 'antd';
+import { DollarOutlined, FileTextOutlined } from '@ant-design/icons';
 import { db } from '../firebase';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import '../styles/AddExpense.css';
 
 const { Option } = Select;
+const { Title, Paragraph } = Typography;
 
 const AddExpense = ({ onExpenseAdded }) => {
   const { currentUser } = useAuth();
@@ -58,59 +60,75 @@ const AddExpense = ({ onExpenseAdded }) => {
 
   return (
     <Spin spinning={loading}>
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleSubmit}
-        style={{ maxWidth: 600, margin: '0 auto' }}
-      >
-        <Form.Item
-          name="amount"
-          label="Amount"
-          rules={[{ required: true, message: 'Please input the amount!' }]}
+      <div className="add-expense-container">
+        <Title level={2} className="add-expense-title">Add New Expense</Title>
+        <Paragraph className="add-expense-description">
+          Fill out the form below to add a new expense to your account.
+        </Paragraph>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
         >
-          <Input type="number" placeholder="Enter amount" />
-        </Form.Item>
-
-        <Form.Item
-          name="currency"
-          label="Currency"
-          rules={[{ required: true, message: 'Please select the currency!' }]}
-        >
-          <Select placeholder="Select currency">
-            <Option value="USD">USD</Option>
-            <Option value="ARS">ARS</Option>
-          </Select>
-        </Form.Item>
-
-        <Form.Item
-          name="category"
-          label="Category"
-          rules={[{ required: true, message: 'Please select a category!' }]}
-        >
-          <Select placeholder="Select category">
-            <Option value="Food">Food</Option>
-            <Option value="Transport">Transport</Option>
-            <Option value="Utilities">Utilities</Option>
-            <Option value="Entertainment">Entertainment</Option>
-            <Option value="Other">Other</Option>
-          </Select>
-        </Form.Item>
-
-        <Form.Item
-          name="description"
-          label="Description"
-          rules={[{ required: true, message: 'Please input a description!' }]}
-        >
-          <Input placeholder="Enter description" />
-        </Form.Item>
-
-        <Form.Item>
-          <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
-            Add Expense
-          </Button>
-        </Form.Item>
-      </Form>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name="amount"
+                label="Amount"
+                rules={[{ required: true, message: 'Please input the amount!' }]}
+              >
+                <Input type="number" placeholder="Enter amount" prefix={<DollarOutlined />} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name="currency"
+                label="Currency"
+                rules={[{ required: true, message: 'Please select the currency!' }]}
+                initialValue="ARS"
+              >
+                <Select placeholder="Select currency">
+                  <Option value="ARS">ARS</Option>
+                  <Option value="USD">USD</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item
+            name="category"
+            label="Category"
+            rules={[{ required: true, message: 'Please select a category!' }]}
+          >
+            <Select placeholder="Select category">
+              <Option value="Apartment">Apartment</Option>
+              <Option value="House Services">House Services</Option>
+              <Option value="University">University</Option>
+              <Option value="Gym">Gym</Option>
+              <Option value="Streaming & Apps">Streaming & Apps</Option>
+              <Option value="PedidosYa">PedidosYa</Option>
+              <Option value="Supermarket">Supermarket</Option>
+              <Option value="Food with Friends">Food with Friends</Option>
+              <Option value="Food">Food</Option>
+              <Option value="Transport">Transport</Option>
+              <Option value="Entertainment">Entertainment</Option>
+              <Option value="Stocks">Stocks</Option>
+              <Option value="Other">Other</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[{ required: true, message: 'Please input a description!' }]}
+          >
+            <Input placeholder="Enter description" prefix={<FileTextOutlined />} />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" className="add-expense-button">
+              Add Expense
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
     </Spin>
   );
 };
