@@ -12,6 +12,7 @@ import DetailedExpenses from './pages/DetailedExpenses';
 import GeneralExpenses from './pages/GeneralExpenses';
 import MonthlyExpensesPage from './pages/MonthlyExpensesPage';
 import AddExpense from './components/AddExpense';
+import AddTarget from './components/AddTarget'; // Importa el nuevo componente
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
 
@@ -148,12 +149,6 @@ const AppLayout = () => {
     </Menu>
   );
 
-  console.log(servicesMenu)
-  console.log({ items: [
-    { key: 'detailed-expenses', label: <Link to="/detailed-expenses">Detailed Expenses</Link> },
-    { key: 'general-expenses', label: <Link to="/general-expenses">General Expenses</Link> }
-  ] })
-
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
@@ -166,6 +161,7 @@ const AppLayout = () => {
             <Tag color="red" className="sidebar-tag" onClick={showModal}>
               Add Expense
             </Tag>
+            <AddTarget /> {/* Añadir el nuevo componente aquí */}
             <Tooltip title="Coming Soon" placement="right" style={{ marginRight: '30px'}}>
               <Tag color="blue" className="sidebar-tag disabled-tag" style={{ marginTop: '10px' }}>
                 Add Stock
