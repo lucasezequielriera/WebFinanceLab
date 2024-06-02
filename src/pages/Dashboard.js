@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Spin, Row, Col, Card, Progress, Modal, Form, Flex, Input, Button, notification } from 'antd';
+import { Spin, Row, Col, Card, Progress, Modal, Form, Input, Button, notification, Flex } from 'antd';
 import { DeleteTwoTone, DollarTwoTone, CheckCircleTwoTone } from '@ant-design/icons';
 import MonthlyChart from '../components/MonthlyChart';
 import DollarExpenseCounter from '../components/DollarExpenseCounter';
@@ -118,6 +118,16 @@ const Dashboard = () => {
     );
   }
 
+  // Ordenar targets por deadline, de menor a mayor, y luego colocar aquellos con deadline null al final
+  const sortedTargets = targets.sort((a, b) => {
+    console.log(a.deadline)
+    console.log(b.deadline)
+    if (a.deadline && !b.deadline) return -1;
+    if (!a.deadline && b.deadline) return 1;
+    if (!a.deadline && !b.deadline) return 0;
+    return a.deadline.toDate() - b.deadline.toDate();
+  });
+
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Hi, {currentUser?.displayName || 'User'}!</h1>
@@ -145,10 +155,10 @@ const Dashboard = () => {
           </Card>
         </Col>
       </Row>
-      {targets.length > 0 && <>
+      {sortedTargets.length > 0 && <>
       <h2 style={{ fontWeight: 200 }}>Targets:</h2>
       <Row className="targets-cards margin-bottom-large" gutter={[16, 16]}>
-        {targets.map((target, index) => (
+        {sortedTargets.map((target, index) => (
           <Col xs={24} sm={24} md={12} key={index}>
             <Card className="equal-height-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
