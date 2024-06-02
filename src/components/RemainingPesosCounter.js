@@ -2,13 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, where, Timestamp, doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
-import { Spin, Card, Statistic } from 'antd';
+import { Card, Statistic, Progress } from 'antd';
 import { DollarOutlined } from '@ant-design/icons';
 
 const RemainingPesosCounter = () => {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [remaining, setRemaining] = useState(0);
+  const [totalIncome, setTotalIncome] = useState(0); // Nuevo estado para el ingreso total
+  const progressPercent = totalIncome > 0 ? ((remaining / totalIncome) * 100).toFixed(0) : 0;
+  const conicColors = {
+    '0%': '#87d068',
+    '50%': '#ffe58f',
+    '100%': '#ffccc7',
+  };
 
   useEffect(() => {
     if (!currentUser) return;
@@ -27,17 +34,18 @@ const RemainingPesosCounter = () => {
       // Obtener ingresos en pesos desde el array jobs dentro del documento del usuario
       const userDocRef = doc(db, "users", currentUser.uid);
       const userDocSnapshot = await getDoc(userDocRef);
-      let totalIncome = 0;
+      let income = 0;
       if (userDocSnapshot.exists()) {
         const userData = userDocSnapshot.data();
         if (userData.jobs) {
           userData.jobs.forEach((job) => {
             if (job.currency === 'ARS') {
-              totalIncome += Number(job.salary);
+              income += Number(job.salary);
             }
           });
         }
       }
+      setTotalIncome(income);
 
       // Obtener expenses en pesos del mes actual
       const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
@@ -50,7 +58,7 @@ const RemainingPesosCounter = () => {
           totalExpenses += Number(doc.data().amount);
         });
 
-        const newRemaining = totalIncome - totalExpenses;
+        const newRemaining = income - totalExpenses;
         setRemaining(newRemaining);
 
         setLoading(false);
@@ -64,24 +72,27 @@ const RemainingPesosCounter = () => {
     fetchData();
   }, [currentUser]);
 
-  // if (loading) {
-  //   return (
-  //     <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-  //       <div style={{ height: '100vh' }} />
-  //     </Spin>
-  //   );
-  // }
+  // Show numbers with US format
+  const formatNumber = (number) => {
+    return new Intl.NumberFormat('en-US').format(number);
+  };
 
   return (
     <Card loading={loading}>
-      <Statistic
-        title="Remaining in ARS"
-        value={remaining}
-        precision={2}
-        valueStyle={{ color: remaining < 50000 ? '#cf1322' : '#3f8600' }}
-        prefix={<DollarOutlined />}
-        suffix="ARS"
-      />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', flexFlow: 'column' }}>
+          <Statistic
+            title="Remaining in ARS"
+            value={remaining}
+            precision={2}
+            valueStyle={{ color: remaining < 50000 ? '#cf1322' : '#3f8600' }}
+            prefix={<DollarOutlined />}
+            suffix="ARS"
+          />
+          <span style={{ fontWeight: 600, fontSize: 13 }}>/ ${formatNumber(totalIncome)}</span>
+        </div>
+        <Progress type="circle" percent={progressPercent} strokeColor={conicColors} size="small" style={{ marginLeft: 30 }} />
+      </div>
     </Card>
   );
 };

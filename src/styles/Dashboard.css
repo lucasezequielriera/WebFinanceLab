@@ -44,7 +44,7 @@
 
   @media (max-width: 768px) {
     .equal-height-card {
-      text-align: center;
+      text-align: left;
     }
     .expenses-counters {
         margin-bottom: 16px !important;

@@ -59,7 +59,7 @@ const Dashboard = () => {
   }
 
   console.log(incomes)
-
+  console.log(progressData[0])
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Hi, {currentUser?.displayName || 'User'}!</h1>
