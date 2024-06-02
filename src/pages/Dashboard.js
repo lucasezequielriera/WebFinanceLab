@@ -36,6 +36,14 @@ const Dashboard = () => {
       setLoading(false);
     });
 
+    return () => {
+      unsubscribeIncomes();
+    };
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
     // Obtener targets
     const targetsRef = collection(db, `users/${currentUser.uid}/targets`);
     const qTargets = query(targetsRef);
@@ -45,11 +53,10 @@ const Dashboard = () => {
       snapshot.forEach((doc) => {
         targetsData.push({ id: doc.id, ...doc.data() });
       });
-      setTargets(targetsData);
+      setTargets(getSortedTargets(targetsData));
     });
 
     return () => {
-      unsubscribeIncomes();
       unsubscribeTargets();
     };
   }, [currentUser]);
@@ -84,6 +91,10 @@ const Dashboard = () => {
         description: 'Your target has been successfully updated.',
       });
 
+      // Forzar reordenamiento de los targets
+      const updatedTargets = targets.map(t => t.id === selectedTarget.id ? { ...t, currentAmount: newAmount, status } : t);
+      setTargets(getSortedTargets(updatedTargets));
+
       handleCancel();
     } catch (e) {
       console.error('Error updating target: ', e);
@@ -101,6 +112,10 @@ const Dashboard = () => {
         message: 'Target Deleted',
         description: 'Your target has been successfully deleted.',
       });
+
+      // Actualizar y ordenar los targets después de la eliminación
+      const updatedTargets = targets.filter(t => t.id !== targetId);
+      setTargets(getSortedTargets(updatedTargets));
     } catch (e) {
       console.error('Error deleting target: ', e);
       notification.error({
@@ -110,6 +125,17 @@ const Dashboard = () => {
     }
   };
 
+  const getSortedTargets = (targets) => {
+    const withDeadline = targets.filter(target => target.deadline && target.status !== 'Completed');
+    const withoutDeadline = targets.filter(target => !target.deadline && target.status !== 'Completed');
+    const completedTargets = targets.filter(target => target.status === 'Completed');
+
+    withDeadline.sort((a, b) => a.deadline.toDate() - b.deadline.toDate());
+    withoutDeadline.sort((a, b) => a.currentAmount / a.target - b.currentAmount / b.target);
+
+    return [...withDeadline, ...withoutDeadline, ...completedTargets];
+  };
+
   if (loading) {
     return (
       <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -117,16 +143,6 @@ const Dashboard = () => {
       </Spin>
     );
   }
-
-  // Ordenar targets por deadline, de menor a mayor, y luego colocar aquellos con deadline null al final
-  const sortedTargets = targets.sort((a, b) => {
-    console.log(a.deadline)
-    console.log(b.deadline)
-    if (a.deadline && !b.deadline) return -1;
-    if (!a.deadline && b.deadline) return 1;
-    if (!a.deadline && !b.deadline) return 0;
-    return a.deadline.toDate() - b.deadline.toDate();
-  });
 
   return (
     <div className="dashboard-container">
@@ -155,35 +171,55 @@ const Dashboard = () => {
           </Card>
         </Col>
       </Row>
-      {sortedTargets.length > 0 && <>
-      <h2 style={{ fontWeight: 200 }}>Targets:</h2>
-      <Row className="targets-cards margin-bottom-large" gutter={[16, 16]}>
-        {sortedTargets.map((target, index) => (
-          <Col xs={24} sm={24} md={12} key={index}>
-            <Card className="equal-height-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                <h2>{target.description}</h2>
-                <div>
-                  {target.status !== 'Completed' && 
-                  <DeleteTwoTone style={{ fontSize: 20, cursor: 'pointer' }} twoToneColor="#eb2f96" onClick={() => handleDeleteTarget(target.id)} />}
-                  {target.status !== 'Completed' ?
-                  <DollarTwoTone style={{ fontSize: 20, marginLeft: 8, cursor: 'pointer' }} twoToneColor={target.status === 'Completed' && "#00b100"} spin={target.status === 'Pending' ? false : true} onClick={() => showEditModal(target)} /> :
-                  <CheckCircleTwoTone style={{ fontSize: 20 }} twoToneColor={"#00b100"}/>}
-                </div>
-              </div>
-              <Flex vertical>
-                <Progress percent={Number((target.currentAmount / target.target * 100).toFixed(2))} status={target.status === 'Started' && "active"} showInfo={false} />
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>{target.currentAmount} / {target.target} {target.currency}</span>
-                  <span style={{ fontWeight: 600, color: target.status === 'Completed' && 'green' }}>{(target.currentAmount / target.target * 100).toFixed(2)}%</span>
-                </div>
-                {/* <span>Status: {target.status}</span> */}
-              </Flex>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-      </>}
+      {targets.length > 0 && (
+        <>
+          <h2 style={{ fontWeight: 200 }}>Targets:</h2>
+          <Row className="targets-cards margin-bottom-large" gutter={[16, 16]}>
+            {targets.map((target, index) => (
+              <Col xs={24} sm={24} md={12} key={index}>
+                <Card className="equal-height-card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <h2>{target.description}</h2>
+                    <div>
+                      {target.status !== 'Completed' && (
+                        <DeleteTwoTone
+                          style={{ fontSize: 20, cursor: 'pointer' }}
+                          twoToneColor="#eb2f96"
+                          onClick={() => handleDeleteTarget(target.id)}
+                        />
+                      )}
+                      {target.status !== 'Completed' ? (
+                        <DollarTwoTone
+                          style={{ fontSize: 20, marginLeft: 8, cursor: 'pointer' }}
+                          twoToneColor={target.status === 'Completed' && "#00b100"}
+                          spin={target.status === 'Pending' ? false : true}
+                          onClick={() => showEditModal(target)}
+                        />
+                      ) : (
+                        <CheckCircleTwoTone style={{ fontSize: 20 }} twoToneColor={"#00b100"} />
+                      )}
+                    </div>
+                  </div>
+                  <Flex vertical>
+                    <Progress
+                      percent={Number((target.currentAmount / target.target * 100).toFixed(2))}
+                      status={target.status === 'Started' && "active"}
+                      showInfo={false}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>{target.currentAmount} / {target.target} {target.currency}</span>
+                      <span style={{ fontWeight: 600, color: target.status === 'Completed' && 'green' }}>
+                        {(target.currentAmount / target.target * 100).toFixed(2)}%
+                      </span>
+                    </div>
+                    {/* <span>Status: {target.status}</span> */}
+                  </Flex>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </>
+      )}
       <Row className="dashboard-chart" gutter={[0, 0]}>
         <Col span={24}>
           <MonthlyChart incomes={incomes} />
