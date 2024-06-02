@@ -138,17 +138,6 @@ const AppLayout = () => {
 
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/forgot-password';
 
-  const servicesMenu = (
-    <Menu>
-      <Menu.Item key="detailed-expenses">
-        <Link to="/detailed-expenses">Detailed Expenses</Link>
-      </Menu.Item>
-      <Menu.Item key="general-expenses">
-        <Link to="/general-expenses">General Expenses</Link>
-      </Menu.Item>
-    </Menu>
-  );
-
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">

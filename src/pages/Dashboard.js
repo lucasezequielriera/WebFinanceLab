@@ -14,7 +14,6 @@ import '../styles/Dashboard.css'; // Importa el archivo CSS para los estilos
 const Dashboard = () => {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [incomes, setIncomes] = useState([]);
   const [targets, setTargets] = useState([]);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState(null);
@@ -32,7 +31,6 @@ const Dashboard = () => {
       snapshot.forEach((doc) => {
         incomesData.push({ id: doc.id, ...doc.data() });
       });
-      setIncomes(incomesData);
       setLoading(false);
     });
 
@@ -220,9 +218,9 @@ const Dashboard = () => {
           </Row>
         </>
       )}
-      <Row className="dashboard-chart" gutter={[0, 0]}>
+      <Row className="dashboard-chart" gutter={[12, 12]}>
         <Col span={24}>
-          <MonthlyChart incomes={incomes} />
+          <MonthlyChart />
         </Col>
       </Row>
 

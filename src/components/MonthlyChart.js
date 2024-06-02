@@ -1,51 +1,34 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 
-const MonthlyChart = ({ incomes = [] }) => {
+const MonthlyChart = () => {
   const [data, setData] = useState([]);
 
-  const monthsOrder = useMemo(() => [
-    'January', 'February', 'March', 'April', 'May', 'June', 
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ], []);
-
   useEffect(() => {
-    console.log("Incomes received in MonthlyChart:", incomes);
-
-    const incomesData = monthsOrder.reduce((acc, month) => {
-      acc[month] = 0;
-      return acc;
-    }, {});
-
-    incomes.forEach((income) => {
-      const date = new Date(income.timestamp.seconds * 1000);
-      const month = format(date, 'MMMM', { locale: es }); // Utilizar el formato español para la comparación
-      const monthIndex = monthsOrder.indexOf(month.charAt(0).toUpperCase() + month.slice(1)); // Convertir el primer carácter a mayúsculas para coincidir con el formato de monthsOrder
-
-      if (monthIndex !== -1) {
-        incomesData[monthsOrder[monthIndex]] += Number(income.amount) || 0;
+    const generateRandomData = () => {
+      const data = [];
+      for (let i = 1; i <= 12; i++) {
+        data.push({
+          name: `Month ${i}`,
+          Incomes: Math.floor(Math.random() * 1000),
+          Expenses: Math.floor(Math.random() * 1000) // Nueva línea verde
+        });
       }
-    });
+      return data;
+    };
 
-    const chartData = monthsOrder.map((month) => ({
-      name: month,
-      income: incomesData[month],
-    })).filter(data => data.income !== 0);
-
-    console.log("ChartData prepared for LineChart:", chartData);
-    setData(chartData);
-  }, [incomes, monthsOrder]);
+    setData(generateRandomData());
+  }, []);
 
   return (
-    <ResponsiveContainer width="100%" height={400}>
+    <ResponsiveContainer width="100%" height={300}>
       <LineChart
-        width={500}
-        height={300}
         data={data}
         margin={{
-          top: 5, right: 30, left: 20, bottom: 5,
+          top: 5,
+          right: 30,
+          left: 20,
+          bottom: 5,
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
@@ -53,7 +36,8 @@ const MonthlyChart = ({ incomes = [] }) => {
         <YAxis />
         <Tooltip />
         <Legend />
-        <Line type="monotone" dataKey="income" stroke="#8884d8" activeDot={{ r: 8 }} />
+        <Line type="monotone" dataKey="Incomes" stroke="#8884d8" activeDot={{ r: 8 }} />
+        <Line type="monotone" dataKey="Expenses" stroke="#82ca9d" /> {/* Nueva línea verde */}
       </LineChart>
     </ResponsiveContainer>
   );
