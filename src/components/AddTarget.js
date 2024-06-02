@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Modal, Form, Input, Select, DatePicker, notification } from 'antd';
+import { Button, Modal, Form, Input, Select, DatePicker, notification, Tag } from 'antd';
 import { db } from '../firebase';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
@@ -53,9 +53,9 @@ const AddTarget = () => {
 
   return (
     <div>
-      <Button type="primary" onClick={showModal} style={{ marginTop: 16 }}>
+      <Tag color="gold" className="sidebar-tag" onClick={showModal} style={{ marginTop: 10 }}>
         Add Target
-      </Button>
+      </Tag>
       <Modal
         title="Add Target"
         visible={isModalVisible}
