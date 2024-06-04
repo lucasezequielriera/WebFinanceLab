@@ -1,6 +1,6 @@
 .credit-card {
     width: 100%;
-    max-width: 300px;
+    /* max-width: 300px; Decidir después que queda mejor */
     height: 160px;
     border-radius: 10px;
     padding: 15px;
@@ -40,6 +40,10 @@
     align-items: center;
   }
 
+  .credit-card__closing-date {
+    font-size: 13px;
+  }
+
   .credit-card__closing-date .credit-card__closing-date__date {
     font-size: 14px;
     font-weight: bold;
@@ -55,7 +59,7 @@
   }
   
   .credit-card__logo {
-    height: 25px;
+    height: 30px;
   }
 
   /* @media (max-width: 1490px) {
@@ -72,25 +76,6 @@
       height: 25px;
     }
   } */
-  
-  @media (max-width: 1400px) {
-    .credit-card {
-      height: 160px;
-      padding: 15px;
-    }
-  
-    .credit-card__number {
-      font-size: 16px;
-    }
-  
-    .credit-card__amount {
-      font-size: 14px;
-    }
-  
-    .credit-card__logo {
-      height: 25px;
-    }
-  }
   
   @media (max-width: 480px) {
     .credit-card {

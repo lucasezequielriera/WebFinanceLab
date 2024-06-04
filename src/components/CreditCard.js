@@ -19,7 +19,7 @@ const CreditCard = ({ card }) => {
   console.log(card)
 
   return (
-    <div className="credit-card" style={{ backgroundColor: card.color }}>
+    <div className="credit-card" style={{ background: card.color }}>
       <div className="credit-card__type">{card.type}</div>
       <div className="credit-card__name">{card.name}</div>
       <div className="credit-card__number">#### #### #### ####</div>
