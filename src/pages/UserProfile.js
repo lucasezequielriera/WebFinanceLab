@@ -277,7 +277,7 @@ export default function UserProfile() {
                         width="150"
                         height="150"
                         onClick={() => photoRef.current.click()} // Hacer clic para cambiar la imagen
-                        style={{ cursor: "pointer" }}
+                        style={{ cursor: "pointer", borderRadius: '100%', boxShadow: '0 0 14px 5px #0000004d' }}
                     />
                     <input
                         type="file"
