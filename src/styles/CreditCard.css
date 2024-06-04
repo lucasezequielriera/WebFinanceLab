@@ -1,0 +1,125 @@
+.credit-card {
+    width: 100%;
+    max-width: 300px;
+    height: 160px;
+    border-radius: 10px;
+    padding: 15px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-shadow: 3px 4px 10px 6px #00000033;
+    position: relative;
+    margin: 0 auto; /* Centrar horizontalmente */
+  }
+  
+  .credit-card__type {
+    font-size: 12px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+
+  .credit-card__name {
+    font-size: 17px;
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    font-weight: 600;
+  }
+  
+  .credit-card__number {
+    font-size: 16px;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+  
+  .credit-card__details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .credit-card__closing-date .credit-card__closing-date__date {
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  .credit-card__amount {
+    font-size: 13px;
+  }
+
+  .credit-card__amount__amount {
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  .credit-card__logo {
+    height: 25px;
+  }
+
+  /* @media (max-width: 1490px) {
+  
+    .credit-card__number {
+      font-size: 16px;
+    }
+  
+    .credit-card__amount {
+      font-size: 14px;
+    }
+  
+    .credit-card__logo {
+      height: 25px;
+    }
+  } */
+  
+  @media (max-width: 1400px) {
+    .credit-card {
+      height: 160px;
+      padding: 15px;
+    }
+  
+    .credit-card__number {
+      font-size: 16px;
+    }
+  
+    .credit-card__amount {
+      font-size: 14px;
+    }
+  
+    .credit-card__logo {
+      height: 25px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .credit-card {
+      height: 140px;
+      padding: 10px;
+    }
+  
+    .credit-card__number {
+      font-size: 14px;
+    }
+
+    .credit-card__closing-date {
+      font-size: 11px;
+    }
+
+    .credit-card__closing-date .credit-card__closing-date__date {
+      font-size: 12px;
+    }
+  
+    .credit-card__amount {
+      font-size: 11px;
+    }
+
+    .credit-card__amount__amount {
+      font-size: 12px;
+    }
+  
+    .credit-card__logo {
+      height: 20px;
+    }
+  }
+  

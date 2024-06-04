@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Layout, Menu, Tag, Modal, Tooltip, Button, Dropdown } from 'antd';
-import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, UnorderedListOutlined, PlusOutlined, LoginOutlined } from '@ant-design/icons';
+import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, UnorderedListOutlined, PlusOutlined, LoginOutlined, CreditCardOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -12,7 +12,8 @@ import DetailedExpenses from './pages/DetailedExpenses';
 import GeneralExpenses from './pages/GeneralExpenses';
 import MonthlyExpensesPage from './pages/MonthlyExpensesPage';
 import AddExpense from './components/AddExpense';
-import AddTarget from './components/AddTarget'; // Importa el nuevo componente
+import AddTarget from './components/AddTarget';
+import Expenses from './pages/Expenses'; // Importa el nuevo componente
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
 
@@ -38,6 +39,8 @@ const AppLayout = () => {
     const path = location.pathname;
     if (path.startsWith('/dashboard')) {
       setSelectedKey('1');
+    } else if (path.startsWith('/expenses')) {
+      setSelectedKey('5');
     } else if (path.startsWith('/detailed-expenses')) {
       setSelectedKey('detailed-expenses');
     } else if (path.startsWith('/general-expenses')) {
@@ -95,18 +98,8 @@ const AppLayout = () => {
     },
     {
       key: '5',
-      icon: <UnorderedListOutlined />,
-      label: 'Expenses',
-      children: [
-        {
-          key: 'detailed-expenses',
-          label: <Link to="/detailed-expenses">Detailed Expenses</Link>
-        },
-        {
-          key: 'general-expenses',
-          label: <Link to="/general-expenses">General Expenses</Link>
-        }
-      ]
+      icon: <CreditCardOutlined />,
+      label: <Link to="/expenses">Expenses</Link>
     },
     {
       key: '2',
@@ -142,7 +135,7 @@ const AppLayout = () => {
     <Layout style={{ minHeight: '100vh' }}>
       <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
         <div className="user-greeting" style={{ color: 'white', padding: '16px', textAlign: 'center' }}>
-          <img src="https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/projectImages%2Fmanager-money-image.webp?alt=media&token=f9e1658d-1bc3-4455-b883-ab05e3e621a5" alt="app-icon" width={'100%'} height={'50px'}/>
+          <img src="https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/projectImages%2Fmanager-money-image.webp?alt=media&token=f9e1658d-1bc3-4455-b883-ab05e3e621a5" alt="app-icon" width={'100%'} height={'50px'} />
         </div>
         <Menu theme="dark" mode="inline" selectedKeys={[selectedKey]} items={filteredMenuItems} />
         {currentUser && (
@@ -151,7 +144,7 @@ const AppLayout = () => {
               Add Expense
             </Tag>
             <AddTarget /> {/* Añadir el nuevo componente aquí */}
-            <Tooltip title="Coming Soon" placement="right" style={{ marginRight: '30px'}}>
+            <Tooltip title="Coming Soon" placement="right" style={{ marginRight: '30px' }}>
               <Tag color="blue" className="sidebar-tag disabled-tag" style={{ marginTop: '10px' }}>
                 Add Stock
               </Tag>
@@ -170,6 +163,7 @@ const AppLayout = () => {
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard expenses={expenses} handleExpenseAdded={handleExpenseAdded} /></PrivateRoute>} />
+            <Route path="/expenses" element={<PrivateRoute><Expenses /></PrivateRoute>} /> {/* Añadir nueva ruta */}
             <Route path="/signup" element={<RedirectIfAuthenticated><Signup /></RedirectIfAuthenticated>} />
             <Route path="/login" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -186,12 +180,7 @@ const AppLayout = () => {
         {currentUser && (
           <div className="mobile-nav">
             <Button type="link" icon={<DashboardOutlined />}><Link to="/dashboard"></Link>Dashboard</Button>
-            <Dropdown menu={{ items: [
-                { key: 'detailed-expenses', label: <Link to="/detailed-expenses">Detailed Expenses</Link> },
-                { key: 'general-expenses', label: <Link to="/general-expenses">General Expenses</Link> }
-              ] }} trigger={['click']}>
-              <Button type="link" size="large" icon={<UnorderedListOutlined />}>Expenses</Button>
-            </Dropdown>
+            <Button type="link" icon={<CreditCardOutlined />}><Link to="/expenses"></Link>Expenses</Button>
             <div className="add-expense-button-mobile">
               <Button type="primary" shape="circle" icon={<PlusOutlined />} size="large" onClick={showModal} />
             </div>
