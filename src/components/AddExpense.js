@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Select, notification, Spin, Typography, Row, Col } from 'antd';
 import { DollarOutlined, FileTextOutlined } from '@ant-design/icons';
 import { db } from '../firebase';
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, Timestamp, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/AddExpense.css';
+import moment from 'moment';
 
 const { Option } = Select;
 const { Title, Paragraph } = Typography;
@@ -13,12 +14,17 @@ const AddExpense = ({ onExpenseAdded }) => {
   const { currentUser } = useAuth();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState(null);
 
   const openNotification = () => {
     notification.success({
       message: 'Expense Added',
       description: 'Your expense has been successfully added.',
     });
+  };
+
+  const handlePaymentMethodChange = (value) => {
+    setPaymentMethod(value);
   };
 
   const handleSubmit = async (values) => {
@@ -35,14 +41,44 @@ const AddExpense = ({ onExpenseAdded }) => {
         currency: values.currency,
         category: values.category,
         description: values.description,
+        paymentMethod: values.paymentMethod,
+        bank: values.bank || null,
+        cardType: values.cardType || null,
         timestamp: timestamp,
         day: day,
         month: month,
         year: year,
       };
 
+      // Agregar el gasto
       const docRef = await addDoc(collection(db, `users/${currentUser.uid}/expenses`), newExpense);
       newExpense.id = docRef.id;
+
+      // Verificar y actualizar la información de la tarjeta
+      if (values.paymentMethod === 'Credit Card' || values.paymentMethod === 'Debit Card') {
+        const userDocRef = doc(db, `users`, currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        const userData = userDoc.data();
+        const creditCards = userData.creditCards || [];
+
+        const cardIndex = creditCards.findIndex(
+          (card) => card.bank === values.bank && card.cardType === values.cardType
+        );
+
+        if (cardIndex === -1) {
+          const closingDate = moment().endOf('month').toDate(); // último día del mes actual
+          const newCard = {
+            bank: values.bank,
+            cardType: values.cardType,
+            closingDate,
+          };
+          creditCards.push(newCard);
+        }
+
+        await updateDoc(userDocRef, { creditCards });
+      }
+
       form.resetFields();
       openNotification();
       onExpenseAdded(newExpense);
@@ -122,6 +158,39 @@ const AddExpense = ({ onExpenseAdded }) => {
           >
             <Input placeholder="Enter description" prefix={<FileTextOutlined />} />
           </Form.Item>
+          <Form.Item
+            name="paymentMethod"
+            label="Payment Method"
+            rules={[{ required: true, message: 'Please select the payment method!' }]}
+          >
+            <Select placeholder="Select payment method" onChange={handlePaymentMethodChange}>
+              <Option value="Cash">Cash</Option>
+              <Option value="Credit Card">Credit Card</Option>
+              <Option value="Debit Card">Debit Card</Option>
+            </Select>
+          </Form.Item>
+          {(paymentMethod === 'Credit Card' || paymentMethod === 'Debit Card') && (
+            <>
+              <Form.Item
+                name="bank"
+                label="Bank"
+                rules={[{ required: true, message: 'Please input the bank!' }]}
+              >
+                <Input placeholder="Enter your bank" prefix={<FileTextOutlined />} />
+              </Form.Item>
+              <Form.Item
+                name="cardType"
+                label="Card Type"
+                rules={[{ required: true, message: 'Please select the card type!' }]}
+              >
+                <Select placeholder="Select card type">
+                  <Option value="Visa">Visa</Option>
+                  <Option value="MasterCard">MasterCard</Option>
+                  <Option value="American Express">American Express</Option>
+                </Select>
+              </Form.Item>
+            </>
+          )}
           <Form.Item>
             <Button type="primary" htmlType="submit" className="add-expense-button">
               Add Expense
