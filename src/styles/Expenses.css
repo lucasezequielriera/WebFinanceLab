@@ -68,6 +68,10 @@
     border: 1px solid #ccc;
   }
 
+  .buttons button:nth-child(1) {
+    margin-right: 20px;
+  }
+
   @media (max-width: 1107px) {
     .cards-container {
         justify-content: center;
@@ -81,9 +85,23 @@
         margin-bottom: 20px;
       }
       .buttons {
-        margin-left: auto !important;
-        margin: auto;
+        display: flex;
+        width: 100%;
+        justify-content: space-around;
+        button {
+          margin: 0;
+          font-size: 12px;
+        }
       }
     }
+  }
+
+  @media (max-width: 388px) {
+    .buttons {
+        flex-flow: column;
+        button:nth-child(1) {
+          margin-bottom: 10px;
+        }
+      }
   }
   

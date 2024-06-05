@@ -84,12 +84,12 @@ const Expenses = () => {
     <div style={{ padding: 24 }}>
       <div className='title-and-buttons' style={{ display: 'flex', justifyContent: 'space-between' }}>
         <h1 className='title'>Expenses</h1>
-        <div className="buttons" style={{ marginLeft: 20 }}>
-          <Button onClick={() => navigate('/detailed-expenses')} style={{ marginRight: 16 }}>
-            Detailed Expenses
-          </Button>
+        <div className="buttons">
           <Button onClick={() => navigate('/general-expenses')}>
             General Expenses
+          </Button>
+          <Button onClick={() => navigate('/detailed-expenses')}>
+            Detailed Expenses
           </Button>
         </div>
       </div>
