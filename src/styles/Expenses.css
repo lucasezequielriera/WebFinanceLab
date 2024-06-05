@@ -73,4 +73,17 @@
         justify-content: center;
       }
   }
+
+  @media (max-width: 563px) {
+    .title-and-buttons {
+      flex-flow: column;
+      .title {
+        margin-bottom: 20px;
+      }
+      .buttons {
+        margin-left: auto !important;
+        margin: auto;
+      }
+    }
+  }
   
