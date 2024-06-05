@@ -12,7 +12,7 @@ const cardColors = {
   Visa: 'linear-gradient(135deg, #1A1F71, #2E77BB)',
   MasterCard: 'linear-gradient(135deg, #ff2500, #ff9300)',
   'American Express': 'linear-gradient(135deg, #0080ff, #00d6ff)',
-  Cash: '#4CAF50',
+  Cash: 'linear-gradient(135deg, #00771A, #00BF5A)',
 };
 
 const Expenses = () => {

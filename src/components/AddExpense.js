@@ -42,8 +42,8 @@ const AddExpense = ({ onExpenseAdded }) => {
         category: values.category,
         description: values.description,
         paymentMethod: values.paymentMethod,
-        bank: values.bank || null,
-        cardType: values.cardType || null,
+        bank: values.bank || 'N/A',
+        cardType: values.cardType || 'N/A',
         timestamp: timestamp,
         day: day,
         month: month,
@@ -59,15 +59,18 @@ const AddExpense = ({ onExpenseAdded }) => {
         const creditCards = userData.creditCards || [];
 
         const cardIndex = creditCards.findIndex(
-          (card) => card.bank === values.bank && card.cardBank === values.cardType && card.cardType === values.paymentMethod
+          (card) =>
+            card.bank === newExpense.bank &&
+            card.cardBank === newExpense.cardType &&
+            card.cardType === newExpense.paymentMethod
         );
 
         if (cardIndex === -1) {
           const closingDate = moment().endOf('month').toDate(); // último día del mes actual
           const newCard = {
-            bank: values.bank,
-            cardBank: values.cardType,
-            cardType: values.paymentMethod,
+            bank: newExpense.bank || 'N/A',
+            cardBank: newExpense.cardType || 'N/A',
+            cardType: newExpense.paymentMethod,
             amount: parseFloat(values.amount),
             closingDate: closingDate,
           };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, notification } from 'antd';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, DollarOutlined } from '@ant-design/icons';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import DatePicker from 'react-datepicker';
@@ -23,6 +23,8 @@ const CreditCard = ({ card, currentUser, updateCardClosingDate }) => {
         return 'https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/projectImages%2Fmastercard.png?alt=media&token=1d150640-6fe9-4466-a6c8-9fb2e0a3d92e';
       case 'American Express':
         return 'https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/projectImages%2Famericanexpress.png?alt=media&token=ec68eff4-dbde-4c81-93e8-5d1b0a851e05';
+      case 'Cash':
+        return 'https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/projectImages%2Fdollar-sign.png?alt=media&token=a65927a3-f40e-4c5b-a7a1-beb7040b9548';
       default:
         return '';
     }
@@ -73,10 +75,12 @@ const CreditCard = ({ card, currentUser, updateCardClosingDate }) => {
     setTempClosingDate(date);
   };
 
+  console.log(card)
+
   return (
     <div className="credit-card" style={{ background: card.color }}>
-      <div className="credit-card__type">{card.cardType}</div>
-      <div className="credit-card__name">{card.bank}</div>
+      {card.cardType !== 'Cash' && <div className="credit-card__type">{card.cardType}</div>}
+      <div className="credit-card__name">{card.bank === 'N/A' ? 'Cash' : card.bank}</div>
       {card.cardType !== 'Cash' && <div className="credit-card__number">#### #### #### ####</div>}
       {card.cardType === 'Credit Card' && (
         <div className="credit-card__closing-date">
@@ -85,7 +89,8 @@ const CreditCard = ({ card, currentUser, updateCardClosingDate }) => {
       )}
       <div className="credit-card__details">
         <div className="credit-card__amount">Expenses: <span className="credit-card__amount__amount">${card.amount}</span></div>
-        <img src={getCardLogo(card.cardBank)} alt={card.cardBank} className="credit-card__logo" />
+        {card.cardType !== 'Cash' && <img src={getCardLogo(card.cardBank)} alt={card.cardBank} className="credit-card__logo" />}
+        {card.cardType === 'Cash' && <DollarOutlined style={{ fontSize: 30 }}/>}
       </div>
 
       <Modal
