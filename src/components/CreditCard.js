@@ -8,9 +8,10 @@ import 'react-datepicker/dist/react-datepicker.css';
 import moment from 'moment';
 import '../styles/CreditCard.css';
 
-const CreditCard = ({ card, currentUser }) => {
+const CreditCard = ({ card, currentUser, updateCardClosingDate }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const initialClosingDate = card.closingDate ? moment(card.closingDate.toDate()).toDate() : moment().endOf('month').toDate();
+  let initialClosingDate = card.closingDate;
+  
   const [closingDate, setClosingDate] = useState(initialClosingDate);
   const [tempClosingDate, setTempClosingDate] = useState(initialClosingDate);
 
@@ -35,16 +36,20 @@ const CreditCard = ({ card, currentUser }) => {
   const handleOk = async () => {
     try {
       const userDocRef = doc(db, `users/${currentUser.uid}`);
-      const userData = (await getDoc(userDocRef)).data();
-      const updatedCards = userData.creditCards.map(c => {
-        if (c.bank === card.bank && c.cardType === card.cardType && c.type === card.type) {
+      const userDoc = await getDoc(userDocRef);
+      const userData = userDoc.data();
+      const updatedCards = userData.creditCards.map((c) => {
+        if (c.bank === card.bank && c.cardBank === card.cardBank && c.cardType === card.cardType) {
           return { ...c, closingDate: tempClosingDate };
         }
         return c;
       });
 
-      await updateDoc(userDocRef, { creditCards: updatedCards });
+      await updateDoc(userDocRef, {
+        creditCards: updatedCards,
+      });
       setClosingDate(tempClosingDate);
+      updateCardClosingDate(card.bank, card.cardBank, card.cardType, tempClosingDate);
       notification.success({
         message: 'Closing Date Updated',
         description: 'The closing date has been successfully updated.',
@@ -70,22 +75,22 @@ const CreditCard = ({ card, currentUser }) => {
 
   return (
     <div className="credit-card" style={{ background: card.color }}>
-      <div className="credit-card__type">{card.type}</div>
+      <div className="credit-card__type">{card.cardType}</div>
       <div className="credit-card__name">{card.bank}</div>
-      {card.type !== 'Cash' && <div className="credit-card__number">#### #### #### ####</div>}
-      {card.type === 'Credit Card' && (
+      {card.cardType !== 'Cash' && <div className="credit-card__number">#### #### #### ####</div>}
+      {card.cardType === 'Credit Card' && (
         <div className="credit-card__closing-date">
-          Closing date: <span className="credit-card__closing-date__date">{closingDate ? moment(closingDate).format('DD/MM') : 'N/A'}</span> <EditOutlined onClick={handleEditDate} />
+          Closing date: <span className="credit-card__closing-date__date">{card.closingDate ? moment(card.closingDate).format('DD/MM') : 'N/A'}</span> <EditOutlined onClick={handleEditDate} />
         </div>
       )}
       <div className="credit-card__details">
         <div className="credit-card__amount">Expenses: <span className="credit-card__amount__amount">${card.amount}</span></div>
-        <img src={getCardLogo(card.cardType)} alt={card.cardType} className="credit-card__logo" />
+        <img src={getCardLogo(card.cardBank)} alt={card.cardBank} className="credit-card__logo" />
       </div>
 
       <Modal
         title="Edit Closing Date"
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
       >

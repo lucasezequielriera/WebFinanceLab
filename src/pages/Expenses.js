@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Spin } from 'antd';
 import CreditCard from '../components/CreditCard';
-import { collection, query, onSnapshot, where, doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import moment from 'moment';
@@ -21,70 +21,91 @@ const Expenses = () => {
   const [cards, setCards] = useState([]);
   const navigate = useNavigate();
 
+  const fetchCards = async () => {
+    if (!currentUser) return;
+
+    const userDocRef = doc(db, "users", currentUser.uid);
+    const userDoc = await getDoc(userDocRef);
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      const cardsData = [];
+      if (userData.creditCards) {
+        const cardMap = new Map();
+
+        userData.creditCards.forEach((card) => {
+          const key = `${card.bank}-${card.cardBank}-${card.cardType}`;
+          if (cardMap.has(key)) {
+            const existingCard = cardMap.get(key);
+            existingCard.amount += card.amount;
+          } else {
+            cardMap.set(key, {
+              bank: card.bank,
+              cardBank: card.cardBank,
+              cardType: card.cardType,
+              amount: card.amount,
+              color: cardColors[card.cardBank] || cardColors.Cash,
+              closingDate: card.closingDate ? new Date(card.closingDate.seconds * 1000) : moment().endOf('month').toDate(),
+            });
+          }
+        });
+
+        cardMap.forEach((value) => cardsData.push(value));
+      }
+      setCards(cardsData);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (!currentUser) return;
 
-    const fetchExpensesAndCards = async () => {
-      const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
-      const q = query(expensesRef, where('paymentMethod', 'in', ['Credit Card', 'Debit Card', 'Cash']));
-
-      const unsubscribe = onSnapshot(q, async (snapshot) => {
-        const expensesData = [];
+    const userDocRef = doc(db, "users", currentUser.uid);
+    
+    // Set up a listener for real-time updates
+    const unsubscribe = onSnapshot(userDocRef, (doc) => {
+      if (doc.exists()) {
+        const userData = doc.data();
         const cardsData = [];
+        if (userData.creditCards) {
+          const cardMap = new Map();
 
-        // Fetch expenses
-        snapshot.forEach((doc) => {
-          const expense = doc.data();
-          expensesData.push({
-            id: doc.id,
-            name: expense.category,
-            type: expense.paymentMethod,
-            bank: expense.bank,
-            cardType: expense.cardType,
-            amount: expense.amount,
-            color: cardColors[expense.cardType] || cardColors.Cash,
-          });
-        });
-
-        // Fetch cards
-        const cardsSnapshot = await getDoc(doc(db, "users", currentUser.uid));
-        if (cardsSnapshot.exists()) {
-          const userData = cardsSnapshot.data();
-          if (userData.creditCards) {
-            userData.creditCards.forEach((card) => {
-              cardsData.push({
+          userData.creditCards.forEach((card) => {
+            const key = `${card.bank}-${card.cardBank}-${card.cardType}`;
+            if (cardMap.has(key)) {
+              const existingCard = cardMap.get(key);
+              existingCard.amount += card.amount;
+            } else {
+              cardMap.set(key, {
                 bank: card.bank,
+                cardBank: card.cardBank,
                 cardType: card.cardType,
-                closingDate: card.closingDate ? moment(card.closingDate.toDate()) : moment().endOf('month')
+                amount: card.amount,
+                color: cardColors[card.cardBank] || cardColors.Cash,
+                closingDate: card.closingDate ? new Date(card.closingDate.seconds * 1000) : moment().endOf('month').toDate(),
               });
-            });
-          }
+            }
+          });
+
+          cardMap.forEach((value) => cardsData.push(value));
         }
-
-        // Combine expenses of the same bank and card type
-        const combinedCards = expensesData.reduce((acc, expense) => {
-          const key = `${expense.bank}-${expense.cardType}-${expense.type}`;
-          if (!acc[key]) {
-            // Find closing date for the card
-            const card = cardsData.find(card => card.bank === expense.bank && card.cardType === expense.cardType);
-            const closingDate = card ? card.closingDate : moment().endOf('month');
-
-            acc[key] = { ...expense, closingDate };
-          } else {
-            acc[key].amount += expense.amount;
-          }
-          return acc;
-        }, {});
-
-        setCards(Object.values(combinedCards));
+        setCards(cardsData);
         setLoading(false);
-      });
+      }
+    });
 
-      return () => unsubscribe();
-    };
-
-    fetchExpensesAndCards();
+    // Clean up listener on unmount
+    return () => unsubscribe();
   }, [currentUser]);
+
+  const updateCardClosingDate = (bank, cardBank, cardType, newClosingDate) => {
+    setCards((prevCards) =>
+      prevCards.map((card) =>
+        card.bank === bank && card.cardBank === cardBank && card.cardType === cardType
+          ? { ...card, closingDate: newClosingDate }
+          : card
+      )
+    );
+  };
 
   if (loading) {
     return (
@@ -98,10 +119,10 @@ const Expenses = () => {
     <div style={{ padding: 24 }}>
       <h1>Credit Cards</h1>
       <div className="cards-container" style={{ marginTop: 24 }}>
-        {cards.map((card) => (
-          <div key={card.id} className="card-column">
+        {cards.map((card, index) => (
+          <div key={index} className="card-column">
             <div className="credit-cards-container">
-              <CreditCard card={card} currentUser={currentUser} />
+              <CreditCard card={card} currentUser={currentUser} updateCardClosingDate={updateCardClosingDate} />
             </div>
           </div>
         ))}

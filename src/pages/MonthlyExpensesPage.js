@@ -3,8 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Spin, Table, notification, Popconfirm, Tag, Row, Col, Button, Tooltip } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
-import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, Timestamp, doc, deleteDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { parse } from 'date-fns';
 import { es } from 'date-fns/locale';
 import '../styles/ExpensesPage.css';
@@ -54,7 +53,36 @@ const MonthlyExpensesPage = () => {
 
   const handleDelete = async (key) => {
     try {
-      await deleteDoc(doc(db, `users/${currentUser.uid}/expenses`, key.id));
+      const expenseRef = doc(db, `users/${currentUser.uid}/expenses`, key.id);
+      const expenseDoc = await getDoc(expenseRef);
+      const expenseData = expenseDoc.data();
+
+      // Eliminar el gasto
+      await deleteDoc(expenseRef);
+
+      // Actualizar el monto de la tarjeta correspondiente
+      const userDocRef = doc(db, `users/${currentUser.uid}`);
+      const userDoc = await getDoc(userDocRef);
+      const userData = userDoc.data();
+      const creditCards = userData.creditCards || [];
+
+      const cardIndex = creditCards.findIndex(
+        (card) =>
+          card.bank === expenseData.bank &&
+          card.cardBank === expenseData.cardType &&
+          card.cardType === expenseData.paymentMethod
+      );
+
+      if (cardIndex !== -1) {
+        creditCards[cardIndex].amount -= parseFloat(expenseData.amount);
+
+        if (creditCards[cardIndex].amount <= 0) {
+          creditCards.splice(cardIndex, 1); // Elimina la tarjeta si el monto es 0 o menor
+        }
+
+        await updateDoc(userDocRef, { creditCards });
+      }
+
       notification.success({
         message: 'Expense Deleted',
         description: 'The expense has been successfully deleted.',

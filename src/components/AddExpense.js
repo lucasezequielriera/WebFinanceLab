@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Select, notification, Spin, Typography, Row, Col } from 'antd';
 import { DollarOutlined, FileTextOutlined } from '@ant-design/icons';
 import { db } from '../firebase';
-import { collection, addDoc, Timestamp, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, Timestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/AddExpense.css';
 import moment from 'moment';
@@ -50,12 +50,8 @@ const AddExpense = ({ onExpenseAdded }) => {
         year: year,
       };
 
-      // Agregar el gasto
-      const docRef = await addDoc(collection(db, `users/${currentUser.uid}/expenses`), newExpense);
-      newExpense.id = docRef.id;
-
       // Verificar y actualizar la información de la tarjeta
-      if (values.paymentMethod === 'Credit Card' || values.paymentMethod === 'Debit Card') {
+      if (values.paymentMethod === 'Credit Card' || values.paymentMethod === 'Debit Card' || values.paymentMethod === 'Cash') {
         const userDocRef = doc(db, `users`, currentUser.uid);
         const userDoc = await getDoc(userDocRef);
 
@@ -63,21 +59,29 @@ const AddExpense = ({ onExpenseAdded }) => {
         const creditCards = userData.creditCards || [];
 
         const cardIndex = creditCards.findIndex(
-          (card) => card.bank === values.bank && card.cardType === values.cardType
+          (card) => card.bank === values.bank && card.cardBank === values.cardType && card.cardType === values.paymentMethod
         );
 
         if (cardIndex === -1) {
           const closingDate = moment().endOf('month').toDate(); // último día del mes actual
           const newCard = {
             bank: values.bank,
-            cardType: values.cardType,
-            closingDate,
+            cardBank: values.cardType,
+            cardType: values.paymentMethod,
+            amount: parseFloat(values.amount),
+            closingDate: closingDate,
           };
           creditCards.push(newCard);
+        } else {
+          creditCards[cardIndex].amount += parseFloat(values.amount);
         }
 
         await updateDoc(userDocRef, { creditCards });
       }
+
+      // Agregar el gasto
+      const docRef = await addDoc(collection(db, `users/${currentUser.uid}/expenses`), newExpense);
+      newExpense.id = docRef.id;
 
       form.resetFields();
       openNotification();
