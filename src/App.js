@@ -177,7 +177,7 @@ const AppLayout = () => {
         <Modal title="Add Expense" open={isModalVisible} onCancel={handleCancel} footer={null}>
           <AddExpense onExpenseAdded={handleExpenseAdded} />
         </Modal>
-        {currentUser && (
+        {currentUser ? (
           <div className="mobile-nav">
             <Button type="link" icon={<DashboardOutlined />}><Link to="/dashboard"></Link>Dashboard</Button>
             <Button type="link" icon={<CreditCardOutlined />}><Link to="/expenses"></Link>Expenses</Button>
@@ -187,7 +187,14 @@ const AppLayout = () => {
             <Button type="link" icon={<UserOutlined />}><Link to="/profile"></Link>Profile</Button>
             <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} size="large" className="logout">Logout</Button>
           </div>
-        )}
+        ) :
+          <div className="mobile-nav">
+            {location.pathname === '/signup' ? (
+                <Button type="link" icon={<UserOutlined />}><Link to="/login"></Link>Login</Button>
+            ) : (
+              <Button type="link" icon={<UserOutlined />}><Link to="/signup"></Link>Sign up</Button>
+            )}
+          </div>}
       </Layout>
     </Layout>
   );
