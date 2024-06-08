@@ -98,10 +98,16 @@
 
   @media (max-width: 388px) {
     .buttons {
-        flex-flow: column;
-        button:nth-child(1) {
-          margin-bottom: 10px;
-        }
+      flex-flow: column;
+      button:nth-child(1) {
+        margin-bottom: 10px;
       }
+    }
+    .cards h2 {
+      font-weight: 600;
+      font-size: 17px;
+      margin-bottom: 15px;
+      width: 250px;
+    }
   }
   

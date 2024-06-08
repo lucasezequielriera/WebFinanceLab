@@ -10,10 +10,7 @@ import '../styles/CreditCard.css';
 
 const CreditCard = ({ card, currentUser, updateCardClosingDate }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  let initialClosingDate = card.closingDate;
-  
-  const [closingDate, setClosingDate] = useState(initialClosingDate);
-  const [tempClosingDate, setTempClosingDate] = useState(initialClosingDate);
+  const [tempClosingDate, setTempClosingDate] = useState(card.closingDate);
 
   const getCardLogo = (cardType) => {
     switch (cardType) {
@@ -31,7 +28,7 @@ const CreditCard = ({ card, currentUser, updateCardClosingDate }) => {
   };
 
   const handleEditDate = () => {
-    setTempClosingDate(closingDate);
+    setTempClosingDate(card.closingDate);
     setIsModalVisible(true);
   };
 
@@ -40,6 +37,7 @@ const CreditCard = ({ card, currentUser, updateCardClosingDate }) => {
       const userDocRef = doc(db, `users/${currentUser.uid}`);
       const userDoc = await getDoc(userDocRef);
       const userData = userDoc.data();
+      console.log(userData.creditCards)
       const updatedCards = userData.creditCards.map((c) => {
         if (c.bank === card.bank && c.cardBank === card.cardBank && c.cardType === card.cardType) {
           return { ...c, closingDate: tempClosingDate };
@@ -50,7 +48,6 @@ const CreditCard = ({ card, currentUser, updateCardClosingDate }) => {
       await updateDoc(userDocRef, {
         creditCards: updatedCards,
       });
-      setClosingDate(tempClosingDate);
       updateCardClosingDate(card.bank, card.cardBank, card.cardType, tempClosingDate);
       notification.success({
         message: 'Closing Date Updated',
@@ -75,8 +72,6 @@ const CreditCard = ({ card, currentUser, updateCardClosingDate }) => {
     setTempClosingDate(date);
   };
 
-  console.log(card)
-
   return (
     <div className="credit-card" style={{ background: card.color }}>
       {card.cardType !== 'Cash' && <div className="credit-card__type">{card.cardType}</div>}
@@ -88,9 +83,15 @@ const CreditCard = ({ card, currentUser, updateCardClosingDate }) => {
         </div>
       )}
       <div className="credit-card__details">
-        <div className="credit-card__amount">Expenses: <span className="credit-card__amount__amount">${card.amount}</span></div>
+        <div className='amounts' style={{ display: 'flex' }}>
+          {card.amounts.map((amount, index) => (
+            <div key={index} className="credit-card__amount" style={{ marginRight: index === 0 && '10px' }}>
+              {amount.currency}: <span className="credit-card__amount__amount">{amount.amount}</span>
+            </div>
+          ))}
+        </div>
         {card.cardType !== 'Cash' && <img src={getCardLogo(card.cardBank)} alt={card.cardBank} className="credit-card__logo" />}
-        {card.cardType === 'Cash' && <DollarOutlined style={{ fontSize: 30 }}/>}
+        {card.cardType === 'Cash' && <DollarOutlined style={{ fontSize: 30 }} />}
       </div>
 
       <Modal

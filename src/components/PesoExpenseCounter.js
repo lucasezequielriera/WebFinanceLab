@@ -23,17 +23,13 @@ const PesoExpenseCounter = () => {
     const qExpenses = query(expensesRef, where('currency', '==', 'ARS'), where('timestamp', '>=', startTimestamp), where('timestamp', '<', endTimestamp));
 
     const unsubscribeExpenses = onSnapshot(qExpenses, (snapshot) => {
-      const totalExpenses = snapshot.docs.reduce((sum, doc) => sum + doc.data().amount, 0);
+      const totalExpenses = snapshot.docs.reduce((sum, doc) => sum + parseFloat(doc.data().amount), 0);
       setTotal(totalExpenses);
       setLoading(false);
     });
 
     return () => unsubscribeExpenses();
   }, [currentUser]);
-
-  // if (loading) {
-  //   return <Spin spinning={loading} />;
-  // }
 
   return (
     <Card loading={loading}>
