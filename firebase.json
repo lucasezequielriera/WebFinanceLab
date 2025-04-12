@@ -16,7 +16,7 @@
     }
   ],
   "hosting": {
-    "public": "public",
+    "public": "build",
     "site": "finance-manager-d4589",
     "ignore": [
       "firebase.json",
