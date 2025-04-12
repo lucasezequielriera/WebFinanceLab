@@ -16,7 +16,10 @@ import AddTarget from './components/AddTarget';
 import Expenses from './pages/Expenses'; // Importa el nuevo componente
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
+// Importaciones de AntD
+import { Typography } from 'antd';
 
+const { Title } = Typography;
 const { Header, Sider, Content } = Layout;
 
 const RedirectIfAuthenticated = ({ children }) => {
@@ -135,7 +138,11 @@ const AppLayout = () => {
     <Layout style={{ minHeight: '100vh' }}>
       <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
         <div className="user-greeting" style={{ color: 'white', padding: '16px', textAlign: 'center' }}>
-          <img src="https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/projectImages%2Fmanager-money-image.webp?alt=media&token=f9e1658d-1bc3-4455-b883-ab05e3e621a5" alt="app-icon" width={'100%'} height={'50px'} />
+          <Title level={3} style={{ margin: 0 }}>
+            <Link to="/" style={{ color: 'white' }}>
+              WebFinance<span style={{ fontSize: 13, verticalAlign: 'text-top' }}>®</span>
+            </Link>
+          </Title>
         </div>
         <Menu theme="dark" mode="inline" selectedKeys={[selectedKey]} items={filteredMenuItems} />
         {currentUser && (
