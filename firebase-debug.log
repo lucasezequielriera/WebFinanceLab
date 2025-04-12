@@ -1,0 +1,304 @@
+[debug] [2025-04-12T13:57:56.435Z] ----------------------------------------------------------------------
+[debug] [2025-04-12T13:57:56.439Z] Command:       /Users/lucasriera/.nvm/versions/node/v23.0.0/bin/node /usr/local/bin/firebase deploy
+[debug] [2025-04-12T13:57:56.439Z] CLI Version:   13.9.0
+[debug] [2025-04-12T13:57:56.439Z] Platform:      darwin
+[debug] [2025-04-12T13:57:56.439Z] Node Version:  v23.0.0
+[debug] [2025-04-12T13:57:56.439Z] Time:          Sat Apr 12 2025 17:57:56 GMT+0400 (hora estándar de Georgia)
+[debug] [2025-04-12T13:57:56.440Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-12T13:57:56.443Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2025-04-12T13:57:56.521Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-12T13:57:56.521Z] > authorizing via signed-in user (lucasezequielriera@gmail.com)
+[debug] [2025-04-12T13:57:56.521Z] [iam] checking project finance-manager-d4589 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-04-12T13:57:56.522Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T13:57:56.523Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T13:57:56.523Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T13:57:56.861Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T13:57:56.861Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T13:57:56.861Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions [none]
+[debug] [2025-04-12T13:57:56.861Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions x-goog-quota-user=projects/finance-manager-d4589
+[debug] [2025-04-12T13:57:56.861Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-04-12T13:57:57.093Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2025-04-12T13:57:57.093Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2025-04-12T13:57:57.993Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions 401
+[debug] [2025-04-12T13:57:57.993Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"service":"cloudresourcemanager.googleapis.com","method":"google.cloudresourcemanager.v1.Projects.TestIamPermissions"}}]}}
+[debug] [2025-04-12T13:57:57.994Z] [iam] error while checking permissions, command may fail: FirebaseError: HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[debug] [2025-04-12T13:57:57.994Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T13:57:57.995Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T13:57:57.995Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T13:57:58.099Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T13:57:58.100Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T13:57:58.100Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-04-12T13:57:58.100Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-04-12T13:57:59.234Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions 401
+[debug] [2025-04-12T13:57:59.235Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.iam.admin.v1.IAM.TestIamPermissions","service":"iam.googleapis.com"}}]}}
+[debug] [2025-04-12T13:57:59.235Z] [functions] service account IAM check errored, deploy may fail: HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project. {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.iam.admin.v1.IAM.TestIamPermissions","service":"iam.googleapis.com"}}]}},"response":{"statusCode":401}},"exit":1,"message":"HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":401}
+[debug] [2025-04-12T13:57:59.236Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T13:57:59.236Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T13:57:59.236Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T13:57:59.352Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T13:57:59.352Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T13:57:59.352Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 [none]
+[debug] [2025-04-12T13:57:59.692Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 401
+[debug] [2025-04-12T13:57:59.692Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED"}}
+[debug] [2025-04-12T13:57:59.692Z] HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[error] 
+[error] Error: Assertion failed: resolving hosting target of a site with no site name or target name. This should have caused an error earlier
+[debug] [2025-04-12T14:02:13.767Z] ----------------------------------------------------------------------
+[debug] [2025-04-12T14:02:13.769Z] Command:       /Users/lucasriera/.nvm/versions/node/v23.0.0/bin/node /usr/local/bin/firebase deploy
+[debug] [2025-04-12T14:02:13.769Z] CLI Version:   13.9.0
+[debug] [2025-04-12T14:02:13.770Z] Platform:      darwin
+[debug] [2025-04-12T14:02:13.770Z] Node Version:  v23.0.0
+[debug] [2025-04-12T14:02:13.770Z] Time:          Sat Apr 12 2025 18:02:13 GMT+0400 (hora estándar de Georgia)
+[debug] [2025-04-12T14:02:13.770Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-12T14:02:13.808Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-12T14:02:13.808Z] > authorizing via signed-in user (lucasezequielriera@gmail.com)
+[debug] [2025-04-12T14:02:13.808Z] [iam] checking project finance-manager-d4589 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-04-12T14:02:13.809Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:02:13.810Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:02:13.810Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:02:14.202Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:02:14.203Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:02:14.203Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions [none]
+[debug] [2025-04-12T14:02:14.203Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions x-goog-quota-user=projects/finance-manager-d4589
+[debug] [2025-04-12T14:02:14.203Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-04-12T14:02:15.213Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions 401
+[debug] [2025-04-12T14:02:15.213Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.cloudresourcemanager.v1.Projects.TestIamPermissions","service":"cloudresourcemanager.googleapis.com"}}]}}
+[debug] [2025-04-12T14:02:15.214Z] [iam] error while checking permissions, command may fail: FirebaseError: HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[debug] [2025-04-12T14:02:15.214Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:02:15.215Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:02:15.215Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:02:15.329Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:02:15.330Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:02:15.330Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-04-12T14:02:15.330Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-04-12T14:02:16.339Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions 401
+[debug] [2025-04-12T14:02:16.339Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.iam.admin.v1.IAM.TestIamPermissions","service":"iam.googleapis.com"}}]}}
+[debug] [2025-04-12T14:02:16.339Z] [functions] service account IAM check errored, deploy may fail: HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project. {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.iam.admin.v1.IAM.TestIamPermissions","service":"iam.googleapis.com"}}]}},"response":{"statusCode":401}},"exit":1,"message":"HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":401}
+[debug] [2025-04-12T14:02:16.341Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:02:16.342Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:02:16.342Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:02:16.460Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:02:16.460Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:02:16.461Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 [none]
+[debug] [2025-04-12T14:02:16.740Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 401
+[debug] [2025-04-12T14:02:16.740Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED"}}
+[debug] [2025-04-12T14:02:16.740Z] HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[error] 
+[error] Error: Assertion failed: resolving hosting target of a site with no site name or target name. This should have caused an error earlier
+[debug] [2025-04-12T14:07:18.060Z] ----------------------------------------------------------------------
+[debug] [2025-04-12T14:07:18.065Z] Command:       /Users/lucasriera/.nvm/versions/node/v23.0.0/bin/node /usr/local/bin/firebase deploy
+[debug] [2025-04-12T14:07:18.065Z] CLI Version:   13.9.0
+[debug] [2025-04-12T14:07:18.065Z] Platform:      darwin
+[debug] [2025-04-12T14:07:18.065Z] Node Version:  v23.0.0
+[debug] [2025-04-12T14:07:18.066Z] Time:          Sat Apr 12 2025 18:07:18 GMT+0400 (hora estándar de Georgia)
+[debug] [2025-04-12T14:07:18.066Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-12T14:07:18.127Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-12T14:07:18.127Z] > authorizing via signed-in user (lucasezequielriera@gmail.com)
+[debug] [2025-04-12T14:07:18.127Z] [iam] checking project finance-manager-d4589 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-04-12T14:07:18.128Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:07:18.129Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:07:18.129Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:07:18.519Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:07:18.519Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:07:18.519Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions [none]
+[debug] [2025-04-12T14:07:18.519Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions x-goog-quota-user=projects/finance-manager-d4589
+[debug] [2025-04-12T14:07:18.519Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-04-12T14:07:18.968Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions 401
+[debug] [2025-04-12T14:07:18.968Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.cloudresourcemanager.v1.Projects.TestIamPermissions","service":"cloudresourcemanager.googleapis.com"}}]}}
+[debug] [2025-04-12T14:07:18.968Z] [iam] error while checking permissions, command may fail: FirebaseError: HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[debug] [2025-04-12T14:07:18.968Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:07:18.969Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:07:18.969Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:07:19.098Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:07:19.098Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:07:19.098Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-04-12T14:07:19.098Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-04-12T14:07:20.184Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions 401
+[debug] [2025-04-12T14:07:20.185Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.iam.admin.v1.IAM.TestIamPermissions","service":"iam.googleapis.com"}}]}}
+[debug] [2025-04-12T14:07:20.185Z] [functions] service account IAM check errored, deploy may fail: HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project. {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.iam.admin.v1.IAM.TestIamPermissions","service":"iam.googleapis.com"}}]}},"response":{"statusCode":401}},"exit":1,"message":"HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":401}
+[debug] [2025-04-12T14:07:20.185Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:07:20.185Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:07:20.185Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:07:20.291Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:07:20.291Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:07:20.291Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 [none]
+[debug] [2025-04-12T14:07:20.661Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 401
+[debug] [2025-04-12T14:07:20.661Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED"}}
+[debug] [2025-04-12T14:07:20.661Z] HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[error] 
+[error] Error: Assertion failed: resolving hosting target of a site with no site name or target name. This should have caused an error earlier
+[debug] [2025-04-12T14:12:16.283Z] ----------------------------------------------------------------------
+[debug] [2025-04-12T14:12:16.288Z] Command:       /Users/lucasriera/.nvm/versions/node/v23.0.0/bin/node /usr/local/bin/firebase deploy
+[debug] [2025-04-12T14:12:16.288Z] CLI Version:   13.9.0
+[debug] [2025-04-12T14:12:16.288Z] Platform:      darwin
+[debug] [2025-04-12T14:12:16.289Z] Node Version:  v23.0.0
+[debug] [2025-04-12T14:12:16.289Z] Time:          Sat Apr 12 2025 18:12:16 GMT+0400 (hora estándar de Georgia)
+[debug] [2025-04-12T14:12:16.289Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-12T14:12:16.365Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-12T14:12:16.365Z] > authorizing via signed-in user (lucasezequielriera@gmail.com)
+[debug] [2025-04-12T14:12:16.365Z] [iam] checking project finance-manager-d4589 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-04-12T14:12:16.366Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:12:16.367Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:12:16.367Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:12:16.671Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:12:16.671Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:12:16.671Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions [none]
+[debug] [2025-04-12T14:12:16.671Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions x-goog-quota-user=projects/finance-manager-d4589
+[debug] [2025-04-12T14:12:16.672Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-04-12T14:12:17.673Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions 401
+[debug] [2025-04-12T14:12:17.674Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.cloudresourcemanager.v1.Projects.TestIamPermissions","service":"cloudresourcemanager.googleapis.com"}}]}}
+[debug] [2025-04-12T14:12:17.675Z] [iam] error while checking permissions, command may fail: FirebaseError: HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[debug] [2025-04-12T14:12:17.675Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:12:17.676Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:12:17.676Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:12:17.791Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:12:17.792Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:12:17.792Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-04-12T14:12:17.792Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-04-12T14:12:18.791Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions 401
+[debug] [2025-04-12T14:12:18.792Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.iam.admin.v1.IAM.TestIamPermissions","service":"iam.googleapis.com"}}]}}
+[debug] [2025-04-12T14:12:18.792Z] [functions] service account IAM check errored, deploy may fail: HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project. {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.iam.admin.v1.IAM.TestIamPermissions","service":"iam.googleapis.com"}}]}},"response":{"statusCode":401}},"exit":1,"message":"HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":401}
+[debug] [2025-04-12T14:12:18.794Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:12:18.795Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:12:18.795Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:12:18.909Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:12:18.909Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:12:18.910Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 [none]
+[debug] [2025-04-12T14:12:19.184Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 401
+[debug] [2025-04-12T14:12:19.184Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED"}}
+[debug] [2025-04-12T14:12:19.184Z] HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[error] 
+[error] Error: Assertion failed: resolving hosting target of a site with no site name or target name. This should have caused an error earlier
+[debug] [2025-04-12T14:12:40.514Z] ----------------------------------------------------------------------
+[debug] [2025-04-12T14:12:40.516Z] Command:       /Users/lucasriera/.nvm/versions/node/v23.0.0/bin/node /usr/local/bin/firebase deploy
+[debug] [2025-04-12T14:12:40.516Z] CLI Version:   13.9.0
+[debug] [2025-04-12T14:12:40.516Z] Platform:      darwin
+[debug] [2025-04-12T14:12:40.516Z] Node Version:  v23.0.0
+[debug] [2025-04-12T14:12:40.516Z] Time:          Sat Apr 12 2025 18:12:40 GMT+0400 (hora estándar de Georgia)
+[debug] [2025-04-12T14:12:40.516Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-12T14:12:40.559Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-12T14:12:40.559Z] > authorizing via signed-in user (lucasezequielriera@gmail.com)
+[debug] [2025-04-12T14:12:40.559Z] [iam] checking project finance-manager-d4589 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-04-12T14:12:40.566Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:12:40.567Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:12:40.567Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:12:40.881Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:12:40.882Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:12:40.882Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions [none]
+[debug] [2025-04-12T14:12:40.882Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions x-goog-quota-user=projects/finance-manager-d4589
+[debug] [2025-04-12T14:12:40.882Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-04-12T14:12:41.883Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions 401
+[debug] [2025-04-12T14:12:41.883Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.cloudresourcemanager.v1.Projects.TestIamPermissions","service":"cloudresourcemanager.googleapis.com"}}]}}
+[debug] [2025-04-12T14:12:41.884Z] [iam] error while checking permissions, command may fail: FirebaseError: HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[debug] [2025-04-12T14:12:41.885Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:12:41.885Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:12:41.885Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:12:42.002Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:12:42.003Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:12:42.003Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-04-12T14:12:42.003Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-04-12T14:12:42.983Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions 401
+[debug] [2025-04-12T14:12:42.984Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.iam.admin.v1.IAM.TestIamPermissions","service":"iam.googleapis.com"}}]}}
+[debug] [2025-04-12T14:12:42.984Z] [functions] service account IAM check errored, deploy may fail: HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project. {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.iam.admin.v1.IAM.TestIamPermissions","service":"iam.googleapis.com"}}]}},"response":{"statusCode":401}},"exit":1,"message":"HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":401}
+[debug] [2025-04-12T14:12:42.986Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:12:42.987Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:12:42.987Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:12:43.099Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:12:43.099Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:12:43.099Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 [none]
+[debug] [2025-04-12T14:12:43.414Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 401
+[debug] [2025-04-12T14:12:43.415Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED"}}
+[debug] [2025-04-12T14:12:43.415Z] HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[error] 
+[error] Error: Assertion failed: resolving hosting target of a site with no site name or target name. This should have caused an error earlier
+[debug] [2025-04-12T14:17:39.515Z] ----------------------------------------------------------------------
+[debug] [2025-04-12T14:17:39.521Z] Command:       /Users/lucasriera/.nvm/versions/node/v23.0.0/bin/node /usr/local/bin/firebase deploy
+[debug] [2025-04-12T14:17:39.522Z] CLI Version:   13.9.0
+[debug] [2025-04-12T14:17:39.522Z] Platform:      darwin
+[debug] [2025-04-12T14:17:39.523Z] Node Version:  v23.0.0
+[debug] [2025-04-12T14:17:39.523Z] Time:          Sat Apr 12 2025 18:17:39 GMT+0400 (hora estándar de Georgia)
+[debug] [2025-04-12T14:17:39.523Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-12T14:17:39.592Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-12T14:17:39.592Z] > authorizing via signed-in user (lucasezequielriera@gmail.com)
+[debug] [2025-04-12T14:17:39.592Z] [iam] checking project finance-manager-d4589 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-04-12T14:17:39.593Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:17:39.594Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:17:39.594Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:17:40.005Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:17:40.005Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:17:40.006Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions [none]
+[debug] [2025-04-12T14:17:40.006Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions x-goog-quota-user=projects/finance-manager-d4589
+[debug] [2025-04-12T14:17:40.006Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-04-12T14:17:41.106Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions 401
+[debug] [2025-04-12T14:17:41.106Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.cloudresourcemanager.v1.Projects.TestIamPermissions","service":"cloudresourcemanager.googleapis.com"}}]}}
+[debug] [2025-04-12T14:17:41.107Z] [iam] error while checking permissions, command may fail: FirebaseError: HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[debug] [2025-04-12T14:17:41.107Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:17:41.108Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:17:41.108Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:17:41.228Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:17:41.228Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:17:41.228Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-04-12T14:17:41.228Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-04-12T14:17:42.333Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions 401
+[debug] [2025-04-12T14:17:42.333Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.iam.admin.v1.IAM.TestIamPermissions","service":"iam.googleapis.com"}}]}}
+[debug] [2025-04-12T14:17:42.333Z] [functions] service account IAM check errored, deploy may fail: HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project. {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.iam.admin.v1.IAM.TestIamPermissions","service":"iam.googleapis.com"}}]}},"response":{"statusCode":401}},"exit":1,"message":"HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":401}
+[debug] [2025-04-12T14:17:42.335Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:17:42.335Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:17:42.335Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:17:42.444Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:17:42.445Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:17:42.445Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 [none]
+[debug] [2025-04-12T14:17:42.815Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 401
+[debug] [2025-04-12T14:17:42.815Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED"}}
+[debug] [2025-04-12T14:17:42.815Z] HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[error] 
+[error] Error: Assertion failed: resolving hosting target of a site with no site name or target name. This should have caused an error earlier
+[debug] [2025-04-12T14:19:47.126Z] ----------------------------------------------------------------------
+[debug] [2025-04-12T14:19:47.129Z] Command:       /Users/lucasriera/.nvm/versions/node/v23.0.0/bin/node /usr/local/bin/firebase deploy
+[debug] [2025-04-12T14:19:47.129Z] CLI Version:   13.9.0
+[debug] [2025-04-12T14:19:47.130Z] Platform:      darwin
+[debug] [2025-04-12T14:19:47.130Z] Node Version:  v23.0.0
+[debug] [2025-04-12T14:19:47.130Z] Time:          Sat Apr 12 2025 18:19:47 GMT+0400 (hora estándar de Georgia)
+[debug] [2025-04-12T14:19:47.130Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-12T14:19:47.191Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-12T14:19:47.191Z] > authorizing via signed-in user (lucasezequielriera@gmail.com)
+[debug] [2025-04-12T14:19:47.191Z] [iam] checking project finance-manager-d4589 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-04-12T14:19:47.192Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:19:47.193Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:19:47.193Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:19:47.499Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:19:47.500Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:19:47.500Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions [none]
+[debug] [2025-04-12T14:19:47.500Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions x-goog-quota-user=projects/finance-manager-d4589
+[debug] [2025-04-12T14:19:47.500Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-04-12T14:19:48.508Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions 401
+[debug] [2025-04-12T14:19:48.508Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/finance-manager-d4589:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.cloudresourcemanager.v1.Projects.TestIamPermissions","service":"cloudresourcemanager.googleapis.com"}}]}}
+[debug] [2025-04-12T14:19:48.508Z] [iam] error while checking permissions, command may fail: FirebaseError: HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[debug] [2025-04-12T14:19:48.508Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:19:48.508Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:19:48.508Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:19:48.624Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:19:48.624Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:19:48.625Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-04-12T14:19:48.625Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-04-12T14:19:49.614Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions 401
+[debug] [2025-04-12T14:19:49.614Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/finance-manager-d4589/serviceAccounts/finance-manager-d4589@appspot.gserviceaccount.com:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"service":"iam.googleapis.com","method":"google.iam.admin.v1.IAM.TestIamPermissions"}}]}}
+[debug] [2025-04-12T14:19:49.614Z] [functions] service account IAM check errored, deploy may fail: HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project. {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"service":"iam.googleapis.com","method":"google.iam.admin.v1.IAM.TestIamPermissions"}}]}},"response":{"statusCode":401}},"exit":1,"message":"HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":401}
+[debug] [2025-04-12T14:19:49.616Z] > refreshing access token with scopes: []
+[debug] [2025-04-12T14:19:49.616Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-12T14:19:49.616Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:19:49.735Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2025-04-12T14:19:49.736Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-12T14:19:49.736Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 [none]
+[debug] [2025-04-12T14:19:50.002Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 401
+[debug] [2025-04-12T14:19:50.002Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/finance-manager-d4589 {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED"}}
+[debug] [2025-04-12T14:19:50.002Z] HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[error] 
+[error] Error: Assertion failed: resolving hosting target of a site with no site name or target name. This should have caused an error earlier
