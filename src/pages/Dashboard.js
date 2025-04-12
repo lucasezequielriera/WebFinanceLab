@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Spin, Row, Col, Card, Progress, Modal, Form, Input, Button, notification, Flex } from 'antd';
 import { DeleteTwoTone, DollarTwoTone, CheckCircleTwoTone } from '@ant-design/icons';
-import MonthlyChart from '../components/MonthlyChart';
 import DollarExpenseCounter from '../components/DollarExpenseCounter';
 import PesoExpenseCounter from '../components/PesoExpenseCounter';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,6 +8,7 @@ import { db } from '../firebase';
 import { collection, query, onSnapshot, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import RemainingPesosCounter from '../components/RemainingPesosCounter';
 import RemainingDollarsCounter from '../components/RemainingDollarsCounter';
+import DailyExpensesChart from '../components/DailyExpensesChart';
 import '../styles/Dashboard.css'; // Importa el archivo CSS para los estilos
 
 const Dashboard = () => {
@@ -218,11 +218,15 @@ const Dashboard = () => {
           </Row>
         </>
       )}
-      <Row className="dashboard-chart" gutter={[12, 12]}>
-        <Col span={24}>
-          <MonthlyChart />
+      { currentUser && (
+      <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 10 }}>
+        <Col span={24} style={{ padding: 0 }}>
+          <Card>
+            <DailyExpensesChart userId={currentUser?.uid} />
+          </Card>
         </Col>
       </Row>
+      )}
 
       <Modal
         title="Add Money"

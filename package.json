@@ -17,6 +17,7 @@
     "@testing-library/user-event": "^14.6.1",
     "antd": "^5.24.6",
     "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
     "firebase": "^11.6.0",
     "lodash": "^4.17.21",
     "moment": "^2.30.1",

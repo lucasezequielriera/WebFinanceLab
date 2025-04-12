@@ -39,9 +39,6 @@ export default function UserProfile() {
     const [imageLoading, setImageLoading] = useState(true); // Estado de carga de la imagen
     // const navigate = useNavigate();
     const photoRef = useRef(null);
-    const isDataChanged = () => {
-        return JSON.stringify(userData) !== JSON.stringify(initialUserData);
-    };
 
     useEffect(() => {
         async function fetchUserData() {
