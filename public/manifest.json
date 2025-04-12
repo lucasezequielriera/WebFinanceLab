@@ -1,11 +1,11 @@
 {
-  "short_name": "Manager Money",
-  "name": "You can have your finance in order and the best savings",
+  "short_name": "Finance",
+  "name": "Web Finance",
   "icons": [
     {
-      "src": "manager-money-icon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "/manager-money-icon.ico",
+      "type": "image/x-icon",
+      "sizes": "64x64 32x32 24x24 16x16"
     }
   ],
   "start_url": ".",

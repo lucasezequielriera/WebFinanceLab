@@ -58,7 +58,7 @@ const AddTarget = () => {
       </Tag>
       <Modal
         title="Add Target"
-        visible={isModalVisible}
+        open={isModalVisible}
         onCancel={handleCancel}
         footer={null}
       >

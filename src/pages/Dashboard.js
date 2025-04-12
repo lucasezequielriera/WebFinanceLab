@@ -226,7 +226,7 @@ const Dashboard = () => {
 
       <Modal
         title="Add Money"
-        visible={isEditModalVisible}
+        open={isEditModalVisible}
         onCancel={handleCancel}
         footer={null}
       >
