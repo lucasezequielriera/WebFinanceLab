@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Layout, Menu, Tag, Modal, Tooltip, Button } from 'antd';
-import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, PlusOutlined, LoginOutlined, CreditCardOutlined } from '@ant-design/icons';
+import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, PlusOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -111,19 +111,19 @@ const AppLayout = () => {
       label: <Link to="/expenses">Expenses</Link>
     },
     {
-      key: '2',
-      icon: <UserOutlined />,
-      label: <Link to="/profile">Profile</Link>
-    },
-    {
       key: '7',
-      icon: <UserOutlined />,
+      icon: <FlagOutlined />,
       label: <Link to="/financial-goals">Financial Goals</Link>
     },
     {
       key: '6',
-      icon: <UserOutlined />,
+      icon: <InfoCircleOutlined />,
       label: <Link to="/about-us">About Us</Link>
+    },
+    {
+      key: '2',
+      icon: <UserOutlined />,
+      label: <Link to="/profile">Profile</Link>
     },
     {
       key: '4',
@@ -209,9 +209,9 @@ const AppLayout = () => {
             <div className="add-expense-button-mobile">
               <Button type="primary" shape="circle" icon={<PlusOutlined />} size="large" onClick={showModal} />
             </div>
+            <Button type="link" icon={<FlagOutlined />}><Link to="/about-us"></Link>Financial Goals</Button>
+            <Button type="link" icon={<InfoCircleOutlined />}><Link to="/about-us"></Link>About Us</Button>
             <Button type="link" icon={<UserOutlined />}><Link to="/profile"></Link>Profile</Button>
-            <Button type="link" icon={<UserOutlined />}><Link to="/about-us"></Link>Financial Goals</Button>
-            <Button type="link" icon={<UserOutlined />}><Link to="/about-us"></Link>About Us</Button>
             <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} size="large" className="logout">Logout</Button>
           </div>
         ) :
