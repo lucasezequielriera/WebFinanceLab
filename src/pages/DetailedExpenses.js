@@ -28,7 +28,12 @@ const DetailedExpenses = () => {
         const month = format(date, 'MMMM yyyy', { locale: es });
         monthsSet.add(month);
       });
-      setMonths(Array.from(monthsSet));
+      const sortedMonths = Array.from(monthsSet).sort((a, b) => {
+        const dateA = new Date(a);
+        const dateB = new Date(b);
+        return dateB - dateA;
+      });
+      setMonths(sortedMonths);
       setLoading(false);
     });
 

@@ -114,19 +114,19 @@ const GeneralExpenses = () => {
   }));
 
   const getSortedMonths = () => {
-    const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June', 
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
+    const spanishMonthMap = {
+      enero: 0, febrero: 1, marzo: 2, abril: 3, mayo: 4, junio: 5,
+      julio: 6, agosto: 7, septiembre: 8, octubre: 9, noviembre: 10, diciembre: 11
+    };
 
     const sortedMonths = Array.from(new Set(expenses.map(expense => `${format(new Date(expense.timestamp.seconds * 1000), 'MMMM', { locale: es })} ${expense.year}`)))
-      .sort((a, b) => {
-        const [monthA, yearA] = a.split(' ');
-        const [monthB, yearB] = b.split(' ');
-        const dateA = new Date(`${yearA}-${monthNames.indexOf(monthA) + 1}-01`);
-        const dateB = new Date(`${yearB}-${monthNames.indexOf(monthB) + 1}-01`);
-        return dateB - dateA;
-      });
+    .sort((a, b) => {
+      const [monthA, yearA] = a.split(' ');
+      const [monthB, yearB] = b.split(' ');
+      const dateA = new Date(parseInt(yearA), spanishMonthMap[monthA.toLowerCase()]);
+      const dateB = new Date(parseInt(yearB), spanishMonthMap[monthB.toLowerCase()]);
+      return dateB - dateA;
+    });
 
     return sortedMonths;
   };
