@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { updateProfile } from "firebase/auth";
+import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { db, storage } from "../firebase"; // Importa db y storage
 import { doc, getDoc, updateDoc } from "firebase/firestore"; // Importa Firestore
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Importa Storage
 // import { useNavigate } from "react-router-dom";
 import { PlusOutlined } from '@ant-design/icons';
-import { notification, Button, Input, Select, Table, Modal, Form, Spin } from 'antd';
+import { notification, Button, Input, Select, Table, Modal, Form, Spin, message } from 'antd';
 import "../index.css"
 import "../styles/UserProfile.css"; // Importa el archivo CSS
 
@@ -39,6 +39,11 @@ export default function UserProfile() {
     const [imageLoading, setImageLoading] = useState(true); // Estado de carga de la imagen
     // const navigate = useNavigate();
     const photoRef = useRef(null);
+    const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+    const [newPassword, setNewPassword] = useState("");
+    const [updatingPassword, setUpdatingPassword] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     useEffect(() => {
         async function fetchUserData() {
@@ -233,8 +238,8 @@ export default function UserProfile() {
 
     const openNotificationWithIcon = (type, message, description) => {
         notification[type]({
-          message: message,
-          description: description,
+          message,
+          description,
         });
     };
 
@@ -307,6 +312,46 @@ export default function UserProfile() {
         },
     ];
 
+    const handlePasswordUpdate = async () => {
+        if (!currentPassword || !newPassword || !confirmPassword) {
+          message.error('Please fill all password fields');
+          return;
+        }
+      
+        if (newPassword !== confirmPassword) {
+          message.error('New passwords do not match');
+          return;
+        }
+      
+        if (newPassword.length < 6) {
+          message.error('Password must be at least 6 characters');
+          return;
+        }
+      
+        try {
+          setUpdatingPassword(true);
+      
+          const credential = EmailAuthProvider.credential(
+            currentUser.email,
+            currentPassword
+          );
+      
+          await reauthenticateWithCredential(currentUser, credential);
+          await updatePassword(currentUser, newPassword);
+      
+          openNotificationWithIcon('success', 'Password Changed', 'Your password has been updated successfully.');
+          setCurrentPassword('');
+          setNewPassword('');
+          setConfirmPassword('');
+          setPasswordModalVisible(false);
+        } catch (error) {
+          console.error(error);
+          message.error('The Password are wrong.');
+        } finally {
+          setUpdatingPassword(false);
+        }
+    };        
+
     if (loading || imageLoading) {
         return <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <div style={{ height: '100vh' }} />
@@ -318,7 +363,7 @@ export default function UserProfile() {
             <h2 className="title">User Profile</h2>
             {error && <div>{error}</div>}
             <form onSubmit={handleSubmit}>
-                <div className="display-flex center margin-bottom-large margin-top-large">
+                <div className="display-flex center margin-bottom-medium margin-top-large">
                     <img
                         src={previewURL || "https://via.placeholder.com/150"} // Imagen preestablecida
                         alt="Profile"
@@ -334,6 +379,15 @@ export default function UserProfile() {
                         onChange={handlePhotoChange}
                         style={{ display: "none" }} // Ocultar el input de archivo
                     />
+                </div>
+                <div className="display-flex center margin-bottom-large">
+                <Button
+                    type="link"
+                    onClick={() => setPasswordModalVisible(true)}
+                    style={{ padding: 0, color: '#1890ff', fontWeight: 500 }}
+                    >
+                    Change Password
+                </Button>
                 </div>
                 <div className="display-flex center">
                     <div className="display-flex w-200" style={{ flexFlow: "column" }}>
@@ -433,6 +487,46 @@ export default function UserProfile() {
                     </Modal>
                 </div>
             </form>
+            <Modal
+                title="Change Password"
+                open={passwordModalVisible}
+                onCancel={() => setPasswordModalVisible(false)}
+                footer={null} // ✅ sacamos el botón OK del modal, lo ponemos en el form
+                >
+                <Form onFinish={handlePasswordUpdate}>
+                    <Form.Item className="margin-bottom-small">
+                        <Input.Password
+                            placeholder="Current Password"
+                            value={currentPassword}
+                            onChange={(e) => setCurrentPassword(e.target.value)}
+                            style={{ marginBottom: 10, marginTop: 15 }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item className="margin-bottom-small">
+                        <Input.Password
+                            placeholder="New Password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            style={{ marginBottom: 0 }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item>
+                        <Input.Password
+                            placeholder="Confirm New Password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                    </Form.Item>
+
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit" loading={updatingPassword} block>
+                            Change Password
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
 }
