@@ -116,7 +116,7 @@ const DailyExpensesChart = ({ userId }) => {
               <ReferenceLine
                 key={index}
                 y={limit.amount}
-                label={{ value: limit.label || `Limit ${index + 1}`, position: 'top', fill: limit.color || 'red', fontSize: 12 }}
+                label={{ value: `${limit.label} $${limit.amount}` || `Limit ${index + 1}`, position: 'top', fill: limit.color || 'red', fontSize: 12 }}
                 stroke={limit.color || 'red'}
                 strokeDasharray="3 3"
               />
@@ -144,7 +144,7 @@ const DailyExpensesChart = ({ userId }) => {
               <ReferenceLine
                 key={index}
                 y={limit.amount}
-                label={{ value: limit.label || `Limit ${index + 1}`, position: 'top', fill: limit.color || 'red', fontSize: 12 }}
+                label={{ value: `${limit.label} $${limit.amount}` || `Limit ${index + 1}`, position: 'top', fill: limit.color || 'red', fontSize: 12 }}
                 stroke={limit.color || 'red'}
                 strokeDasharray="3 3"
               />
