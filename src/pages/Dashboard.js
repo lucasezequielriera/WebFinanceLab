@@ -5,10 +5,11 @@ import DollarExpenseCounter from '../components/DollarExpenseCounter';
 import PesoExpenseCounter from '../components/PesoExpenseCounter';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
-import { collection, query, onSnapshot, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, updateDoc, doc, deleteDoc, getDoc } from 'firebase/firestore';
 import RemainingPesosCounter from '../components/RemainingPesosCounter';
 import RemainingDollarsCounter from '../components/RemainingDollarsCounter';
 import DailyExpensesChart from '../components/DailyExpensesChart';
+import UserBalance from '../components/UserBalance';
 import '../styles/Dashboard.css'; // Importa el archivo CSS para los estilos
 
 const Dashboard = () => {
@@ -18,6 +19,8 @@ const Dashboard = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState(null);
   const [form] = Form.useForm();
+  const [userInfo, setUserInfo] = useState(null);
+  const [expenses, setExpenses] = useState([]);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -30,6 +33,7 @@ const Dashboard = () => {
       const incomesData = [];
       snapshot.forEach((doc) => {
         incomesData.push({ id: doc.id, ...doc.data() });
+        setExpenses(incomesData);
       });
       setLoading(false);
     });
@@ -57,6 +61,17 @@ const Dashboard = () => {
     return () => {
       unsubscribeTargets();
     };
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+  
+    const fetchUser = async () => {
+      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+      if (userDoc.exists()) setUserInfo(userDoc.data());
+    };
+  
+    fetchUser();
   }, [currentUser]);
 
   const showEditModal = (target) => {
@@ -144,7 +159,25 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      <h1 className="dashboard-title">Hi, {currentUser?.displayName || 'User'}!</h1>
+      <div className='margin-bottom-medium' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <img
+            src={currentUser?.photoURL || "https://via.placeholder.com/150"}
+            alt="profile"
+            width={40}
+            height={40}
+            style={{
+              borderRadius: '50%',
+              objectFit: 'cover',
+              boxShadow: '0 0 6px rgba(0,0,0,0.1)'
+            }}
+          />
+          <h1 className="dashboard-title" style={{ marginBottom: 0 }}>Hi, {currentUser?.displayName || 'User'}</h1>
+        </div>
+        <div className="balance-box">
+          <UserBalance userInfo={userInfo} monthlyExpenses={expenses} />
+        </div>
+      </div>
       <Row className="expenses-counters margin-bottom-large" gutter={[16, 16]}>
         <Col xs={24} sm={12}>
           <Card className="equal-height-card">
@@ -219,7 +252,7 @@ const Dashboard = () => {
         </>
       )}
       { currentUser && (
-      <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 30 }}>
+      <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 30, marginRight: 0, marginLeft: 0 }}>
         <Col span={24} style={{ padding: 0 }}>
           <Card>
             <DailyExpensesChart userId={currentUser?.uid} />

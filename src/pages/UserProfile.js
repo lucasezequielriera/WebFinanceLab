@@ -28,6 +28,7 @@ export default function UserProfile() {
         phone: "",
         photoURL: "",
         jobs: [],
+        displayBalance: "ARS", // valor por defecto
     });
     const [isDirty, setIsDirty] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -107,7 +108,11 @@ export default function UserProfile() {
             setInitialUserData({
                 ...userData,
                 photoURL: photoURL,
-            });              
+            });        
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                ...userData,
+                displayBalance: userData.displayBalance,
+              });
             setLoading(false);
             // navigate("/dashboard");
             openNotificationWithIcon('success', 'Profile Updated', 'Your profile has been successfully updated.');
@@ -460,10 +465,22 @@ export default function UserProfile() {
                         />
                         <label className="label-small">Phone</label>
                         <Input type="number"
+                            className="margin-bottom-small"
                             name="phone"
                             value={userData.phone}
                             onChange={handleChange}
                             placeholder="Phone"
+                        />
+                        <label className="label-small">Balance Display</label>
+                        <Select
+                            style={{ width: '100%' }}
+                            value={userData.displayBalance}
+                            onChange={(value) => setUserData(prev => ({ ...prev, displayBalance: value }))}
+                            options={[
+                                { value: 'ARS', label: 'Pesos (ARS)' },
+                                { value: 'USD', label: 'Dollars (USD)' },
+                                { value: 'Both', label: 'Both' },
+                            ]}
                         />
                     </div>
                 </div>
