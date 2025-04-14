@@ -26,7 +26,7 @@ const DailyExpensesChart = ({ userId }) => {
   const scrollRef = useRef(null);
   const isMobile = useIsMobile();
   const currentMonth = dayjs().format('MMMM').charAt(0).toUpperCase() + dayjs().format('MMMM').slice(1);
-  const [expenseLimit, setExpenseLimit] = useState(null);
+  const [expenseLimits, setExpenseLimits] = useState([]);
 
   useEffect(() => {
     if (!userId) return;
@@ -77,21 +77,22 @@ const DailyExpensesChart = ({ userId }) => {
   }, [userId]);
 
   useEffect(() => {
-    const fetchUserLimit = async () => {
+    const fetchUserLimits = async () => {
       try {
         const userRef = doc(db, 'users', userId);
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
           const userData = userSnap.data();
-          setExpenseLimit(userData.expenseLimit || null);
+          const limits = userData.expenseLimits || []; // ✅ si no hay nada, default vacío
+          setExpenseLimits(limits);
         }
       } catch (error) {
-        console.error("Failed to fetch expense limit:", error);
+        console.error("Failed to fetch expense limits:", error);
       }
     };
   
-    if (userId) fetchUserLimit();
-  }, [userId]);
+    if (userId) fetchUserLimits();
+  }, [userId]);  
 
   useEffect(() => {
     if (isMobile && scrollRef.current) {
@@ -111,16 +112,24 @@ const DailyExpensesChart = ({ userId }) => {
         <div ref={scrollRef} style={{ overflowX: 'auto', width: '100%', paddingBottom: 12 }}>
           <LineChart width={chartWidth} height={300} data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            {expenseLimit && (
+            {expenseLimits.map((limit, index) => (
               <ReferenceLine
-                y={expenseLimit}
-                label={{ value: `Limit: $${expenseLimit}`, position: 'top', fill: 'red', fontSize: 12 }}
-                stroke="red"
+                key={index}
+                y={limit.amount}
+                label={{ value: limit.label || `Limit ${index + 1}`, position: 'top', fill: limit.color || 'red', fontSize: 12 }}
+                stroke={limit.color || 'red'}
                 strokeDasharray="3 3"
               />
-            )}
+            ))}
             <XAxis dataKey="day" />
-            <YAxis tickFormatter={(value) => `$${value}`} />
+            <YAxis
+              tickFormatter={(value) => `$${value}`}
+              domain={
+                expenseLimits.length > 0
+                  ? [0, Math.max(...expenseLimits.map(limit => limit.amount))]
+                  : ['auto', 'auto']
+              }
+            />
             <Tooltip formatter={(value, dataKey) => [`$${Number(value).toLocaleString('es-AR')}`, dataKey] } />
             <Line type="monotone" dataKey="ars" stroke="#1890ff" name="Expenses ($)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
             <Line type="monotone" dataKey="usd" name="Expenses (USD)" stroke="#4CAF50" strokeWidth={2} />
@@ -131,16 +140,24 @@ const DailyExpensesChart = ({ userId }) => {
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            {expenseLimit && (
+            {expenseLimits.map((limit, index) => (
               <ReferenceLine
-                y={expenseLimit}
-                label={{ value: `Limit: $${expenseLimit}`, position: 'top', fill: 'red', fontSize: 12 }}
-                stroke="red"
+                key={index}
+                y={limit.amount}
+                label={{ value: limit.label || `Limit ${index + 1}`, position: 'top', fill: limit.color || 'red', fontSize: 12 }}
+                stroke={limit.color || 'red'}
                 strokeDasharray="3 3"
               />
-            )}
+            ))}
             <XAxis dataKey="day" />
-            <YAxis tickFormatter={(value) => `$${value}`} />
+            <YAxis
+              tickFormatter={(value) => `$${value}`}
+              domain={
+                expenseLimits.length > 0
+                  ? [0, Math.max(...expenseLimits.map(limit => limit.amount))]
+                  : ['auto', 'auto']
+              }
+            />
             <Tooltip formatter={(value, dataKey) => [`$${Number(value).toLocaleString('es-AR')}`, dataKey] } />
             <Line type="monotone" dataKey="ars" stroke="#1890ff" name="Expenses ($)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
             <Line type="monotone" dataKey="usd" name="Expenses (USD)" stroke="#4CAF50" strokeWidth={2} />
