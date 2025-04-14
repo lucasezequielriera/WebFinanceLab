@@ -209,8 +209,8 @@ const AppLayout = () => {
             <div className="add-expense-button-mobile">
               <Button type="primary" shape="circle" icon={<PlusOutlined />} size="large" onClick={showModal} />
             </div>
-            <Button type="link" icon={<FlagOutlined />}><Link to="/about-us"></Link>Financial Goals</Button>
-            <Button type="link" icon={<InfoCircleOutlined />}><Link to="/about-us"></Link>About Us</Button>
+            {/* <Button type="link" icon={<FlagOutlined />}><Link to="/financial-goals"></Link>Financial Goals</Button>
+            <Button type="link" icon={<InfoCircleOutlined />}><Link to="/about-us"></Link>About Us</Button> */}
             <Button type="link" icon={<UserOutlined />}><Link to="/profile"></Link>Profile</Button>
             <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} size="large" className="logout">Logout</Button>
           </div>
