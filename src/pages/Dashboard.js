@@ -22,6 +22,9 @@ const Dashboard = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [expenses, setExpenses] = useState([]);
 
+  const DEFAULT_PROFILE_PICTURE_URL =
+    "https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/profilePictures%2Fimage.png?alt=media&token=c7f97e78-1aa1-4b87-9c7a-a5ebe6087b3d";
+
   useEffect(() => {
     if (!currentUser) return;
 
@@ -162,7 +165,7 @@ const Dashboard = () => {
       <div className='margin-bottom-medium' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <img
-            src={currentUser?.photoURL || "https://via.placeholder.com/150"}
+            src={currentUser?.photoURL || DEFAULT_PROFILE_PICTURE_URL}
             alt="profile"
             width={40}
             height={40}

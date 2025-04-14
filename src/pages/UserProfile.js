@@ -378,7 +378,7 @@ export default function UserProfile() {
             <form onSubmit={handleSubmit}>
                 <div className="display-flex center margin-bottom-medium margin-top-large">
                     <img
-                    src={previewURL || "https://via.placeholder.com/150"}
+                    src={previewURL || DEFAULT_PROFILE_PICTURE_URL}
                     alt="Profile"
                     width="150"
                     height="150"
