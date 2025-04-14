@@ -27,32 +27,21 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!currentUser) return;
-
-    // Obtener ingresos
+  
     const incomesRef = collection(db, `users/${currentUser.uid}/expenses`);
-    const qIncomes = query(incomesRef);
-
-    const unsubscribeIncomes = onSnapshot(qIncomes, (snapshot) => {
-      const incomesData = [];
-      snapshot.forEach((doc) => {
-        incomesData.push({ id: doc.id, ...doc.data() });
-        setExpenses(incomesData);
-      });
-      setLoading(false);
-    });
-
-    return () => {
-      unsubscribeIncomes();
-    };
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (!currentUser) return;
-
-    // Obtener targets
     const targetsRef = collection(db, `users/${currentUser.uid}/targets`);
+    const qIncomes = query(incomesRef);
     const qTargets = query(targetsRef);
-
+  
+    // Snapshot listeners
+    const unsubscribeIncomes = onSnapshot(qIncomes, (snapshot) => {
+      const expenses = [];
+      snapshot.forEach((doc) => {
+        expenses.push({ id: doc.id, ...doc.data() });
+      });
+      setExpenses(expenses);
+    });
+  
     const unsubscribeTargets = onSnapshot(qTargets, (snapshot) => {
       const targetsData = [];
       snapshot.forEach((doc) => {
@@ -60,22 +49,28 @@ const Dashboard = () => {
       });
       setTargets(getSortedTargets(targetsData));
     });
-
+  
+    const fetchUserInfo = async () => {
+      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+      if (userDoc.exists()) {
+        setUserInfo(userDoc.data());
+      }
+    };
+  
+    // 🔁 Ejecutar todo en paralelo y esperar que termine
+    Promise.allSettled([
+      fetchUserInfo()
+      // Acá podrías agregar más fetchs en el futuro si los necesitás
+    ])
+    .finally(() => {
+      setLoading(false); // ✅ se apaga el loading solo cuando TODO terminó (con éxito o no)
+    });
+  
     return () => {
+      unsubscribeIncomes();
       unsubscribeTargets();
     };
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (!currentUser) return;
-  
-    const fetchUser = async () => {
-      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-      if (userDoc.exists()) setUserInfo(userDoc.data());
-    };
-  
-    fetchUser();
-  }, [currentUser]);
+  }, [currentUser]);    
 
   const showEditModal = (target) => {
     setSelectedTarget(target);
@@ -152,140 +147,134 @@ const Dashboard = () => {
     return [...withDeadline, ...withoutDeadline, ...completedTargets];
   };
 
-  if (loading) {
-    return (
-      <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div style={{ height: '100vh' }} />
-      </Spin>
-    );
-  }
-
   return (
-    <div className="dashboard-container">
-      <div className='margin-bottom-medium' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img
-            src={currentUser?.photoURL || DEFAULT_PROFILE_PICTURE_URL}
-            alt="profile"
-            width={40}
-            height={40}
-            style={{
-              borderRadius: '50%',
-              objectFit: 'cover',
-              boxShadow: '0 0 6px rgba(0,0,0,0.1)'
-            }}
-          />
-          <h1 className="dashboard-title" style={{ marginBottom: 0 }}>Hi, {currentUser?.displayName || 'User'}</h1>
+    <Spin spinning={loading}>
+      <div className="dashboard-container">
+        <div className='margin-bottom-medium' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <img
+              src={currentUser?.photoURL || DEFAULT_PROFILE_PICTURE_URL}
+              alt="profile"
+              width={40}
+              height={40}
+              style={{
+                borderRadius: '50%',
+                objectFit: 'cover',
+                boxShadow: '0 0 6px rgba(0,0,0,0.1)'
+              }}
+            />
+            <h1 className="dashboard-title" style={{ marginBottom: 0 }}>Hi, {currentUser?.displayName || 'User'}</h1>
+          </div>
+          <div className="balance-box">
+            <UserBalance userInfo={userInfo} monthlyExpenses={expenses} />
+          </div>
         </div>
-        <div className="balance-box">
-          <UserBalance userInfo={userInfo} monthlyExpenses={expenses} />
-        </div>
-      </div>
-      <Row className="expenses-counters margin-bottom-large" gutter={[16, 16]}>
-        <Col xs={24} sm={12}>
-          <Card className="equal-height-card">
-            <RemainingPesosCounter />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12}>
-          <Card className="equal-height-card">
-            <RemainingDollarsCounter />
-          </Card>
-        </Col>
-      </Row>
-      <Row className="remainings-counters margin-bottom-large" gutter={[16, 16]}>
-        <Col xs={24} sm={12}>
-          <Card className="equal-height-card">
-            <PesoExpenseCounter />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12}>
-          <Card className="equal-height-card">
-            <DollarExpenseCounter />
-          </Card>
-        </Col>
-      </Row>
-      {targets.length > 0 && (
-        <>
-          <h2 style={{ fontWeight: 200 }}>Targets:</h2>
-          <Row className="targets-cards margin-bottom-large" gutter={[16, 16]}>
-            {targets.map((target, index) => (
-              <Col xs={24} sm={24} md={12} key={index}>
-                <Card className="equal-height-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                    <h2>{target.description}</h2>
-                    <div>
-                      {target.status !== 'Completed' && (
-                        <DeleteTwoTone
-                          style={{ fontSize: 20, cursor: 'pointer' }}
-                          twoToneColor="#eb2f96"
-                          onClick={() => handleDeleteTarget(target.id)}
-                        />
-                      )}
-                      {target.status !== 'Completed' ? (
-                        <DollarTwoTone
-                          style={{ fontSize: 20, marginLeft: 8, cursor: 'pointer' }}
-                          twoToneColor={target.status === 'Completed' && "#00b100"}
-                          spin={target.status === 'Pending' ? false : true}
-                          onClick={() => showEditModal(target)}
-                        />
-                      ) : (
-                        <CheckCircleTwoTone style={{ fontSize: 20 }} twoToneColor={"#00b100"} />
-                      )}
+        <Row className="expenses-counters margin-bottom-large" gutter={[16, 16]}>
+          <Col xs={24} sm={12}>
+            <Card className="equal-height-card">
+              <RemainingPesosCounter />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Card className="equal-height-card">
+              <RemainingDollarsCounter />
+            </Card>
+          </Col>
+        </Row>
+        <Row className="remainings-counters margin-bottom-large" gutter={[16, 16]}>
+          <Col xs={24} sm={12}>
+            <Card className="equal-height-card">
+              <PesoExpenseCounter />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Card className="equal-height-card">
+              <DollarExpenseCounter />
+            </Card>
+          </Col>
+        </Row>
+        {targets.length > 0 && (
+          <>
+            <h2 style={{ fontWeight: 200 }}>Targets:</h2>
+            <Row className="targets-cards margin-bottom-large" gutter={[16, 16]}>
+              {targets.map((target, index) => (
+                <Col xs={24} sm={24} md={12} key={index}>
+                  <Card className="equal-height-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                      <h2>{target.description}</h2>
+                      <div>
+                        {target.status !== 'Completed' && (
+                          <DeleteTwoTone
+                            style={{ fontSize: 20, cursor: 'pointer' }}
+                            twoToneColor="#eb2f96"
+                            onClick={() => handleDeleteTarget(target.id)}
+                          />
+                        )}
+                        {target.status !== 'Completed' ? (
+                          <DollarTwoTone
+                            style={{ fontSize: 20, marginLeft: 8, cursor: 'pointer' }}
+                            twoToneColor={target.status === 'Completed' && "#00b100"}
+                            spin={target.status === 'Pending' ? false : true}
+                            onClick={() => showEditModal(target)}
+                          />
+                        ) : (
+                          <CheckCircleTwoTone style={{ fontSize: 20 }} twoToneColor={"#00b100"} />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <Flex vertical>
-                    <Progress
-                      percent={Number((target.currentAmount / target.target * 100).toFixed(2))}
-                      status={target.status === 'Started' && "active"}
-                      showInfo={false}
-                    />
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>{target.currentAmount} / {target.target} {target.currency}</span>
-                      <span style={{ fontWeight: 600, color: target.status === 'Completed' && 'green' }}>
-                        {(target.currentAmount / target.target * 100).toFixed(2)}%
-                      </span>
-                    </div>
-                    {/* <span>Status: {target.status}</span> */}
-                  </Flex>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </>
-      )}
-      { currentUser && (
-      <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 30, marginRight: 0, marginLeft: 0 }}>
-        <Col span={24} style={{ padding: 0 }}>
-          <Card>
-            <DailyExpensesChart userId={currentUser?.uid} />
-          </Card>
-        </Col>
-      </Row>
-      )}
+                    <Flex vertical>
+                      <Progress
+                        percent={Number((target.currentAmount / target.target * 100).toFixed(2))}
+                        status={target.status === 'Started' && "active"}
+                        showInfo={false}
+                      />
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span>{target.currentAmount} / {target.target} {target.currency}</span>
+                        <span style={{ fontWeight: 600, color: target.status === 'Completed' && 'green' }}>
+                          {(target.currentAmount / target.target * 100).toFixed(2)}%
+                        </span>
+                      </div>
+                      {/* <span>Status: {target.status}</span> */}
+                    </Flex>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </>
+        )}
+        { currentUser && (
+        <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 30, marginRight: 0, marginLeft: 0 }}>
+          <Col span={24} style={{ padding: 0 }}>
+            <Card>
+              <DailyExpensesChart userId={currentUser?.uid} />
+            </Card>
+          </Col>
+        </Row>
+        )}
 
-      <Modal
-        title="Add Money"
-        open={isEditModalVisible}
-        onCancel={handleCancel}
-        footer={null}
-      >
-        <Form form={form} layout="vertical" onFinish={handleUpdateTarget}>
-          <Form.Item
-            name="amount"
-            label="Add Amount"
-            rules={[{ required: true, message: 'Please input the amount to add!' }]}
-          >
-            <Input type="number" placeholder="Enter amount" />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Add Money
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
+        <Modal
+          title="Add Money"
+          open={isEditModalVisible}
+          onCancel={handleCancel}
+          footer={null}
+        >
+          <Form form={form} layout="vertical" onFinish={handleUpdateTarget}>
+            <Form.Item
+              name="amount"
+              label="Add Amount"
+              rules={[{ required: true, message: 'Please input the amount to add!' }]}
+            >
+              <Input type="number" placeholder="Enter amount" />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                Add Money
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
+      </div>
+    </Spin>
   );
 };
 

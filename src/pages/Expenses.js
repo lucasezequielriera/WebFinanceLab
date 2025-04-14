@@ -35,7 +35,7 @@ const Expenses = () => {
 
     const unsubscribe = onSnapshot(expensesQuery, (snapshot) => {
       const expensesData = snapshot.docs.map(doc => doc.data());
-      console.log('Expenses Data:', expensesData);
+
       updateCreditCards(expensesData);
     });
 
@@ -155,14 +155,6 @@ const Expenses = () => {
     return count > 1 ? `${type} Cards` : `${type} Card`;
   };
 
-  if (loading) {
-    return (
-      <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div style={{ height: '100vh' }} />
-      </Spin>
-    );
-  }
-
   const noCards = creditCards.length === 0 && debitCards.length === 0 && cashCards.length === 0;
 
   const StyledDatePicker = styled(DatePicker)`
@@ -172,7 +164,7 @@ const Expenses = () => {
 `;
 
   return (
-    <div>
+    <Spin spinning={loading}>
       <div className='title-and-buttons' style={{ display: 'flex', justifyContent: 'space-between' }}>
         <h1 className='title'>Expenses</h1>
         <div className="buttons">
@@ -212,7 +204,7 @@ const Expenses = () => {
           </>
         )
       }
-    </div>
+    </Spin>
   );
 };
 

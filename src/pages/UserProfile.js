@@ -51,33 +51,49 @@ export default function UserProfile() {
     const [cropModalVisible, setCropModalVisible] = useState(false);
 
     useEffect(() => {
-        async function fetchUserData() {
-            if (currentUser) {
-                const userDocRef = doc(db, "users", currentUser.uid);
-                const userDoc = await getDoc(userDocRef);
-                if (userDoc.exists()) {
-                    const data = userDoc.data();
-                    setUserData(data);
-                    setInitialUserData(data); // Guardar el estado inicial
-                    setPreviewURL(data.photoURL || DEFAULT_PROFILE_PICTURE_URL); // Establece la URL de la imagen
-                }
-                setLoading(false); // Terminar la carga después de obtener los datos
+        let isMounted = true;
+      
+        const fetchUserData = async () => {
+          if (currentUser) {
+            const userDocRef = doc(db, "users", currentUser.uid);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+              const data = userDoc.data();
+      
+              if (!isMounted) return;
+      
+              setUserData(data);
+              setInitialUserData(data);
+              setPreviewURL(data.photoURL || DEFAULT_PROFILE_PICTURE_URL);
             }
-        }
+          }
+        };
+      
         fetchUserData();
+      
+        return () => {
+          isMounted = false;
+        };
     }, [currentUser]);
-
+      
+    // Este para el estado de isDirty
     useEffect(() => {
-        // Comparar los datos actuales con los datos iniciales
         setIsDirty(JSON.stringify(userData) !== JSON.stringify(initialUserData));
     }, [userData, initialUserData]);
-
+    
+    // Este se mantiene aparte porque depende de la carga de imagen, no del usuario
     useEffect(() => {
-        // Manejar la carga de la imagen
         const img = new Image();
         img.src = previewURL;
-        img.onload = () => setImageLoading(false); // Termina la carga cuando la imagen se ha cargado
+        img.onload = () => setImageLoading(false); // Termina la carga de la imagen
     }, [previewURL]);
+    
+    // ✅ Y en un lugar donde tengas ambos loading controlados:
+    useEffect(() => {
+        if (userData && !imageLoading) {
+            setLoading(false); // solo desactiva cuando ambos están listos
+        }
+    }, [userData, imageLoading]);      
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -365,205 +381,201 @@ export default function UserProfile() {
         }
     };        
 
-    if (loading || imageLoading) {
-        return <Spin tip="Loading..." size="large" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div style={{ height: '100vh' }} />
-    </Spin>
-    }
-
     return (
-        <div className="user-profile">
-            <h2 className="title">User Profile</h2>
-            {error && <div>{error}</div>}
-            <form onSubmit={handleSubmit}>
-                <div className="display-flex center margin-bottom-medium margin-top-large">
-                    <img
-                    src={previewURL || DEFAULT_PROFILE_PICTURE_URL}
-                    alt="Profile"
-                    width="150"
-                    height="150"
-                    onClick={() => photoRef.current.click()}
-                    style={{
-                        cursor: "pointer",
-                        borderRadius: '100%',
-                        boxShadow: '0 0 14px 5px #0000004d',
-                        objectFit: 'cover',
-                        objectPosition: 'center'
-                    }}
-                    />
-                    <input
-                        type="file"
-                        ref={photoRef}
-                        accept="image/*"
-                        onChange={handlePhotoChange}
-                        style={{ display: "none" }} // Ocultar el input de archivo
-                    />
-                </div>
-                <div className="display-flex center margin-bottom-large">
-                <Button
-                    type="link"
-                    onClick={() => setPasswordModalVisible(true)}
-                    style={{ padding: 0, color: '#1890ff', fontWeight: 500 }}
-                    >
-                    Change Password
-                </Button>
-                </div>
-                <div className="display-flex center">
-                    <div className="display-flex w-200" style={{ flexFlow: "column" }}>
-                        <label className="label-small">First Name</label>
-                        <Input type="text" className="margin-bottom-small"
-                            name="firstName"
-                            value={userData.firstName}
-                            onChange={handleChange}
-                            placeholder="First Name"
-                            required
+        <Spin spinning={loading}>
+            <div className="user-profile">
+                <h2 className="title">User Profile</h2>
+                {error && <div>{error}</div>}
+                <form onSubmit={handleSubmit}>
+                    <div className="display-flex center margin-bottom-medium margin-top-large">
+                        <img
+                        src={previewURL || DEFAULT_PROFILE_PICTURE_URL}
+                        alt="Profile"
+                        width="150"
+                        height="150"
+                        onClick={() => photoRef.current.click()}
+                        style={{
+                            cursor: "pointer",
+                            borderRadius: '100%',
+                            boxShadow: '0 0 14px 5px #0000004d',
+                            objectFit: 'cover',
+                            objectPosition: 'center'
+                        }}
                         />
-                        <label className="label-small">Last Name</label>
-                        <Input type="text" className="margin-bottom-small"
-                            name="lastName"
-                            value={userData.lastName}
-                            onChange={handleChange}
-                            placeholder="Last Name"
-                            required
-                        />
-                        <label className="label-small">Age</label>
-                        <Input type="number" className="margin-bottom-small"
-                            name="age"
-                            value={userData.age}
-                            onChange={handleChange}
-                            placeholder="Age"
-                        />
-                        <label className="label-small">City</label>
-                        <Input type="text" className="margin-bottom-small"
-                            name="city"
-                            value={userData.city}
-                            onChange={handleChange}
-                            placeholder="City"
-                        />
-                        <label className="label-small">Gender</label>
-                        <Select className="margin-bottom-small"
-                            defaultValue="Select gender"
-                            style={{
-                                width: '100%',
-                            }}
-                            value={userData.gender}
-                            onChange={handleGenderChange}
-                            options={[
-                                {
-                                value: 'male',
-                                label: 'Male',
-                                },
-                                {
-                                value: 'female',
-                                label: 'Female',
-                                },
-                                {
-                                value: 'other',
-                                label: 'Other',
-                                }
-                            ]}
-                        />
-                        <label className="label-small">Phone</label>
-                        <Input type="number"
-                            className="margin-bottom-small"
-                            name="phone"
-                            value={userData.phone}
-                            onChange={handleChange}
-                            placeholder="Phone"
-                        />
-                        <label className="label-small">Balance Display</label>
-                        <Select
-                            style={{ width: '100%' }}
-                            value={userData.displayBalance}
-                            onChange={(value) => setUserData(prev => ({ ...prev, displayBalance: value }))}
-                            options={[
-                                { value: 'ARS', label: 'Pesos (ARS)' },
-                                { value: 'USD', label: 'Dollars (USD)' },
-                                { value: 'Both', label: 'Both' },
-                            ]}
+                        <input
+                            type="file"
+                            ref={photoRef}
+                            accept="image/*"
+                            onChange={handlePhotoChange}
+                            style={{ display: "none" }} // Ocultar el input de archivo
                         />
                     </div>
-                </div>
-                <div className="display-flex margin-top-large center">
-                    <Button disabled={!isDirty} type="primary" htmlType="submit">Save changes</Button>
-                </div>
-                <hr style={{ marginTop: 30, borderColor: '#fafafa8c' }}/>
-                <div className="display-flex center margin-top-large margin-bottom-large" style={{ alignItems: 'center' }}>
-                    <h1 className="margin-right-medium" style={{ fontWeight: 200, margin: 0, marginRight: 10 }}>Current Incomes</h1>
-                    <Button type="primary" size="medium" shape="circle" icon={<PlusOutlined />} onClick={showModal} />
-                </div>
-                <div className="display-flex center">
-                    <Table className="margin-bottom-large" pagination={false} style={{width: 1200 }} columns={columns} dataSource={userData.jobs} rowKey={(record) => record.title} />
-                    <Modal title="Add New Job" open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
-                        <Form layout="vertical">
-                            <Form.Item label="Title">
-                                <Input name="title" value={newJobData.title} onChange={handleNewJobChange} />
-                            </Form.Item>
-                            <Form.Item label="Salary">
-                                <Input name="salary" type="number" value={newJobData.salary} onChange={handleNewJobChange} />
-                            </Form.Item>
-                            <Form.Item label="Type">
-                                <Select value={newJobData.type} onChange={handleNewJobTypeChange}>
-                                <Option value="employed">Employed</Option>
-                                <Option value="self-employed">Self-Employed</Option>
-                                </Select>
-                            </Form.Item>
-                            <Form.Item label="Currency">
-                                <Select value={newJobData.currency} onChange={handleNewJobCurrencyChange}>
-                                    <Option value="ARS">ARS</Option>
-                                    <Option value="USD">USD</Option>
-                                </Select>
-                            </Form.Item>
-                        </Form>
-                    </Modal>
-                </div>
-            </form>
-            <Modal
-                title="Change Password"
-                open={passwordModalVisible}
-                onCancel={() => setPasswordModalVisible(false)}
-                footer={null} // ✅ sacamos el botón OK del modal, lo ponemos en el form
-                >
-                <Form onFinish={handlePasswordUpdate}>
-                    <Form.Item className="margin-bottom-small">
-                        <Input.Password
-                            placeholder="Current Password"
-                            value={currentPassword}
-                            onChange={(e) => setCurrentPassword(e.target.value)}
-                            style={{ marginBottom: 10, marginTop: 15 }}
-                        />
-                    </Form.Item>
+                    <div className="display-flex center margin-bottom-large">
+                    <Button
+                        type="link"
+                        onClick={() => setPasswordModalVisible(true)}
+                        style={{ padding: 0, color: '#1890ff', fontWeight: 500 }}
+                        >
+                        Change Password
+                    </Button>
+                    </div>
+                    <div className="display-flex center">
+                        <div className="display-flex w-200" style={{ flexFlow: "column" }}>
+                            <label className="label-small">First Name</label>
+                            <Input type="text" className="margin-bottom-small"
+                                name="firstName"
+                                value={userData.firstName}
+                                onChange={handleChange}
+                                placeholder="First Name"
+                                required
+                            />
+                            <label className="label-small">Last Name</label>
+                            <Input type="text" className="margin-bottom-small"
+                                name="lastName"
+                                value={userData.lastName}
+                                onChange={handleChange}
+                                placeholder="Last Name"
+                                required
+                            />
+                            <label className="label-small">Age</label>
+                            <Input type="number" className="margin-bottom-small"
+                                name="age"
+                                value={userData.age}
+                                onChange={handleChange}
+                                placeholder="Age"
+                            />
+                            <label className="label-small">City</label>
+                            <Input type="text" className="margin-bottom-small"
+                                name="city"
+                                value={userData.city}
+                                onChange={handleChange}
+                                placeholder="City"
+                            />
+                            <label className="label-small">Gender</label>
+                            <Select className="margin-bottom-small"
+                                defaultValue="Select gender"
+                                style={{
+                                    width: '100%',
+                                }}
+                                value={userData.gender}
+                                onChange={handleGenderChange}
+                                options={[
+                                    {
+                                    value: 'male',
+                                    label: 'Male',
+                                    },
+                                    {
+                                    value: 'female',
+                                    label: 'Female',
+                                    },
+                                    {
+                                    value: 'other',
+                                    label: 'Other',
+                                    }
+                                ]}
+                            />
+                            <label className="label-small">Phone</label>
+                            <Input type="number"
+                                className="margin-bottom-small"
+                                name="phone"
+                                value={userData.phone}
+                                onChange={handleChange}
+                                placeholder="Phone"
+                            />
+                            <label className="label-small">Balance Display</label>
+                            <Select
+                                style={{ width: '100%' }}
+                                value={userData.displayBalance}
+                                onChange={(value) => setUserData(prev => ({ ...prev, displayBalance: value }))}
+                                options={[
+                                    { value: 'ARS', label: 'Pesos (ARS)' },
+                                    { value: 'USD', label: 'Dollars (USD)' },
+                                    { value: 'Both', label: 'Both' },
+                                ]}
+                            />
+                        </div>
+                    </div>
+                    <div className="display-flex margin-top-large center">
+                        <Button disabled={!isDirty} type="primary" htmlType="submit">Save changes</Button>
+                    </div>
+                    <hr style={{ marginTop: 30, borderColor: '#fafafa8c' }}/>
+                    <div className="display-flex center margin-top-large margin-bottom-large" style={{ alignItems: 'center' }}>
+                        <h1 className="margin-right-medium" style={{ fontWeight: 200, margin: 0, marginRight: 10 }}>Current Incomes</h1>
+                        <Button type="primary" size="medium" shape="circle" icon={<PlusOutlined />} onClick={showModal} />
+                    </div>
+                    <div className="display-flex center">
+                        <Table className="margin-bottom-large" pagination={false} style={{width: 1200 }} columns={columns} dataSource={userData.jobs} rowKey={(record) => record.title} />
+                        <Modal title="Add New Job" open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+                            <Form layout="vertical">
+                                <Form.Item label="Title">
+                                    <Input name="title" value={newJobData.title} onChange={handleNewJobChange} />
+                                </Form.Item>
+                                <Form.Item label="Salary">
+                                    <Input name="salary" type="number" value={newJobData.salary} onChange={handleNewJobChange} />
+                                </Form.Item>
+                                <Form.Item label="Type">
+                                    <Select value={newJobData.type} onChange={handleNewJobTypeChange}>
+                                    <Option value="employed">Employed</Option>
+                                    <Option value="self-employed">Self-Employed</Option>
+                                    </Select>
+                                </Form.Item>
+                                <Form.Item label="Currency">
+                                    <Select value={newJobData.currency} onChange={handleNewJobCurrencyChange}>
+                                        <Option value="ARS">ARS</Option>
+                                        <Option value="USD">USD</Option>
+                                    </Select>
+                                </Form.Item>
+                            </Form>
+                        </Modal>
+                    </div>
+                </form>
+                <Modal
+                    title="Change Password"
+                    open={passwordModalVisible}
+                    onCancel={() => setPasswordModalVisible(false)}
+                    footer={null} // ✅ sacamos el botón OK del modal, lo ponemos en el form
+                    >
+                    <Form onFinish={handlePasswordUpdate}>
+                        <Form.Item className="margin-bottom-small">
+                            <Input.Password
+                                placeholder="Current Password"
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                style={{ marginBottom: 10, marginTop: 15 }}
+                            />
+                        </Form.Item>
 
-                    <Form.Item className="margin-bottom-small">
-                        <Input.Password
-                            placeholder="New Password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            style={{ marginBottom: 0 }}
-                        />
-                    </Form.Item>
+                        <Form.Item className="margin-bottom-small">
+                            <Input.Password
+                                placeholder="New Password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                style={{ marginBottom: 0 }}
+                            />
+                        </Form.Item>
 
-                    <Form.Item>
-                        <Input.Password
-                            placeholder="Confirm New Password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                        />
-                    </Form.Item>
+                        <Form.Item>
+                            <Input.Password
+                                placeholder="Confirm New Password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                            />
+                        </Form.Item>
 
-                    <Form.Item>
-                        <Button type="primary" htmlType="submit" loading={updatingPassword} block>
-                            Change Password
-                        </Button>
-                    </Form.Item>
-                </Form>
-            </Modal>
-            <ImageCropper
-            image={imageToCrop}
-            visible={cropModalVisible}
-            onComplete={handleCropComplete}
-            onCancel={() => setCropModalVisible(false)}
-            />
-        </div>
+                        <Form.Item>
+                            <Button type="primary" htmlType="submit" loading={updatingPassword} block>
+                                Change Password
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                </Modal>
+                <ImageCropper
+                image={imageToCrop}
+                visible={cropModalVisible}
+                onComplete={handleCropComplete}
+                onCancel={() => setCropModalVisible(false)}
+                />
+            </div>
+        </Spin>
     );
 }

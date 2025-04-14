@@ -3,7 +3,9 @@ import {
   collection,
   query,
   where,
-  onSnapshot
+  onSnapshot,
+  doc, 
+  getDoc
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import {
@@ -13,7 +15,8 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  ResponsiveContainer
+  ResponsiveContainer,
+  ReferenceLine
 } from 'recharts';
 import dayjs from 'dayjs';
 import useIsMobile from '../hooks/useIsMobile';
@@ -23,6 +26,7 @@ const DailyExpensesChart = ({ userId }) => {
   const scrollRef = useRef(null);
   const isMobile = useIsMobile();
   const currentMonth = dayjs().format('MMMM').charAt(0).toUpperCase() + dayjs().format('MMMM').slice(1);
+  const [expenseLimit, setExpenseLimit] = useState(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -73,6 +77,23 @@ const DailyExpensesChart = ({ userId }) => {
   }, [userId]);
 
   useEffect(() => {
+    const fetchUserLimit = async () => {
+      try {
+        const userRef = doc(db, 'users', userId);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          setExpenseLimit(userData.expenseLimit || null);
+        }
+      } catch (error) {
+        console.error("Failed to fetch expense limit:", error);
+      }
+    };
+  
+    if (userId) fetchUserLimit();
+  }, [userId]);
+
+  useEffect(() => {
     if (isMobile && scrollRef.current) {
       const today = dayjs().date();
       const approxScroll = (today - 4) * 60;
@@ -83,31 +104,47 @@ const DailyExpensesChart = ({ userId }) => {
   const chartWidth = Math.max(600, data.length * 60);
 
   return (
-    <div>
+    <div style={{ position: 'relative' }}>
       <h3 style={{ marginBottom: 16, marginTop: 8, textAlign: 'center', fontWeight: 600 }}>Daily Expenses ({currentMonth})</h3>
 
       {isMobile ? (
         <div ref={scrollRef} style={{ overflowX: 'auto', width: '100%', paddingBottom: 12 }}>
-            <LineChart width={chartWidth} height={300} data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" />
-                <YAxis tickFormatter={(value) => `$${value}`} />
-                <Tooltip formatter={(value, dataKey) => [`$${Number(value).toLocaleString('es-AR')}`, dataKey] } />
-                <Line type="monotone" dataKey="ars" stroke="#1890ff" name="Expenses ($)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
-                <Line type="monotone" dataKey="usd" name="Expenses (USD)" stroke="#4CAF50" strokeWidth={2} />
-            </LineChart>
+          <LineChart width={chartWidth} height={300} data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            {expenseLimit && (
+              <ReferenceLine
+                y={expenseLimit}
+                label={{ value: `Limit: $${expenseLimit}`, position: 'top', fill: 'red', fontSize: 12 }}
+                stroke="red"
+                strokeDasharray="3 3"
+              />
+            )}
+            <XAxis dataKey="day" />
+            <YAxis tickFormatter={(value) => `$${value}`} />
+            <Tooltip formatter={(value, dataKey) => [`$${Number(value).toLocaleString('es-AR')}`, dataKey] } />
+            <Line type="monotone" dataKey="ars" stroke="#1890ff" name="Expenses ($)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
+            <Line type="monotone" dataKey="usd" name="Expenses (USD)" stroke="#4CAF50" strokeWidth={2} />
+          </LineChart>
         </div>
         
       ) : (
         <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" />
-                <YAxis tickFormatter={(value) => `$${value}`} />
-                <Tooltip formatter={(value, dataKey) => [`$${Number(value).toLocaleString('es-AR')}`, dataKey] } />
-                <Line type="monotone" dataKey="ars" stroke="#1890ff" name="Expenses ($)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
-                <Line type="monotone" dataKey="usd" name="Expenses (USD)" stroke="#4CAF50" strokeWidth={2} />
-            </LineChart>
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            {expenseLimit && (
+              <ReferenceLine
+                y={expenseLimit}
+                label={{ value: `Limit: $${expenseLimit}`, position: 'top', fill: 'red', fontSize: 12 }}
+                stroke="red"
+                strokeDasharray="3 3"
+              />
+            )}
+            <XAxis dataKey="day" />
+            <YAxis tickFormatter={(value) => `$${value}`} />
+            <Tooltip formatter={(value, dataKey) => [`$${Number(value).toLocaleString('es-AR')}`, dataKey] } />
+            <Line type="monotone" dataKey="ars" stroke="#1890ff" name="Expenses ($)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
+            <Line type="monotone" dataKey="usd" name="Expenses (USD)" stroke="#4CAF50" strokeWidth={2} />
+          </LineChart>
         </ResponsiveContainer>
       )}
     </div>

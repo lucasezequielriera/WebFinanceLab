@@ -14,6 +14,8 @@ import MonthlyExpensesPage from './pages/MonthlyExpensesPage';
 import AddExpense from './components/AddExpense';
 import AddTarget from './components/AddTarget';
 import Expenses from './pages/Expenses'; // Importa el nuevo componente
+import AboutUs from './pages/AboutUs';
+import FinancialGoals from './pages/FinancialGoals';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
 // Importaciones de AntD
@@ -50,6 +52,10 @@ const AppLayout = () => {
       setSelectedKey('general-expenses');
     } else if (path.startsWith('/profile')) {
       setSelectedKey('2');
+    } else if (path.startsWith('/financial-goals')) {
+      setSelectedKey('7');
+    } else if (path.startsWith('/about-us')) {
+      setSelectedKey('6');
     } else if (path.startsWith('/signup')) {
       setSelectedKey('signup');
     } else if (path.startsWith('/login')) {
@@ -108,6 +114,16 @@ const AppLayout = () => {
       key: '2',
       icon: <UserOutlined />,
       label: <Link to="/profile">Profile</Link>
+    },
+    {
+      key: '7',
+      icon: <UserOutlined />,
+      label: <Link to="/financial-goals">Financial Goals</Link>
+    },
+    {
+      key: '6',
+      icon: <UserOutlined />,
+      label: <Link to="/about-us">About Us</Link>
     },
     {
       key: '4',
@@ -175,6 +191,8 @@ const AppLayout = () => {
             <Route path="/login" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
+            <Route path="/financial-goals" element={<PrivateRoute><FinancialGoals /></PrivateRoute>} />
+            <Route path="/about-us" element={<PrivateRoute><AboutUs /></PrivateRoute>} />
             <Route path="/detailed-expenses" element={<PrivateRoute><DetailedExpenses /></PrivateRoute>} />
             <Route path="/general-expenses" element={<PrivateRoute><GeneralExpenses /></PrivateRoute>} />
             <Route path="/monthly-expenses/:month" element={<PrivateRoute><MonthlyExpensesPage /></PrivateRoute>} />
@@ -192,6 +210,8 @@ const AppLayout = () => {
               <Button type="primary" shape="circle" icon={<PlusOutlined />} size="large" onClick={showModal} />
             </div>
             <Button type="link" icon={<UserOutlined />}><Link to="/profile"></Link>Profile</Button>
+            <Button type="link" icon={<UserOutlined />}><Link to="/about-us"></Link>Financial Goals</Button>
+            <Button type="link" icon={<UserOutlined />}><Link to="/about-us"></Link>About Us</Button>
             <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} size="large" className="logout">Logout</Button>
           </div>
         ) :
