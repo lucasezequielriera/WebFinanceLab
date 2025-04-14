@@ -7,6 +7,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Importa 
 // import { useNavigate } from "react-router-dom";
 import { PlusOutlined } from '@ant-design/icons';
 import { notification, Button, Input, Select, Table, Modal, Form, Spin, message } from 'antd';
+import ImageCropper from '../components/ImageCropper';
 import "../index.css"
 import "../styles/UserProfile.css"; // Importa el archivo CSS
 
@@ -44,6 +45,9 @@ export default function UserProfile() {
     const [updatingPassword, setUpdatingPassword] = useState(false);
     const [currentPassword, setCurrentPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [imageToCrop, setImageToCrop] = useState(null);
+    const [croppedFile, setCroppedFile] = useState(null);
+    const [cropModalVisible, setCropModalVisible] = useState(false);
 
     useEffect(() => {
         async function fetchUserData() {
@@ -77,24 +81,15 @@ export default function UserProfile() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!userData.gender) {
-            setError('Gender is required');
-            return;
-        }
-
         try {
             setError("");
             setLoading(true);
             let photoURL = userData.photoURL;
-            if (photoRef.current && photoRef.current.files[0]) {
-                const photoFile = photoRef.current.files[0];
-                const photoStorageRef = ref(
-                    storage,
-                    `profilePictures/${currentUser.uid}`
-                );
-                await uploadBytes(photoStorageRef, photoFile);
-                photoURL = await getDownloadURL(photoStorageRef);
-            }
+                if (croppedFile) {
+                    const photoStorageRef = ref(storage, `profilePictures/${currentUser.uid}`);
+                    await uploadBytes(photoStorageRef, croppedFile);
+                    photoURL = await getDownloadURL(photoStorageRef);
+                }
             await updateProfile(currentUser, {
                 displayName: `${userData.firstName} ${userData.lastName}`,
                 photoURL: photoURL,
@@ -224,16 +219,25 @@ export default function UserProfile() {
     const handlePhotoChange = () => {
         const file = photoRef.current.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewURL(reader.result);
-                setUserData(prevData => ({
-                    ...prevData,
-                    photoURL: reader.result
-                }));
-            };
-            reader.readAsDataURL(file);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setImageToCrop(reader.result);
+            setCropModalVisible(true);
+          };
+          reader.readAsDataURL(file);
         }
+    };
+
+    // nueva función para manejar imagen recortada
+    const handleCropComplete = (croppedImageFile) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+        setPreviewURL(reader.result);
+        setUserData(prev => ({ ...prev, photoURL: reader.result }));
+        setCroppedFile(croppedImageFile);
+        setCropModalVisible(false);
+        };
+        reader.readAsDataURL(croppedImageFile);
     };
 
     const openNotificationWithIcon = (type, message, description) => {
@@ -365,12 +369,18 @@ export default function UserProfile() {
             <form onSubmit={handleSubmit}>
                 <div className="display-flex center margin-bottom-medium margin-top-large">
                     <img
-                        src={previewURL || "https://via.placeholder.com/150"} // Imagen preestablecida
-                        alt="Profile"
-                        width="150"
-                        height="150"
-                        onClick={() => photoRef.current.click()} // Hacer clic para cambiar la imagen
-                        style={{ cursor: "pointer", borderRadius: '100%', boxShadow: '0 0 14px 5px #0000004d' }}
+                    src={previewURL || "https://via.placeholder.com/150"}
+                    alt="Profile"
+                    width="150"
+                    height="150"
+                    onClick={() => photoRef.current.click()}
+                    style={{
+                        cursor: "pointer",
+                        borderRadius: '100%',
+                        boxShadow: '0 0 14px 5px #0000004d',
+                        objectFit: 'cover',
+                        objectPosition: 'center'
+                    }}
                     />
                     <input
                         type="file"
@@ -527,6 +537,12 @@ export default function UserProfile() {
                     </Form.Item>
                 </Form>
             </Modal>
+            <ImageCropper
+            image={imageToCrop}
+            visible={cropModalVisible}
+            onComplete={handleCropComplete}
+            onCancel={() => setCropModalVisible(false)}
+            />
         </div>
     );
 }
