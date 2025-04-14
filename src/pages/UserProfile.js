@@ -104,6 +104,10 @@ export default function UserProfile() {
                 photoURL: photoURL,
                 jobs: userData.jobs,
             });
+            setInitialUserData({
+                ...userData,
+                photoURL: photoURL,
+            });              
             setLoading(false);
             // navigate("/dashboard");
             openNotificationWithIcon('success', 'Profile Updated', 'Your profile has been successfully updated.');
