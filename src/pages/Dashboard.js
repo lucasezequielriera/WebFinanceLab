@@ -219,7 +219,7 @@ const Dashboard = () => {
         </>
       )}
       { currentUser && (
-      <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 10 }}>
+      <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 30 }}>
         <Col span={24} style={{ padding: 0 }}>
           <Card>
             <DailyExpensesChart userId={currentUser?.uid} />
