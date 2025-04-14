@@ -49,6 +49,9 @@
   .expenses-counters {
       margin-bottom: 16px !important;
   }
+  .balance-box .total {
+    font-size: 20px !important;
+  }
 }
 
 /* Ajuste específico para dispositivos móviles */

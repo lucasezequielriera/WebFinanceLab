@@ -60,26 +60,26 @@ const UserBalance = ({ userInfo, monthlyExpenses }) => {
   const totals = calculateTotal();
 
   return (
-    <div style={{ fontSize: 25, fontWeight: 600 }}>
+    <div className="total" style={{ fontSize: 25, fontWeight: 600 }}>
       {userInfo?.displayBalance === "ARS" && (
-        <span style={{ color: totals.pesos >= 0 ? 'green' : 'red' }}>
-          ${totals.pesos.toFixed(2)} ARS
+        <span style={{ color: '#504f4f' }}>
+          ${totals.pesos.toFixed(2)}
         </span>
       )}
       {userInfo?.displayBalance === "USD" && (
-        <span style={{ color: totals.dollars >= 0 ? 'green' : 'red' }}>
-          ${totals.dollars.toFixed(2)} USD
+        <span style={{ color: '#504f4f' }}>
+          ${totals.dollars.toFixed(2)}
         </span>
       )}
-      {userInfo?.displayBalance === "BOTH" && (
-        <>
-          <span style={{ color: totals.pesos >= 0 ? 'green' : 'red', marginRight: 12 }}>
-            ${totals.pesos.toFixed(2)} ARS
+      {userInfo?.displayBalance === "Both" && (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ color: '#504f4f', marginRight: 12 }}>
+            ${totals.pesos.toFixed(2)} <span style={{ fontSize: 10 }}>ARS</span>
           </span>
-          <span style={{ color: totals.dollars >= 0 ? 'green' : 'red' }}>
-            ${totals.dollars.toFixed(2)} USD
+          <span style={{ color: '#504f4f' }}>
+            ${totals.dollars.toFixed(2)}
           </span>
-        </>
+        </div>
       )}
     </div>
   );
