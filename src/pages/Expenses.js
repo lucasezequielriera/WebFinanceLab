@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Spin } from 'antd';
+import { Button, Spin, DatePicker, Empty } from 'antd';
 import CreditCard from '../components/CreditCard';
-import { doc, onSnapshot, updateDoc, collection, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, collection, getDoc, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import moment from 'moment';
+import dayjs from 'dayjs';
+import styled from 'styled-components';
 import '../styles/Expenses.css';
 
 const cardColors = {
@@ -19,17 +21,21 @@ const Expenses = () => {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [cards, setCards] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(dayjs());
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!currentUser) return;
 
-    const userExpensesRef = collection(db, `users/${currentUser.uid}/expenses`);
+    const startOfMonth = selectedMonth.startOf('month').toDate();
+    const endOfMonth = selectedMonth.endOf('month').toDate();
 
-    // Set up a real-time listener for expenses
-    const unsubscribe = onSnapshot(userExpensesRef, (snapshot) => {
+    const userExpensesRef = collection(db, `users/${currentUser.uid}/expenses`);
+    const expensesQuery = query(userExpensesRef, where('timestamp', '>=', startOfMonth), where('timestamp', '<=', endOfMonth));
+
+    const unsubscribe = onSnapshot(expensesQuery, (snapshot) => {
       const expensesData = snapshot.docs.map(doc => doc.data());
-      console.log('Expenses Data:', expensesData); // Log the expenses data
+      console.log('Expenses Data:', expensesData);
       updateCreditCards(expensesData);
     });
 
@@ -38,7 +44,7 @@ const Expenses = () => {
     }, 1000)
 
     return () => unsubscribe();
-  }, [currentUser]);
+  }, [currentUser, selectedMonth]);
 
   const updateCreditCards = (expenses) => {
     const cardMap = new Map();
@@ -129,7 +135,6 @@ const Expenses = () => {
 
   const renderSection = (title, cards) => {
     if (cards.length === 0) return null;
-
     return (
       <div className="card-section">
         <h2>{title}</h2>
@@ -158,6 +163,14 @@ const Expenses = () => {
     );
   }
 
+  const noCards = creditCards.length === 0 && debitCards.length === 0 && cashCards.length === 0;
+
+  const StyledDatePicker = styled(DatePicker)`
+  input {
+    margin: 0;
+  }
+`;
+
   return (
     <div>
       <div className='title-and-buttons' style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -171,9 +184,34 @@ const Expenses = () => {
           </Button>
         </div>
       </div>
-      <div className='cards margin-top-large margin-bottom-large'>{renderSection(getTitle('Credit', creditCards.length), creditCards)}</div>
-      <div className='cards margin-top-large margin-bottom-large'>{renderSection(getTitle('Debit', debitCards.length), debitCards)}</div>
-      <div className='cards margin-top-large margin-bottom-large'>{renderSection(getTitle('Cash', cashCards.length), cashCards)}</div>
+      <div style={{ marginBottom: 24 }}>
+        <span style={{marginRight: 5 }}>Filter:</span> 
+        <StyledDatePicker
+          picker="month"
+          allowClear={false} // ✅ con esto ya no te tira error
+          value={selectedMonth}
+          onChange={(value) => setSelectedMonth(value)}
+          style={{ margin: 0 }}
+        />
+      </div>
+      { noCards ? (
+        <div style={{ marginTop: 40 }}>
+          <Empty description="No hay gastos registrados en este mes" />
+        </div>
+        ) : (
+          <>
+            <div className='cards margin-top-large margin-bottom-large'>
+              {renderSection(getTitle('Credit', creditCards.length), creditCards)}
+            </div>
+            <div className='cards margin-top-large margin-bottom-large'>
+              {renderSection(getTitle('Debit', debitCards.length), debitCards)}
+            </div>
+            <div className='cards margin-top-large margin-bottom-large'>
+              {renderSection(getTitle('Cash', cashCards.length), cashCards)}
+            </div>
+          </>
+        )
+      }
     </div>
   );
 };
