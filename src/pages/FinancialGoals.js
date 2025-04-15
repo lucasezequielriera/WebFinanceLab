@@ -4,11 +4,12 @@ import "../index.css"
 import "../styles/FinancialGoals.css";
 import { Button, InputNumber, Form, notification, Spin, Tooltip, Select, Input, Space, Switch, Typography } from 'antd';
 import { QuestionCircleTwoTone } from '@ant-design/icons';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, getDoc, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import isBetween from 'dayjs/plugin/isBetween';
 
+dayjs.extend(isBetween);
 const { Option } = Select;
 
 export default function FinancialGoals() {
@@ -21,7 +22,7 @@ export default function FinancialGoals() {
     const [calculatedDaily, setCalculatedDaily] = useState(null);
     const [userData, setUserData] = useState(null);
     const [autoCurrency, setAutoCurrency] = useState("USD");
-    const [dollarRate, setDollarRate] = useState(1100); // valor por defecto si falla la API
+    const [exchangeRate, setExchangeRate] = useState(1100);
 
     const today = dayjs();
     const endOfMonth = dayjs().endOf('month');
@@ -29,52 +30,78 @@ export default function FinancialGoals() {
     const { Title, Text } = Typography;
 
     useEffect(() => {
-        const fetchInitialData = async () => {
+        const fetchUserData = async () => {
             try {
-                const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+                const [userDoc, expensesSnap] = await Promise.all([
+                    getDoc(doc(db, 'users', currentUser.uid)),
+                    getDocs(collection(db, `users/${currentUser.uid}/expenses`))
+                ]);
+
                 if (userDoc.exists()) {
                     const data = userDoc.data();
+                    data.expenses = expensesSnap.docs.map(doc => doc.data());
+
                     setUserData(data);
                     if (Array.isArray(data.expenseLimits)) {
                         setLimits(data.expenseLimits);
                         setLimitCount(data.expenseLimits.length);
                     }
                 }
-
-                const res = await axios.get('https://api.bluelytics.com.ar/v2/latest');
-                const blue = res.data.blue.value_sell;
-                if (blue) setDollarRate(blue);
-
-            } catch (err) {
-                console.error("Error fetching data:", err);
+            } catch (e) {
+                console.error("Error fetching data", e);
             } finally {
                 setLoading(false);
             }
         };
 
-        if (currentUser) fetchInitialData();
+        const fetchExchangeRate = async () => {
+            try {
+                const res = await fetch("https://dolarapi.com/v1/dolares/blue");
+                const data = await res.json();
+                if (data?.venta) setExchangeRate(data.venta);
+            } catch (error) {
+                console.warn("No se pudo obtener el valor del dólar blue, se usará 1100 por defecto.");
+            }
+        };
+
+        if (currentUser) {
+            fetchUserData();
+            fetchExchangeRate();
+        }
     }, [currentUser]);
 
     useEffect(() => {
         if (!userData) return;
 
+        const totalIncome = userData.jobs?.reduce((acc, job) => {
+            const salary = parseFloat(job.salary || 0);
+            return acc + (job.currency === autoCurrency
+                ? salary
+                : (autoCurrency === "USD" ? salary / exchangeRate : salary * exchangeRate));
+        }, 0) || 0;
+
+        const startOfMonth = dayjs().startOf('month');
+        const endOfMonth = dayjs().endOf('month');
+
+        const totalExpenses = userData.expenses?.reduce((acc, expense) => {
+            const date = dayjs(expense.timestamp?.toDate?.() || expense.timestamp);
+            if (!date.isBetween(startOfMonth, endOfMonth, 'day', '[]')) return acc;
+
+            const amount = parseFloat(expense.amount || 0);
+            return acc + (expense.currency === autoCurrency
+                ? amount
+                : (autoCurrency === "USD" ? amount / exchangeRate : amount * exchangeRate));
+        }, 0) || 0;
+
+        const net = totalIncome - totalExpenses;
+
         if (manualMode) {
             setCalculatedDaily(manualAmount && daysRemaining ? manualAmount / daysRemaining : null);
-        } else if (userData?.jobs?.length > 0) {
-            let totalConverted = 0;
-
-            userData.jobs.forEach((job) => {
-                const salary = parseFloat(job.salary || 0);
-                if (autoCurrency === "ARS") {
-                    totalConverted += job.currency === "USD" ? salary * dollarRate : salary;
-                } else {
-                    totalConverted += job.currency === "ARS" ? salary / dollarRate : salary;
-                }
-            });
-
-            setCalculatedDaily(daysRemaining > 0 ? totalConverted / daysRemaining : 0);
+        } else {
+            setCalculatedDaily(net / daysRemaining);
+            setManualAmount(Number(net.toFixed(2))); // Valor inicial cuando cambia a manual
         }
-    }, [manualMode, manualAmount, userData, autoCurrency, dollarRate, daysRemaining]);
+    }, [manualMode, manualAmount, userData, autoCurrency, exchangeRate]);
 
     const handleSave = async () => {
         setLoading(true);
@@ -167,7 +194,7 @@ export default function FinancialGoals() {
                             unCheckedChildren="Auto"
                             checked={manualMode}
                             onChange={(checked) => setManualMode(checked)}
-                            style={{ marginLeft: 12, marginBottom: 0, verticalAlign: 'text-top' }}
+                            style={{ marginLeft: 12, verticalAlign: 'text-top' }}
                         />
                     </Title>
 
@@ -175,7 +202,7 @@ export default function FinancialGoals() {
                         <Form.Item label="Currency to base your income on">
                             <Select
                                 value={autoCurrency}
-                                onChange={(val) => setAutoCurrency(val)}
+                                onChange={setAutoCurrency}
                                 style={{ width: 150 }}
                             >
                                 <Option value="ARS">Pesos</Option>
@@ -199,12 +226,10 @@ export default function FinancialGoals() {
                     <Text>
                         You can spend approximately <b style={{ color: '#2cb212' }}>${calculatedDaily?.toFixed(2)}</b> per day
                         {manualMode ?
-                        <> for the rest of the month. (${daysRemaining} days left)* <Tooltip title="You can calculate how much money you can spend by entering your available money (it will be divided by the number of days remaining in the current month).">
-                        <QuestionCircleTwoTone />
-                    </Tooltip></> :
-                        <> this month. (${daysRemaining} days left)* <Tooltip title="Your incomes ($ & USD) divided by the remaining days of the current month (with conversion to the chosen currency.)">
-                        <QuestionCircleTwoTone />
-                    </Tooltip></>}
+                            <> for the rest of the month. ({daysRemaining} days left)* <Tooltip title="You can calculate how much money you can spend by entering your available money. It will be divided by the number of days remaining in the month."><QuestionCircleTwoTone /></Tooltip></>
+                            :
+                            <> this month. ({daysRemaining} days left)* <Tooltip title="Your income minus current expenses, converted to the selected currency, divided by the number of days remaining."><QuestionCircleTwoTone /></Tooltip></>
+                        }
                     </Text>
                 </div>
                 <p style={{ fontSize: 12, color: '#363636' }}>* This suggestion is for information only.</p>

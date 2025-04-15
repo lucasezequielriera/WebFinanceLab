@@ -50,6 +50,7 @@ const UserBalance = ({ userInfo, monthlyExpenses }) => {
         if (expense.currency === "ARS") totalARS -= amount;
         if (expense.currency === "USD") totalUSD -= amount;
       });
+      console.log(dollarBlue)
 
     return {
       pesos: totalARS + totalUSD * dollarBlue,
