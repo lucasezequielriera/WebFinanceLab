@@ -20,6 +20,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
 // Importaciones de AntD
 import { Typography } from 'antd';
+import logo from './assets/transparent-logo.png';
 
 const { Title } = Typography;
 const { Header, Sider, Content } = Layout;
@@ -153,10 +154,12 @@ const AppLayout = () => {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
-        <div className="user-greeting" style={{ color: 'white', padding: '16px', textAlign: 'center' }}>
-          <Title level={3} style={{ margin: 0 }}>
+        <div className="user-greeting" style={{ display: 'flex', color: 'white', padding: '10px', textAlign: 'center' }}>
+          <img src={logo} alt="#" style={{ width: 60 }}/>
+          <Title level={3} style={{ margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center' }}>
             <Link to="/" style={{ color: 'white' }}>
-              WebFinance<span style={{ fontSize: 13, verticalAlign: 'text-top' }}>®</span>
+              Web
+              FinanceLab
             </Link>
           </Title>
         </div>

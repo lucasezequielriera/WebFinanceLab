@@ -3,7 +3,7 @@
   "name": "Web Finance",
   "icons": [
     {
-      "src": "../src/assets/logo.png",
+      "src": "./logo.ico",
       "type": "image/x-icon",
       "sizes": "64x64 32x32 24x24 16x16"
     }
