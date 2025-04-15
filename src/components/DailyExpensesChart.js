@@ -118,7 +118,8 @@ const DailyExpensesChart = ({ userId }) => {
 
       {isMobile ? (
         <div ref={scrollRef} style={{ overflowX: 'auto', width: '100%', paddingBottom: 12 }}>
-          <LineChart width={chartWidth} height={300} data={data}>
+          <LineChart width={chartWidth} height={300} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }} // ⬅️ más espacio arriba
+          >
             <CartesianGrid strokeDasharray="3 3" />
             {expenseLimits.map((limit, index) => {
               const amount = Number(Number(limit.amount).toFixed(2));
@@ -130,14 +131,15 @@ const DailyExpensesChart = ({ userId }) => {
                     value: `${limit.label || `Limit ${index + 1}`} $${amount}`,
                     position: 'top',
                     fill: limit.color || 'red',
-                    fontSize: 12
+                    fontSize: 12,
                   }}
                   stroke={limit.color || 'red'}
                   strokeDasharray="3 3"
+                  
                 />
               );
             })}
-            <XAxis dataKey="day" />
+            <XAxis dataKey="day" style={{ fontSize: 12, fontWeight: 600 }} />
             <YAxis
               style={{ fontSize: 10, fontWeight: 600 }}
               tickFormatter={formatShortNumber}
@@ -154,7 +156,8 @@ const DailyExpensesChart = ({ userId }) => {
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
+          <LineChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }} // ⬅️ más espacio arriba
+          >
             <CartesianGrid strokeDasharray="3 3" />
             {expenseLimits.map((limit, index) => {
               const amount = Number(Number(limit.amount).toFixed(2));
@@ -166,14 +169,14 @@ const DailyExpensesChart = ({ userId }) => {
                     value: `${limit.label || `Limit ${index + 1}`} $${amount}`,
                     position: 'top',
                     fill: limit.color || 'red',
-                    fontSize: 12
+                    fontSize: 12,
                   }}
                   stroke={limit.color || 'red'}
                   strokeDasharray="3 3"
                 />
               );
             })}
-            <XAxis dataKey="day" />
+            <XAxis dataKey="day" style={{ fontSize: 12, fontWeight: 600 }} />
             <YAxis
               style={{ fontSize: 12, fontWeight: 600 }}
               tickFormatter={formatShortNumber}
