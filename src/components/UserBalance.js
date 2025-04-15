@@ -74,7 +74,7 @@ const UserBalance = ({ userInfo, monthlyExpenses }) => {
       )}
       {userInfo?.displayBalance === "Both" && (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span style={{ color: '#504f4f', marginRight: 12 }}>
+          <span style={{ color: '#504f4f' }}>
             ${totals.pesos.toFixed(2)} <span style={{ fontSize: 10 }}>ARS</span>
           </span>
           <span style={{ color: '#504f4f' }}>
