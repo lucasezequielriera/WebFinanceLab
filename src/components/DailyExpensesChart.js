@@ -66,8 +66,8 @@ const DailyExpensesChart = ({ userId }) => {
       const daysInMonth = dayjs().daysInMonth();
       const chartData = Array.from({ length: daysInMonth }, (_, i) => ({
         day: i + 1,
-        ars: groupedByDay[i + 1]?.ars || 0,
-        usd: groupedByDay[i + 1]?.usd || 0
+        ars: Number((groupedByDay[i + 1]?.ars || 0).toFixed(2)),
+        usd: Number((groupedByDay[i + 1]?.usd || 0).toFixed(2))
       }));
 
       setData(chartData);
@@ -83,7 +83,7 @@ const DailyExpensesChart = ({ userId }) => {
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
           const userData = userSnap.data();
-          const limits = userData.expenseLimits || []; // ✅ si no hay nada, default vacío
+          const limits = userData.expenseLimits || [];
           setExpenseLimits(limits);
         }
       } catch (error) {
@@ -104,61 +104,86 @@ const DailyExpensesChart = ({ userId }) => {
 
   const chartWidth = Math.max(600, data.length * 60);
 
+  const formatShortNumber = (num) => {
+    if (num >= 1_000_000) return `$${(num / 1_000_000).toFixed(1)}M`;
+    if (num >= 1_000) return `$${(num / 1_000).toFixed(1)}k`;
+    return `$${Number(num).toFixed(2)}`;
+  };  
+
   return (
     <div style={{ position: 'relative' }}>
-      <h3 style={{ marginBottom: 16, marginTop: 8, textAlign: 'center', fontWeight: 600 }}>Daily Expenses ({currentMonth})</h3>
+      <h3 style={{ marginBottom: 16, marginTop: 8, textAlign: 'center', fontWeight: 600 }}>
+        Daily Expenses ({currentMonth})
+      </h3>
 
       {isMobile ? (
         <div ref={scrollRef} style={{ overflowX: 'auto', width: '100%', paddingBottom: 12 }}>
           <LineChart width={chartWidth} height={300} data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            {expenseLimits.map((limit, index) => (
-              <ReferenceLine
-                key={index}
-                y={limit.amount}
-                label={{ value: `${limit.label} $${limit.amount}` || `Limit ${index + 1}`, position: 'top', fill: limit.color || 'red', fontSize: 12 }}
-                stroke={limit.color || 'red'}
-                strokeDasharray="3 3"
-              />
-            ))}
+            {expenseLimits.map((limit, index) => {
+              const amount = Number(Number(limit.amount).toFixed(2));
+              return (
+                <ReferenceLine
+                  key={index}
+                  y={amount}
+                  label={{
+                    value: `${limit.label || `Limit ${index + 1}`} $${amount}`,
+                    position: 'top',
+                    fill: limit.color || 'red',
+                    fontSize: 12
+                  }}
+                  stroke={limit.color || 'red'}
+                  strokeDasharray="3 3"
+                />
+              );
+            })}
             <XAxis dataKey="day" />
             <YAxis
-              tickFormatter={(value) => `$${value}`}
+              style={{ fontSize: 10, fontWeight: 600 }}
+              tickFormatter={formatShortNumber}
               domain={
                 expenseLimits.length > 0
-                  ? [0, Math.max(...expenseLimits.map(limit => limit.amount))]
+                  ? [0, Math.max(...expenseLimits.map(limit => Number(Number(limit.amount).toFixed(2))))]
                   : ['auto', 'auto']
               }
             />
-            <Tooltip formatter={(value, dataKey) => [`$${Number(value).toLocaleString('es-AR')}`, dataKey] } />
+            <Tooltip formatter={(value, dataKey) => [formatShortNumber(value), dataKey]} />
             <Line type="monotone" dataKey="ars" stroke="#1890ff" name="Expenses ($)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
             <Line type="monotone" dataKey="usd" name="Expenses (USD)" stroke="#4CAF50" strokeWidth={2} />
           </LineChart>
         </div>
-        
       ) : (
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            {expenseLimits.map((limit, index) => (
-              <ReferenceLine
-                key={index}
-                y={limit.amount}
-                label={{ value: `${limit.label} $${limit.amount}` || `Limit ${index + 1}`, position: 'top', fill: limit.color || 'red', fontSize: 12 }}
-                stroke={limit.color || 'red'}
-                strokeDasharray="3 3"
-              />
-            ))}
+            {expenseLimits.map((limit, index) => {
+              const amount = Number(Number(limit.amount).toFixed(2));
+              return (
+                <ReferenceLine
+                  key={index}
+                  y={amount}
+                  label={{
+                    value: `${limit.label || `Limit ${index + 1}`} $${amount}`,
+                    position: 'top',
+                    fill: limit.color || 'red',
+                    fontSize: 12
+                  }}
+                  stroke={limit.color || 'red'}
+                  strokeDasharray="3 3"
+                />
+              );
+            })}
             <XAxis dataKey="day" />
             <YAxis
-              tickFormatter={(value) => `$${value}`}
+              style={{ fontSize: 12, fontWeight: 600 }}
+              tickFormatter={formatShortNumber}
               domain={
                 expenseLimits.length > 0
-                  ? [0, Math.max(...expenseLimits.map(limit => limit.amount))]
+                  ? [0, Math.max(...expenseLimits.map(limit => Number(Number(limit.amount).toFixed(2))))]
                   : ['auto', 'auto']
               }
             />
-            <Tooltip formatter={(value, dataKey) => [`$${Number(value).toLocaleString('es-AR')}`, dataKey] } />
+            <Tooltip formatter={(value, dataKey) => [formatShortNumber(value), dataKey]} />
             <Line type="monotone" dataKey="ars" stroke="#1890ff" name="Expenses ($)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
             <Line type="monotone" dataKey="usd" name="Expenses (USD)" stroke="#4CAF50" strokeWidth={2} />
           </LineChart>
