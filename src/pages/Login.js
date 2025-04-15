@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { Form, Input, Button, Typography, Card, notification } from 'antd';
+import { Form, Input, Button, Typography, Card, notification, Image } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import '../styles/Auth.css';
 
@@ -35,7 +35,7 @@ export default function Login() {
     <div className="auth-container">
       <Card className="auth-card">
         <div className="auth-avatar">
-          <UserOutlined style={{ fontSize: '48px', color: '#1890ff' }} />
+          <img src={require('../assets/transparent-logo.png')} alt="Web Finance" style={{ width: 100 }} />
         </div>
         <Title level={3} className="auth-title">Log In</Title>
         <Form onFinish={handleSubmit} className="auth-form">

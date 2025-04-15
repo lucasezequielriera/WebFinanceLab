@@ -24,6 +24,7 @@ export default function FinancialGoals() {
     const today = dayjs();
     const endOfMonth = dayjs().endOf('month');
     const daysRemaining = endOfMonth.diff(today, 'day') + 1; // ✅ incluye hoy
+    const daysInMonth = dayjs().daysInMonth(); // ✅ dias del mes actual
 
     const { Title, Text } = Typography;
 
@@ -59,12 +60,16 @@ export default function FinancialGoals() {
     }, [manualMode, manualAmount, userData, daysRemaining]);
 
     useEffect(() => {
+        if (!userData) return;
+    
+        const daysInMonth = dayjs().daysInMonth();
+    
         if (manualMode) {
             setCalculatedDaily(manualAmount && daysRemaining ? manualAmount / daysRemaining : null);
         } else if (userData?.jobs?.length > 0) {
             const filteredJobs = userData.jobs.filter(job => job.currency === autoCurrency);
             const total = filteredJobs.reduce((acc, job) => acc + parseFloat(job.salary || 0), 0);
-            setCalculatedDaily(total / daysRemaining);
+            setCalculatedDaily(total / daysInMonth); // ✅ gasto por día del mes completo
         }
     }, [manualMode, manualAmount, userData, autoCurrency]);
 
@@ -188,7 +193,7 @@ export default function FinancialGoals() {
 
                     <Text>
                         You can spend approximately <b>${calculatedDaily?.toFixed(2)}</b> per day
-                        {manualMode ? ' for the rest of the month.' : ' this month.'} ({daysRemaining} days left)
+                        {manualMode ? ` for the rest of the month. (${daysRemaining} days left)` : ` this month. (${daysInMonth} days)`}
                     </Text>
                 </div>
                 <hr/>

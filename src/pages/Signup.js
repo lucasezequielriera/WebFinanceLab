@@ -47,7 +47,7 @@ export default function Signup() {
     <div className="auth-container">
       <Card className="auth-card">
         <div className="auth-avatar">
-          <UserOutlined style={{ fontSize: '48px', color: '#1890ff' }} />
+          <img src={require('../assets/transparent-logo.png')} alt="Web Finance" style={{ width: 100 }} />
         </div>
         <Title level={3} className="auth-title">Sign Up</Title>
         {error && <Alert message={error} type="error" showIcon />}
