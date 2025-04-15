@@ -176,7 +176,7 @@ const Expenses = () => {
           </Button>
         </div>
       </div>
-      <div style={{ marginBottom: 24 }}>
+      <div className="filter" style={{ marginBottom: 24 }}>
         <span style={{marginRight: 5 }}>Filter:</span> 
         <StyledDatePicker
           picker="month"
