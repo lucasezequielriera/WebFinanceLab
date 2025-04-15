@@ -63,6 +63,20 @@
   .auth-container :where(.css-dev-only-do-not-override-j9bb5n).ant-input-affix-wrapper {
     padding: 10px;
   }
+
+  .auth-card {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease-out forwards;
+    animation-delay: 0.2s;
+  }
+  
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }  
   
 /* Ajuste específico para dispositivos móviles */
 @media (max-width: 768px) {
