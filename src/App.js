@@ -156,7 +156,7 @@ const AppLayout = () => {
       <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
         <div className="user-greeting" style={{ display: 'flex', color: 'white', padding: '10px', textAlign: 'center' }}>
           <img src={logo} alt="#" style={{ width: 60 }}/>
-          <Title level={3} style={{ margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center' }}>
+          <Title level={3} style={{ display: 'grid', margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center' }}>
             <Link to="/" style={{ color: 'white' }}>
               Web
               FinanceLab
