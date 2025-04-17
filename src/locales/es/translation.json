@@ -63,6 +63,19 @@
     "userProfile.profile.button": "Guardar cambios",
     "userProfile.profile.currentIncomes": "Ingresos Actuales",
 
+    "userProfile.addNewExpense.title": "Agregar Nuevo Gasto",
+    "userProfile.addNewExpense.subtitle": "Registre rápidamente sus gastos y mantenga sus finanzas al día.",
+    "userProfile.addNewExpense.amount": "Cantidad",
+    "userProfile.addNewExpense.currency": "Moneda",
+    "userProfile.addNewExpense.category": "Categoría",
+    "userProfile.addNewExpense.date": "Día del gasto",
+    "userProfile.addNewExpense.defaultDataInputDate": "Hoy",
+    "userProfile.addNewExpense.description": "Descripción",
+    "userProfile.addNewExpense.paymentMethod": "Método de Pago",
+    "userProfile.addNewExpense.bank": "Banco",
+    "userProfile.addNewExpense.cardType": "Tipo de Tarjeta",
+    "userProfile.addNewExpense.addExpenseButton": "Agregar gasto",
+
     "userProfile.comingSoon": "Próximamente"
   }
   

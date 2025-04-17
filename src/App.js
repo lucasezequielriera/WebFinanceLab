@@ -206,7 +206,7 @@ const AppLayout = () => {
             <Route path="*" element={<Navigate to="/dashboard" />} /> {/* Catch-all route */}
           </Routes>
         </Content>
-        <Modal title="Add Expense" open={isModalVisible} onCancel={handleCancel} footer={null}>
+        <Modal open={isModalVisible} onCancel={handleCancel} footer={null}>
           <AddExpense onExpenseAdded={handleExpenseAdded} />
         </Modal>
         {currentUser ? (

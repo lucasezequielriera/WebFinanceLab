@@ -63,6 +63,19 @@
     "userProfile.profile.button": "Save changes",
     "userProfile.profile.currentIncomes": "Current Incomes",
 
+    "userProfile.addNewExpense.title": "Add New Expense",
+    "userProfile.addNewExpense.subtitle": "Quickly log your expense and keep your finances on track.",
+    "userProfile.addNewExpense.amount": "Amount",
+    "userProfile.addNewExpense.currency": "Currency",
+    "userProfile.addNewExpense.category": "Category",
+    "userProfile.addNewExpense.date": "Expense date",
+    "userProfile.addNewExpense.defaultDataInputDate": "Today",
+    "userProfile.addNewExpense.description": "Description",
+    "userProfile.addNewExpense.paymentMethod": "Payment Method",
+    "userProfile.addNewExpense.bank": "Bank",
+    "userProfile.addNewExpense.cardType": "Card Type",
+    "userProfile.addNewExpense.addExpenseButton": "Add expense",
+
     "userProfile.comingSoon": "Coming Soon"
 
   }
