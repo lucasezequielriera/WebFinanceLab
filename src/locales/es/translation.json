@@ -30,6 +30,20 @@
     "userProfile.expenses.debitCardTitle": "Tarjeta de Débito",
     "userProfile.expenses.cashTitle": "Efectivo",
 
+    "userProfile.financialGoals.title": "Mis Objetivos Financieros",
+    "userProfile.financialGoals.subtitle": "Aquí puedes fijar tus objetivos financieros y configurarlo todo. Nosotros te ayudamos a que puedas mantener tus finanzas y tener la capacidad de ahorro que tanto buscas.",
+    "userProfile.financialGoals.dailyLimitSelector.title": "¿Cuántos límites quieres poner?",
+    "userProfile.financialGoals.dailyLimitSelector.tooltip": "Lo verás en el gráfico de Gastos Diarios en el Dashboard.",
+    "userProfile.financialGoals.dailyLimitSelector.button": "Guardar",
+    "userProfile.financialGoals.dailyLimitSelector.labelInput": "Nombre del límite",
+    "userProfile.financialGoals.dailyLimitSelector.amountInput": "Cantidad del límite",
+    "userProfile.financialGoals.suggestedLimit.title": "Límite de Gasto Diario Sugerido",
+    "userProfile.financialGoals.suggestedLimit.inputText": "Moneda en la que basar tus ingresos:",
+    "userProfile.financialGoals.suggestedLimit.suggestedResultText": "Puedes gastar aproximadamente por día durante el resto del mes:",
+    "userProfile.financialGoals.suggestedLimit.automaticModeTooltip": "Sus ingresos - los gastos habituales, convertidos en la moneda seleccionada, divididos por el número de días restantes.",
+    "userProfile.financialGoals.suggestedLimit.manualModeTooltip": "Puede calcular cuánto dinero puede gastar introduciendo su dinero disponible. Se dividirá por el número de días que quedan en el mes.",
+    "userProfile.financialGoals.suggestedLimit.helpText": "* Esta sugerencia es meramente informativa.",
+
     "userProfile.comingSoon": "Próximamente"
   }
   
