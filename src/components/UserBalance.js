@@ -64,7 +64,7 @@ const UserBalance = ({ userInfo, monthlyExpenses }) => {
     <div className="total" style={{ fontSize: 25, fontWeight: 600 }}>
       {userInfo?.displayBalance === "ARS" && (
         <span style={{ color: '#504f4f' }}>
-          ${totals.pesos.toFixed(2)}
+          ${totals.pesos.toFixed(2)} <span style={{ fontSize: 10 }}>ARS</span>
         </span>
       )}
       {userInfo?.displayBalance === "USD" && (
