@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Select, notification, Spin, Typography, Row, Col, Card, Divider, DatePicker } from 'antd';
-import { DollarOutlined, FileTextOutlined, CreditCardOutlined, BankOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Select, notification, Spin, Typography, Row, Col, Card, DatePicker } from 'antd';
+import { DollarOutlined, FileTextOutlined, BankOutlined } from '@ant-design/icons';
 import { db } from '../firebase';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,7 +9,7 @@ import dayjs from 'dayjs';
 import '../styles/AddExpense.css';
 
 const { Option } = Select;
-const { Title, Paragraph, Text } = Typography;
+const { Title, Paragraph   } = Typography;
 
 const AddExpense = ({ onExpenseAdded }) => {
   const { currentUser } = useAuth();
@@ -66,7 +66,7 @@ const AddExpense = ({ onExpenseAdded }) => {
 
   return (
     <Spin spinning={loading}>
-      <Card style={{ borderRadius: 12 }}>
+      <Card style={{ borderRadius: 12 }} className='add-expense-modal'>
         <Title level={3} style={{ marginBottom: 8, textAlign: 'center' }}>{t('userProfile.addNewExpense.title')}</Title>
         <Paragraph type="secondary" style={{ textAlign: 'center', marginBottom: 24 }}>
         {t('userProfile.addNewExpense.subtitle')}
@@ -75,12 +75,13 @@ const AddExpense = ({ onExpenseAdded }) => {
         <Form layout="vertical" form={form} onFinish={handleSubmit}>
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={12}>
-              <Form.Item name="amount" label={t('userProfile.addNewExpense.amount')} rules={[{ required: true }]}>
+              <Form.Item name="amount"
+                label={t('userProfile.addNewExpense.amount')} rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.amountRequired') }]}>
                 <Input type="number" prefix={<DollarOutlined />} placeholder="125.50" />
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="currency" label={t('userProfile.addNewExpense.currency')} initialValue="ARS" rules={[{ required: true }]}>
+              <Form.Item name="currency" label={t('userProfile.addNewExpense.currency')} initialValue="ARS" rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.currencyRequired') }]}>
                 <Select>
                   <Option value="ARS">ARS</Option>
                   <Option value="USD">USD</Option>
@@ -91,7 +92,7 @@ const AddExpense = ({ onExpenseAdded }) => {
 
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={12}>
-              <Form.Item name="category" label={t('userProfile.addNewExpense.category')} rules={[{ required: true }]}>
+              <Form.Item name="category" label={t('userProfile.addNewExpense.category')} rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.categoryRequired') }]}>
                 <Select placeholder="Select category">
                   <Option value="Apartment">Apartment</Option>
                   <Option value="Food">Food</Option>
@@ -115,7 +116,7 @@ const AddExpense = ({ onExpenseAdded }) => {
                 label={t('userProfile.addNewExpense.date')} 
                 placeholder="Hoy"
                 initialValue={dayjs()}
-                rules={[{ required: true, message: 'Please select the date' }]}>
+                rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.dateRequired') }]}>
                 <DatePicker style={{ width: '100%' }} format={(value) =>
                   dayjs().isSame(value, 'day') ? t('userProfile.addNewExpense.defaultDataInputDate') : value.format('DD/MM/YYYY')
                 } />
@@ -123,11 +124,11 @@ const AddExpense = ({ onExpenseAdded }) => {
             </Col>
           </Row>
 
-          <Form.Item name="description" label={t('userProfile.addNewExpense.description')} rules={[{ required: true }]}>
+          <Form.Item name="description" label={t('userProfile.addNewExpense.description')} rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.descriptionRequired') }]}>
             <Input prefix={<FileTextOutlined />} placeholder="Uber to work" />
           </Form.Item>
 
-          <Form.Item name="paymentMethod" label={t('userProfile.addNewExpense.paymentMethod')} rules={[{ required: true }]}>
+          <Form.Item name="paymentMethod" label={t('userProfile.addNewExpense.paymentMethod')} rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.paymentMethodRequired') }]}>
             <Select onChange={setPaymentMethod} placeholder="Select payment method">
               <Option value="Cash">Cash</Option>
               <Option value="Credit Card">Credit Card</Option>
@@ -139,12 +140,12 @@ const AddExpense = ({ onExpenseAdded }) => {
             <>
               <Row gutter={[16, 16]}>
                 <Col xs={24} sm={12}>
-                  <Form.Item name="bank" label={t('userProfile.addNewExpense.bank')} rules={[{ required: true }]}>
+                  <Form.Item name="bank" label={t('userProfile.addNewExpense.bank')} rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.bankRequired') }]}>
                     <Input prefix={<BankOutlined />} placeholder="BBVA, Santander" />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>
-                  <Form.Item name="cardType" label={t('userProfile.addNewExpense.cardType')} rules={[{ required: true }]}>
+                  <Form.Item name="cardType" label={t('userProfile.addNewExpense.cardType')} rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.cardTypeRequired') }]}>
                     <Select placeholder="Visa, MasterCard">
                       <Option value="Visa">Visa</Option>
                       <Option value="MasterCard">MasterCard</Option>

@@ -4,6 +4,15 @@
     padding: 20px;
     background-color: #fff;
   }
+
+  .add-expense-modal .ant-form-item-label {
+    padding-bottom: 2px !important; /* o 0 si querés eliminarlo completamente */
+    font-weight: 600;
+  }
+
+  .add-expense-modal .ant-form-item-label .ant-form-item-required::before {
+    display: none !important;
+  }
   
   .add-expense-title {
     text-align: center;

@@ -75,6 +75,15 @@
     "userProfile.addNewExpense.bank": "Bank",
     "userProfile.addNewExpense.cardType": "Card Type",
     "userProfile.addNewExpense.addExpenseButton": "Add expense",
+    "userProfile.addNewExpense.errorMessages": {
+        "amountRequired": "Please, input the amount.",
+        "currencyRequired": "Please, select the currency.",
+        "categoryRequired": "Please, select a category.",
+        "descriptionRequired": "Please, input a description.",
+        "paymentMethodRequired": "Please, select the payment method.",
+        "bankRequired": "Please, input the bank.",
+        "cardTypeRequired": "Please, select the card type."
+    },
 
     "userProfile.comingSoon": "Coming Soon"
 

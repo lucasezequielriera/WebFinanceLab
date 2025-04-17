@@ -75,6 +75,15 @@
     "userProfile.addNewExpense.bank": "Banco",
     "userProfile.addNewExpense.cardType": "Tipo de Tarjeta",
     "userProfile.addNewExpense.addExpenseButton": "Agregar gasto",
+    "userProfile.addNewExpense.errorMessages": {
+        "amountRequired": "Por favor, ingresa un monto.",
+        "currencyRequired": "Por favor, selecciona una moneda.",
+        "categoryRequired": "Por favor, selecciona una categoría.",
+        "descriptionRequired": "Por favor, ingresa una descripción.",
+        "paymentMethodRequired": "Por favor, selecciona un método de pago.",
+        "bankRequired": "Por favor, ingresa un banco.",
+        "cardTypeRequired": "Por favor, selecciona el tipo de tarjeta."
+    },
 
     "userProfile.comingSoon": "Próximamente"
   }
