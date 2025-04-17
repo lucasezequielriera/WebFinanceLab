@@ -28,7 +28,7 @@ export default function UserProfile() {
         phone: "",
         photoURL: "",
         jobs: [],
-        displayBalance: "ARS", // valor por defecto
+        displayBalance: "", // valor por defecto
     });
     const [isDirty, setIsDirty] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -91,9 +91,11 @@ export default function UserProfile() {
     // ✅ Y en un lugar donde tengas ambos loading controlados:
     useEffect(() => {
         if (userData && !imageLoading) {
-            setLoading(false); // solo desactiva cuando ambos están listos
+            setTimeout(() => {
+                setLoading(false); // solo desactiva cuando ambos están listos
+              }, 500);
         }
-    }, [userData, imageLoading]);      
+    }, [userData, imageLoading, initialUserData]);      
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -453,11 +455,11 @@ export default function UserProfile() {
                             />
                             <label className="label-small">Gender</label>
                             <Select className="margin-bottom-small"
-                                defaultValue="Select gender"
+                                placeholder="Select gender"
                                 style={{
                                     width: '100%',
                                 }}
-                                value={userData.gender}
+                                value={userData.gender || undefined}
                                 onChange={handleGenderChange}
                                 options={[
                                     {

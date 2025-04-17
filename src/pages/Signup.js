@@ -30,10 +30,12 @@ export default function Signup() {
         firstName: firstName,
         lastName: lastName,
         email: email,
+        language: 'en',
         age: '',
         city: '',
         gender: '',
-        jobs: []
+        jobs: [],
+        displayBalance: 'USD'
       });
       navigate('/dashboard');
     } catch (err) {
