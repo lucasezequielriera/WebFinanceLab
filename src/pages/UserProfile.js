@@ -6,7 +6,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore"; // Importa Firestor
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Importa Storage
 // import { useNavigate } from "react-router-dom";
 import { PlusOutlined } from '@ant-design/icons';
-import { notification, Button, Input, Select, Table, Modal, Form, Spin, message } from 'antd';
+import { notification, Button, Input, Select, Table, Modal, Form, Spin, message, Row, Col } from 'antd';
 import ImageCropper from '../components/ImageCropper';
 import "../index.css"
 import "../styles/UserProfile.css"; // Importa el archivo CSS
@@ -29,6 +29,7 @@ export default function UserProfile() {
         photoURL: "",
         jobs: [],
         displayBalance: "", // valor por defecto
+        language: ""
     });
     const [isDirty, setIsDirty] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -122,6 +123,7 @@ export default function UserProfile() {
                 phone: userData.phone,
                 photoURL: photoURL,
                 jobs: userData.jobs,
+                language: userData.language
             });
             setInitialUserData({
                 ...userData,
@@ -453,48 +455,72 @@ export default function UserProfile() {
                                 onChange={handleChange}
                                 placeholder="City"
                             />
-                            <label className="label-small">Gender</label>
-                            <Select className="margin-bottom-small"
-                                placeholder="Select gender"
-                                style={{
-                                    width: '100%',
-                                }}
-                                value={userData.gender || undefined}
-                                onChange={handleGenderChange}
-                                options={[
-                                    {
-                                    value: 'male',
-                                    label: 'Male',
-                                    },
-                                    {
-                                    value: 'female',
-                                    label: 'Female',
-                                    },
-                                    {
-                                    value: 'other',
-                                    label: 'Other',
-                                    }
-                                ]}
-                            />
-                            <label className="label-small">Phone</label>
-                            <Input type="number"
-                                className="margin-bottom-small"
-                                name="phone"
-                                value={userData.phone}
-                                onChange={handleChange}
-                                placeholder="Phone"
-                            />
-                            <label className="label-small">Balance Display</label>
-                            <Select
-                                style={{ width: '100%' }}
-                                value={userData.displayBalance}
-                                onChange={(value) => setUserData(prev => ({ ...prev, displayBalance: value }))}
-                                options={[
-                                    { value: 'ARS', label: 'Pesos (ARS)' },
-                                    { value: 'USD', label: 'Dollars (USD)' },
-                                    { value: 'Both', label: 'Both' },
-                                ]}
-                            />
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <label className="label-small">Phone</label>
+                                    <Input type="number"
+                                        className="margin-bottom-small"
+                                        style={{ marginTop: 3 }}
+                                        name="phone"
+                                        value={userData.phone}
+                                        onChange={handleChange}
+                                        placeholder="Phone"
+                                    />
+                                </Col>
+                                <Col span={12}>
+                                    <label className="label-small">Gender</label>
+                                    <Select className="margin-bottom-small"
+                                        placeholder="Select gender"
+                                        style={{
+                                            width: '100%',
+                                            marginTop: 3
+                                        }}
+                                        value={userData.gender || undefined}
+                                        onChange={handleGenderChange}
+                                        options={[
+                                            {
+                                            value: 'male',
+                                            label: 'Male',
+                                            },
+                                            {
+                                            value: 'female',
+                                            label: 'Female',
+                                            },
+                                            {
+                                            value: 'other',
+                                            label: 'Other',
+                                            }
+                                        ]}
+                                    />
+                                </Col>
+                            </Row>
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <label className="label-small">Balance Display</label>
+                                    <Select
+                                        style={{ width: '100%', marginTop: 3 }}
+                                        value={userData.displayBalance}
+                                        onChange={(value) => setUserData(prev => ({ ...prev, displayBalance: value }))}
+                                        options={[
+                                            { value: 'ARS', label: 'Pesos (ARS)' },
+                                            { value: 'USD', label: 'Dollars (USD)' },
+                                            { value: 'Both', label: 'Both' },
+                                        ]}
+                                    />
+                                </Col>
+                                <Col span={12}>
+                                    <label className="label-small">Language</label>
+                                    <Select
+                                        style={{ width: '100%', marginTop: 3 }}
+                                        value={userData.language}
+                                        onChange={(value) => setUserData(prev => ({ ...prev, language: value }))}
+                                        options={[
+                                            { value: 'en', label: 'English' },
+                                            { value: 'es', label: 'Spanish' }
+                                        ]}
+                                    />
+                                </Col>
+                            </Row>
                         </div>
                     </div>
                     <div className="display-flex margin-top-large center">
