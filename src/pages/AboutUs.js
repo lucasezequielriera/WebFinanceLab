@@ -5,6 +5,7 @@ import { doc, getDoc } from "firebase/firestore"; // Importa Firestore
 import { Spin } from 'antd';
 import { Button } from 'antd';
 import { WhatsAppOutlined } from '@ant-design/icons';
+import { useTranslation } from "react-i18next";
 import "../index.css"
 import "../styles/UserProfile.css"; // Importa el archivo CSS
 
@@ -12,6 +13,8 @@ export default function UserProfile() {
     const { currentUser } = useAuth();
     const [userData, setUserData] = useState()
     const [loading, setLoading] = useState(true); // Estado de carga
+
+    const { t } = useTranslation();
 
     useEffect(() => {
         async function fetchUserData() {
@@ -29,7 +32,7 @@ export default function UserProfile() {
     }, [currentUser]);
 
     const WhatsAppButton = () => {
-        const whatsappURL = 'https://wa.me/+34627043397?text=¡Hola! Quiero dejar una sugerencia para Web Finance.';
+        const whatsappURL = `https://wa.me/+34627043397?text=${t('userProfile.aboutUs.whatsappMessage')}`;
       
         return (
           <Button
@@ -37,7 +40,7 @@ export default function UserProfile() {
             icon={<WhatsAppOutlined />}
             onClick={() => window.open(whatsappURL, '_blank')}
           >
-            Send by Whatsapp
+            {t('userProfile.aboutUs.whatsappButton')}
           </Button>
         );
     };
@@ -45,12 +48,8 @@ export default function UserProfile() {
     return (
         <Spin spinning={loading}>
             <div className="user-profile">
-                <h2 className="title">About Us</h2>
-                <p>At WebFinanceLab, we believe that personal finance should not be a mystery or a burden. We were born with a clear mission: to help you take control of your money simply, visually and from anywhere in the world.</p>
-                <p>We are a team passionate about technology, design and finance. We created an intuitive, modern and accessible platform, designed for real people who want to organize their income, control their expenses and achieve their financial goals without complications.</p>
-                <p>Every feature of Web Finance was designed to make your life easier: from recording your daily expenses with a single click, to visualizing your financial health in clear and motivating graphs. We want to make making decisions about your money as easy as using your favorite app.</p>
-                <p>This is just the beginning. We keep growing, learning and improving every day, driven by the community that trusts us.</p>
-                <p>WebFinanceLab: Your money, under control.</p>
+                <h2 className="title">{t('userProfile.aboutUs.title')}</h2>
+                <p style={{ whiteSpace: 'pre-line' }}>{t('userProfile.aboutUs.text')}</p>
                 <WhatsAppButton />
             </div>
         </Spin>

@@ -9,6 +9,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { notification, Button, Input, Select, Table, Modal, Form, Spin, message, Row, Col } from 'antd';
 import ImageCropper from '../components/ImageCropper';
 import i18n from '../i18n'; // o './i18n' según la ruta correcta a tu archivo i18n.js
+import { useTranslation } from "react-i18next";
 import "../index.css"
 import "../styles/UserProfile.css"; // Importa el archivo CSS
 
@@ -51,6 +52,8 @@ export default function UserProfile() {
     const [imageToCrop, setImageToCrop] = useState(null);
     const [croppedFile, setCroppedFile] = useState(null);
     const [cropModalVisible, setCropModalVisible] = useState(false);
+
+    const { t } = useTranslation();
 
     useEffect(() => {
         let isMounted = true;
@@ -392,7 +395,7 @@ export default function UserProfile() {
     return (
         <Spin spinning={loading}>
             <div className="user-profile">
-                <h2 className="title">User Profile</h2>
+                <h2 className="title">{t('userProfile.profile.title')}</h2>
                 {error && <div>{error}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="display-flex center margin-bottom-medium margin-top-large">
@@ -424,12 +427,12 @@ export default function UserProfile() {
                         onClick={() => setPasswordModalVisible(true)}
                         style={{ padding: 0, color: '#1890ff', fontWeight: 500 }}
                         >
-                        Change Password
+                        {t('userProfile.profile.changePassword')}
                     </Button>
                     </div>
                     <div className="display-flex center">
                         <div className="display-flex w-200" style={{ flexFlow: "column" }}>
-                            <label className="label-small">First Name</label>
+                            <label className="label-small">{t('userProfile.profile.firstName')}</label>
                             <Input type="text" className="margin-bottom-small"
                                 name="firstName"
                                 value={userData.firstName}
@@ -437,7 +440,7 @@ export default function UserProfile() {
                                 placeholder="First Name"
                                 required
                             />
-                            <label className="label-small">Last Name</label>
+                            <label className="label-small">{t('userProfile.profile.lastName')}</label>
                             <Input type="text" className="margin-bottom-small"
                                 name="lastName"
                                 value={userData.lastName}
@@ -445,14 +448,14 @@ export default function UserProfile() {
                                 placeholder="Last Name"
                                 required
                             />
-                            <label className="label-small">Age</label>
+                            <label className="label-small">{t('userProfile.profile.age')}</label>
                             <Input type="number" className="margin-bottom-small"
                                 name="age"
                                 value={userData.age}
                                 onChange={handleChange}
                                 placeholder="Age"
                             />
-                            <label className="label-small">City</label>
+                            <label className="label-small">{t('userProfile.profile.city')}</label>
                             <Input type="text" className="margin-bottom-small"
                                 name="city"
                                 value={userData.city}
@@ -461,7 +464,7 @@ export default function UserProfile() {
                             />
                             <Row gutter={16}>
                                 <Col span={12}>
-                                    <label className="label-small">Phone</label>
+                                    <label className="label-small">{t('userProfile.profile.phone')}</label>
                                     <Input type="number"
                                         className="margin-bottom-small"
                                         style={{ marginTop: 3 }}
@@ -472,7 +475,7 @@ export default function UserProfile() {
                                     />
                                 </Col>
                                 <Col span={12}>
-                                    <label className="label-small">Gender</label>
+                                    <label className="label-small">{t('userProfile.profile.gender')}</label>
                                     <Select className="margin-bottom-small"
                                         placeholder="Select gender"
                                         style={{
@@ -500,20 +503,20 @@ export default function UserProfile() {
                             </Row>
                             <Row gutter={16}>
                                 <Col span={12}>
-                                    <label className="label-small">Balance Display</label>
+                                    <label className="label-small">{t('userProfile.profile.balanceDisplay')}</label>
                                     <Select
                                         style={{ width: '100%', marginTop: 3 }}
                                         value={userData.displayBalance}
                                         onChange={(value) => setUserData(prev => ({ ...prev, displayBalance: value }))}
                                         options={[
-                                            { value: 'ARS', label: 'Pesos (ARS)' },
-                                            { value: 'USD', label: 'Dollars (USD)' },
+                                            { value: 'ARS', label: 'ARS' },
+                                            { value: 'USD', label: 'USD' },
                                             { value: 'Both', label: 'Both' },
                                         ]}
                                     />
                                 </Col>
                                 <Col span={12}>
-                                    <label className="label-small">Language</label>
+                                    <label className="label-small">{t('userProfile.profile.language')}</label>
                                     <Select
                                         style={{ width: '100%', marginTop: 3 }}
                                         value={userData.language}
@@ -528,11 +531,11 @@ export default function UserProfile() {
                         </div>
                     </div>
                     <div className="display-flex margin-top-large center">
-                        <Button disabled={!isDirty} type="primary" htmlType="submit">Save changes</Button>
+                        <Button disabled={!isDirty} type="primary" htmlType="submit">{t('userProfile.profile.button')}</Button>
                     </div>
                     <hr style={{ marginTop: 30, borderColor: '#fafafa8c' }}/>
                     <div className="display-flex center margin-top-large margin-bottom-large" style={{ alignItems: 'center' }}>
-                        <h1 className="margin-right-medium" style={{ fontWeight: 200, margin: 0, marginRight: 10 }}>Current Incomes</h1>
+                        <h1 className="margin-right-medium" style={{ fontWeight: 200, margin: 0, marginRight: 10 }}>{t('userProfile.profile.currentIncomes')}</h1>
                         <Button type="primary" size="medium" shape="circle" icon={<PlusOutlined />} onClick={showModal} />
                     </div>
                     <div className="display-flex center">

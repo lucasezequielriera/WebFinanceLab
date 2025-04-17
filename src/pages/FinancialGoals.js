@@ -8,6 +8,7 @@ import { collection, getDoc, getDocs, updateDoc, doc } from 'firebase/firestore'
 import { db } from '../firebase';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(isBetween);
 const { Option } = Select;
@@ -28,6 +29,8 @@ export default function FinancialGoals() {
     const endOfMonth = dayjs().endOf('month');
     const daysRemaining = endOfMonth.diff(today, 'day') + 1;
     const { Title, Text } = Typography;
+
+    const { t } = useTranslation();
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -136,14 +139,14 @@ export default function FinancialGoals() {
     return (
         <Spin spinning={loading}>
             <div className="user-profile">
-                <h2 className="title">Financial Goals</h2>
-                <p style={{ marginBottom: 30, marginRight: 10 }}>You can check your financial goals here and configure everything.</p>
+                <h2 className="title">{t('userProfile.financialGoals.title')}</h2>
+                <p style={{ marginBottom: 30, marginRight: 10 }}>{t('userProfile.financialGoals.subtitle')}</p>
                 <Form layout="vertical" onFinish={handleSave}>
                     <div style={{ display: 'flex', marginBottom: 0 }}>
                         <Form.Item label={
                             <span>
-                                How many limits do you want to set?&nbsp;&nbsp;
-                                <Tooltip title="You will see this on the Daily Expenses chart">
+                                {t('userProfile.financialGoals.dailyLimitSelector.title')}&nbsp;&nbsp;
+                                <Tooltip title={t('userProfile.financialGoals.dailyLimitSelector.tooltip')}>
                                     <QuestionCircleTwoTone />
                                 </Tooltip>
                             </span>
@@ -152,14 +155,14 @@ export default function FinancialGoals() {
                                 {[1, 2, 3, 4, 5].map(num => <Option key={num} value={num}>{num}</Option>)}
                             </Select>
                             <Button type="primary" className="margin-left-small" htmlType="submit" loading={loading}>
-                                Save
+                                {t('userProfile.financialGoals.dailyLimitSelector.button')}
                             </Button>
                         </Form.Item>
                     </div>
 
                     {limits.map((limit, index) => (
                         <Space key={index} direction="vertical" className="labels" style={{ marginBottom: 20, marginRight: 10 }}>
-                            <Form.Item label={`Limit ${index + 1} Label`}>
+                            <Form.Item label={`${t('userProfile.financialGoals.dailyLimitSelector.labelInput')} ${index + 1}`}>
                                 <Input
                                     value={limit.label}
                                     onChange={e => handleLimitChange(index, 'label', e.target.value)}
@@ -172,7 +175,7 @@ export default function FinancialGoals() {
                                     style={{ width: '20%', verticalAlign: 'bottom' }}
                                 />
                             </Form.Item>
-                            <Form.Item label={`Limit ${index + 1} Amount`}>
+                            <Form.Item label={`${t('userProfile.financialGoals.dailyLimitSelector.amountInput')} ${index + 1}`}>
                                 <InputNumber
                                     value={limit.amount}
                                     onChange={value => handleLimitChange(index, 'amount', value)}
@@ -188,7 +191,7 @@ export default function FinancialGoals() {
                 <hr />
                 <div style={{ marginTop: 30, marginBottom: 40 }}>
                     <Title level={4}>
-                        Suggested Daily Expense Limit
+                        {t('userProfile.financialGoals.suggestedLimit.title')}
                         <Switch
                             checkedChildren="Manual"
                             unCheckedChildren="Auto"
@@ -199,14 +202,14 @@ export default function FinancialGoals() {
                     </Title>
 
                     {!manualMode && (
-                        <Form.Item label="Currency to base your income on">
+                        <Form.Item label={t('userProfile.financialGoals.suggestedLimit.inputText')}>
                             <Select
                                 value={autoCurrency}
                                 onChange={setAutoCurrency}
                                 style={{ width: 150 }}
                             >
-                                <Option value="ARS">Pesos</Option>
-                                <Option value="USD">Dollars</Option>
+                                <Option value="ARS">ARS</Option>
+                                <Option value="USD">USD</Option>
                             </Select>
                         </Form.Item>
                     )}
@@ -224,15 +227,15 @@ export default function FinancialGoals() {
                     )}
 
                     <Text>
-                        You can spend approximately <b style={{ color: '#2cb212' }}>${calculatedDaily?.toFixed(2)}</b> per day
+                        {t('userProfile.financialGoals.suggestedLimit.suggestedResultText')} <b style={{ color: '#2cb212' }}>${calculatedDaily?.toFixed(2)}</b> ({daysRemaining} {t('userProfile.financialGoals.suggestedLimit.remainingDays')})*
                         {manualMode ?
-                            <> for the rest of the month. ({daysRemaining} days left)* <Tooltip title="You can calculate how much money you can spend by entering your available money. It will be divided by the number of days remaining in the month."><QuestionCircleTwoTone /></Tooltip></>
+                            <> <Tooltip title={t('userProfile.financialGoals.suggestedLimit.manualModeTooltip')}><QuestionCircleTwoTone /></Tooltip></>
                             :
-                            <> this month. ({daysRemaining} days left)* <Tooltip title="Your income minus current expenses, converted to the selected currency, divided by the number of days remaining."><QuestionCircleTwoTone /></Tooltip></>
+                            <> <Tooltip title={t('userProfile.financialGoals.suggestedLimit.automaticModeTooltip')}><QuestionCircleTwoTone /></Tooltip></>
                         }
                     </Text>
                 </div>
-                <p style={{ fontSize: 12, color: '#363636' }}>* This suggestion is for information only.</p>
+                <p style={{ fontSize: 12, color: '#363636' }}>{t('userProfile.financialGoals.suggestedLimit.helpText')}</p>
                 <hr />
             </div>
         </Spin>
