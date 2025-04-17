@@ -4,6 +4,7 @@ import { collection, query, onSnapshot, where, doc, getDoc, Timestamp } from 'fi
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Statistic, Progress } from 'antd';
 import { DollarOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 const RemainingDollarsCounter = () => {
   const { currentUser } = useAuth();
@@ -17,6 +18,8 @@ const RemainingDollarsCounter = () => {
     '50%': '#ffe58f',
     '100%': '#ffccc7',
   };
+
+    const { t } = useTranslation();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -35,7 +38,7 @@ const RemainingDollarsCounter = () => {
             }
           });
         }
-        console.log('Total Income (Dollars):', income);
+
         setTotalIncome(income);
       }
     });
@@ -58,7 +61,7 @@ const RemainingDollarsCounter = () => {
         console.log('Expense Document Data:', doc.data());
         expenses += Number(doc.data().amount);
       });
-      console.log('Total Expenses (Dollars) for Current Month:', expenses);
+
       setTotalExpenses(expenses);
       setLoading(false);
     });
@@ -78,12 +81,12 @@ const RemainingDollarsCounter = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', flexFlow: 'column' }}>
           <Statistic
-            title="Remaining in USD"
+            title={t('userProfile.remaining.usd')}
             value={remaining}
             precision={2}
             valueStyle={{ color: remaining < 50 ? '#cf1322' : '#3f8600' }}
             prefix={<DollarOutlined />}
-            suffix="USD"
+            suffix={<span style={{ fontSize: 12 }}>U$D</span>}
           />
           <span style={{ fontWeight: 600, fontSize: 13 }}>/ ${formatNumber(totalIncome)}</span>
         </div>

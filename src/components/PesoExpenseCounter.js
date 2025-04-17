@@ -4,11 +4,14 @@ import { DollarOutlined } from '@ant-design/icons';
 import { db } from '../firebase';
 import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const PesoExpenseCounter = () => {
   const { currentUser } = useAuth();
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -34,12 +37,12 @@ const PesoExpenseCounter = () => {
   return (
     <Card loading={loading}>
       <Statistic
-        title="Total Expenses in ARS"
+        title={t('userProfile.totalExpenses.ars')}
         value={total}
         precision={2}
         valueStyle={{ color: '#cf1322' }}
         prefix={<DollarOutlined />}
-        suffix="ARS"
+        suffix={<span style={{ fontSize: 12 }}>ARS</span>}
       />
     </Card>
   );

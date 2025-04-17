@@ -8,6 +8,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Importa 
 import { PlusOutlined } from '@ant-design/icons';
 import { notification, Button, Input, Select, Table, Modal, Form, Spin, message, Row, Col } from 'antd';
 import ImageCropper from '../components/ImageCropper';
+import i18n from '../i18n'; // o './i18n' según la ruta correcta a tu archivo i18n.js
 import "../index.css"
 import "../styles/UserProfile.css"; // Importa el archivo CSS
 
@@ -96,7 +97,7 @@ export default function UserProfile() {
                 setLoading(false); // solo desactiva cuando ambos están listos
               }, 500);
         }
-    }, [userData, imageLoading, initialUserData]);      
+    }, [userData, imageLoading, initialUserData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -133,6 +134,9 @@ export default function UserProfile() {
                 ...userData,
                 displayBalance: userData.displayBalance,
               });
+
+            i18n.changeLanguage(userData.language);
+
             setLoading(false);
             // navigate("/dashboard");
             openNotificationWithIcon('success', 'Profile Updated', 'Your profile has been successfully updated.');

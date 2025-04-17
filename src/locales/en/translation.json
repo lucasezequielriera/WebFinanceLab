@@ -1,0 +1,36 @@
+{
+    "userProfile.title": "Hi",
+    "userProfile.username": "User",
+    "userProfile.remaining.ars": "Remaining in ARS",
+    "userProfile.remaining.usd": "Remaining in USD",
+    "userProfile.totalExpenses.ars": "Total Expenses in ARS",
+    "userProfile.totalExpenses.usd": "Total Expenses in USD",
+    "userProfile.dailyExpenses.title": "Daily Expenses",
+    "userProfile.dailyExpenses.tooltip": "Expenses",
+
+    "userPrifle.navbar.signup": "Sign Up",
+    "userPrifle.navbar.login": "Login",
+    "userPrifle.navbar.dashboard": "Dashboard",
+    "userPrifle.navbar.expenses": "Expenses",
+    "userPrifle.navbar.financialGoals": "Financial Goals",
+    "userPrifle.navbar.aboutUs": "About Us",
+    "userPrifle.navbar.profile": "Profile",
+    "userPrifle.navbar.logout": "Logout",
+    "userProfile.navbar.addExpense": "Add Expense",
+    "userProfile.navbar.addTarget": "Add Target",
+    "userProfile.navbar.addStock": "Add Stock",
+
+    "userProfile.expenses.title": "My Expenses",
+    "userProfile.expenses.generalExpensesButton": "Monthly Expenses",
+    "userProfile.expenses.detailedExpensesButton": "Detailed Expenses",
+    "userProfile.expenses.filter": "Filter:",
+    "userProfile.expenses.creditCardsTitle": "Credit Cards",
+    "userProfile.expenses.creditCardTitle": "Credit Card",
+    "userProfile.expenses.debitCardsTitle": "Debit Cards",
+    "userProfile.expenses.debitCardTitle": "Debit Card",
+    "userProfile.expenses.cashTitle": "Cash",
+
+    "userProfile.comingSoon": "Coming Soon"
+
+  }
+  

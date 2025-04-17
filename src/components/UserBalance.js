@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 
 const UserBalance = ({ userInfo, monthlyExpenses }) => {
-    const [dollarBlue, setDollarBlue] = useState(1100); // valor default
+    const [dollarBlue, setDollarBlue] = useState(1100); // valor default    
 
     useEffect(() => {
         fetch('https://dolarapi.com/v1/dolares/blue')

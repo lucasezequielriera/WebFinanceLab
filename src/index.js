@@ -2,9 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import 'antd/dist/reset.css';
 import App from './App';
-
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
+import './i18n'; // <- importar la configuración
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 

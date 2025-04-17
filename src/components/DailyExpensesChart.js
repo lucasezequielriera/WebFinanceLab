@@ -20,13 +20,22 @@ import {
 } from 'recharts';
 import dayjs from 'dayjs';
 import useIsMobile from '../hooks/useIsMobile';
+import { useTranslation } from 'react-i18next';
+import 'dayjs/locale/es';
+import 'dayjs/locale/en';
 
 const DailyExpensesChart = ({ userId }) => {
   const [data, setData] = useState([]);
   const scrollRef = useRef(null);
   const isMobile = useIsMobile();
-  const currentMonth = dayjs().format('MMMM').charAt(0).toUpperCase() + dayjs().format('MMMM').slice(1);
   const [expenseLimits, setExpenseLimits] = useState([]);
+
+  const { i18n } = useTranslation();
+  const { t } = useTranslation();
+
+  const currentMonth = dayjs().format('MMMM');
+
+  dayjs.locale(i18n.language); // sincroniza el idioma
 
   useEffect(() => {
     if (!userId) return;
@@ -113,7 +122,7 @@ const DailyExpensesChart = ({ userId }) => {
   return (
     <div style={{ position: 'relative' }}>
       <h3 style={{ marginBottom: 16, marginTop: 8, textAlign: 'center', fontWeight: 600 }}>
-        Daily Expenses ({currentMonth})
+        {t('userProfile.dailyExpenses.title')} ({currentMonth})
       </h3>
 
       {isMobile ? (
@@ -150,8 +159,8 @@ const DailyExpensesChart = ({ userId }) => {
               }
             />
             <Tooltip formatter={(value, dataKey) => [formatShortNumber(value), dataKey]} />
-            <Line type="monotone" dataKey="ars" stroke="#1890ff" name="Expenses ($)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
-            <Line type="monotone" dataKey="usd" name="Expenses (USD)" stroke="#4CAF50" strokeWidth={2} />
+            <Line type="monotone" dataKey="ars" stroke="#1890ff" name={t('userProfile.dailyExpenses.tooltip') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
+            <Line type="monotone" dataKey="usd" name={t('userProfile.dailyExpenses.tooltip') + ' (USD)'} stroke="#4CAF50" strokeWidth={2} />
           </LineChart>
         </div>
       ) : (
@@ -187,8 +196,8 @@ const DailyExpensesChart = ({ userId }) => {
               }
             />
             <Tooltip formatter={(value, dataKey) => [formatShortNumber(value), dataKey]} />
-            <Line type="monotone" dataKey="ars" stroke="#1890ff" name="Expenses ($)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
-            <Line type="monotone" dataKey="usd" name="Expenses (USD)" stroke="#4CAF50" strokeWidth={2} />
+            <Line type="monotone" dataKey="ars" stroke="#1890ff" name={t('userProfile.dailyExpenses.tooltip') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
+            <Line type="monotone" dataKey="usd" name={t('userProfile.dailyExpenses.tooltip') + ' (USD)'} stroke="#4CAF50" strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
       )}

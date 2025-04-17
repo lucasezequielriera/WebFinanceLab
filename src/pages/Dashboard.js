@@ -10,6 +10,7 @@ import RemainingPesosCounter from '../components/RemainingPesosCounter';
 import RemainingDollarsCounter from '../components/RemainingDollarsCounter';
 import DailyExpensesChart from '../components/DailyExpensesChart';
 import UserBalance from '../components/UserBalance';
+import { useTranslation } from 'react-i18next';
 import '../styles/Dashboard.css'; // Importa el archivo CSS para los estilos
 
 const Dashboard = () => {
@@ -21,6 +22,8 @@ const Dashboard = () => {
   const [form] = Form.useForm();
   const [userInfo, setUserInfo] = useState(null);
   const [expenses, setExpenses] = useState([]);
+
+  const { t } = useTranslation();
 
   const DEFAULT_PROFILE_PICTURE_URL =
     "https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/profilePictures%2Fimage.png?alt=media&token=c7f97e78-1aa1-4b87-9c7a-a5ebe6087b3d";
@@ -163,7 +166,7 @@ const Dashboard = () => {
                 boxShadow: '0 0 6px rgba(0,0,0,0.1)'
               }}
             />
-            <h1 className="dashboard-title" style={{ marginBottom: 0 }}>Hi, {currentUser?.displayName || 'User'}</h1>
+            <h1 className="dashboard-title" style={{ marginBottom: 0 }}>{t('userProfile.title')}, {currentUser?.displayName || t('userProfile.username')}</h1>
           </div>
           <div className="balance-box">
             <UserBalance userInfo={userInfo} monthlyExpenses={expenses} />

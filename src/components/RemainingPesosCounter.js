@@ -4,6 +4,7 @@ import { collection, query, onSnapshot, where, Timestamp, doc, getDoc } from 'fi
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Statistic, Progress } from 'antd';
 import { DollarOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 const RemainingPesosCounter = () => {
   const { currentUser } = useAuth();
@@ -16,6 +17,8 @@ const RemainingPesosCounter = () => {
     '50%': '#ffe58f',
     '100%': '#ffccc7',
   };
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -82,12 +85,12 @@ const RemainingPesosCounter = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', flexFlow: 'column' }}>
           <Statistic
-            title="Remaining in ARS"
+            title={t('userProfile.remaining.ars')}
             value={remaining}
             precision={2}
             valueStyle={{ color: remaining < 50000 ? '#cf1322' : '#3f8600' }}
             prefix={<DollarOutlined />}
-            suffix="ARS"
+            suffix={<span style={{ fontSize: 12 }}>ARS</span>}
           />
           <span style={{ fontWeight: 600, fontSize: 13 }}>/ ${formatNumber(totalIncome)}</span>
         </div>

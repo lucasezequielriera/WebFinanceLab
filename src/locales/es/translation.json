@@ -1,0 +1,35 @@
+{
+    "userProfile.title": "Hola",
+    "userProfile.username": "Usuario",
+    "userProfile.remaining.ars": "Restante en ARS",
+    "userProfile.remaining.usd": "Restante en USD",
+    "userProfile.totalExpenses.ars": "Gastos Totales en ARS",
+    "userProfile.totalExpenses.usd": "Gastos Totales en USD",
+    "userProfile.dailyExpenses.title": "Gastos Diarios",
+    "userProfile.dailyExpenses.tooltip": "Gastos",
+
+    "userProfile.navbar.signup": "Registrarme",
+    "userProfile.navbar.login": "Ingresar",
+    "userProfile.navbar.dashboard": "Dashboard",
+    "userProfile.navbar.expenses": "Gastos",
+    "userProfile.navbar.financialGoals": "Mis Objetivos",
+    "userProfile.navbar.aboutUs": "Sobre Nosotros",
+    "userProfile.navbar.profile": "Perfil",
+    "userProfile.navbar.logout": "Cerrar Sesión",
+    "userProfile.navbar.addExpense": "Agregar Gasto",
+    "userProfile.navbar.addTarget": "Agregar Objetivo",
+    "userProfile.navbar.addStock": "Agregar Acción",
+
+    "userProfile.expenses.title": "Mis Gastos",
+    "userProfile.expenses.generalExpensesButton": "Gastos Mensuales",
+    "userProfile.expenses.detailedExpensesButton": "Gastos Detallados",
+    "userProfile.expenses.filter": "Filtro:",
+    "userProfile.expenses.creditCardsTitle": "Tarjetas de Crédito",
+    "userProfile.expenses.creditCardTitle": "Tarjeta de Crédito",
+    "userProfile.expenses.debitCardsTitle": "Tarjetas de Débito",
+    "userProfile.expenses.debitCardTitle": "Tarjeta de Débito",
+    "userProfile.expenses.cashTitle": "Efectivo",
+
+    "userProfile.comingSoon": "Próximamente"
+  }
+  

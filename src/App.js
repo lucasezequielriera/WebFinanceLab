@@ -21,12 +21,14 @@ import './index.css';
 // Importaciones de AntD
 import { Typography } from 'antd';
 import logo from './assets/transparent-logo.png';
+import { useTranslation } from 'react-i18next';
 
 const { Title } = Typography;
 const { Header, Sider, Content } = Layout;
 
 const RedirectIfAuthenticated = ({ children }) => {
   const { currentUser } = useAuth();
+  
   if (currentUser) {
     return <Navigate to="/dashboard" />;
   }
@@ -40,6 +42,8 @@ const AppLayout = () => {
   const [expenses, setExpenses] = useState([]);
   const location = useLocation();
   const [selectedKey, setSelectedKey] = useState('1');
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     const path = location.pathname;
@@ -104,45 +108,45 @@ const AppLayout = () => {
     {
       key: '1',
       icon: <DashboardOutlined />,
-      label: <Link to="/dashboard">Dashboard</Link>
+      label: <Link to="/dashboard">{t('userProfile.navbar.dashboard')}</Link>
     },
     {
       key: '5',
       icon: <CreditCardOutlined />,
-      label: <Link to="/expenses">Expenses</Link>
+      label: <Link to="/expenses">{t('userProfile.navbar.expenses')}</Link>
     },
     {
       key: '7',
       icon: <FlagOutlined />,
-      label: <Link to="/financial-goals">Financial Goals</Link>
+      label: <Link to="/financial-goals">{t('userProfile.navbar.financialGoals')}</Link>
     },
     {
       key: '6',
       icon: <InfoCircleOutlined />,
-      label: <Link to="/about-us">About Us</Link>
+      label: <Link to="/about-us">{t('userProfile.navbar.aboutUs')}</Link>
     },
     {
       key: '2',
       icon: <UserOutlined />,
-      label: <Link to="/profile">Profile</Link>
+      label: <Link to="/profile">{t('userProfile.navbar.profile')}</Link>
     },
     {
       key: '4',
       icon: <LogoutOutlined />,
-      label: 'Logout',
+      label: t('userProfile.navbar.logout'),
       onClick: handleLogout
     }
   ] : [
     {
       key: 'signup',
       icon: <UserOutlined />,
-      label: <Link to="/signup">Sign Up</Link>,
+      label: <Link to="/signup">{t('userProfile.navbar.signup')}</Link>,
       hidden: location.pathname === '/signup',
     },
     {
       key: 'login',
       icon: <LoginOutlined />,
-      label: <Link to="/login">Log In</Link>,
+      label: <Link to="/login">{t('userProfile.navbar.login')}</Link>,
       hidden: location.pathname === '/login',
     }
   ];
@@ -167,12 +171,12 @@ const AppLayout = () => {
         {currentUser && (
           <div className="sidebar-tags">
             <Tag color="red" className="sidebar-tag" onClick={showModal}>
-              Add Expense
+              {t('userProfile.navbar.addExpense')}
             </Tag>
             <AddTarget />
-            <Tooltip title="Coming Soon" placement="right" style={{ marginRight: '30px' }}>
+            <Tooltip title={t('userProfile.comingSoon')} placement="right" style={{ marginRight: '30px' }}>
               <Tag color="blue" className="sidebar-tag disabled-tag" style={{ marginTop: '10px' }}>
-                Add Stock
+              {t('userProfile.navbar.addStock')}
               </Tag>
             </Tooltip>
           </div>

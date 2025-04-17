@@ -3,6 +3,7 @@ import { Button, Modal, Form, Input, Select, DatePicker, notification, Tag, Tool
 import { db } from '../firebase';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 
@@ -10,6 +11,8 @@ const AddTarget = () => {
   const { currentUser } = useAuth();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
+
+  const { t } = useTranslation();
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -53,11 +56,11 @@ const AddTarget = () => {
 
   return (
     <div>
-      <Tooltip title="Coming Soon" placement="right" style={{ marginRight: '30px' }}>
+      <Tooltip title={t('userProfile.comingSoon')} placement="right" style={{ marginRight: '30px' }}>
         <Tag color="gold" className="sidebar-tag disabled-tag"
         // onClick={showModal}
         style={{ marginTop: 10 }}>
-          Add Target
+          {t('userProfile.navbar.addTarget')}
         </Tag>
       </Tooltip>
       <Modal

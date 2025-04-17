@@ -1,6 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { auth } from '../firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "firebase/auth";
+import { db } from '../firebase';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  sendPasswordResetEmail
+} from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import i18n from '../i18n'; // 👈 Asegurate de importar i18n
 
 const AuthContext = React.createContext();
 
@@ -12,15 +21,36 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            const language = data.language || 'es'; // 🇪🇸 Default a español
+            i18n.changeLanguage(language);
+          }
+        } catch (error) {
+          console.error("Error reading user language:", error);
+        }
+      }
     });
 
     return () => unsubscribe();
   }, []);
 
-  const signup = (email, password) => {
-    return createUserWithEmailAndPassword(auth, email, password);
+  const signup = async (email, password) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // 👇 Guarda idioma por defecto al registrarse
+    await setDoc(doc(db, "users", user.uid), {
+      language: 'es'
+    }, { merge: true });
+
+    return userCredential;
   };
 
   const login = (email, password) => {
@@ -52,7 +82,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-        {children}
+      {children}
     </AuthContext.Provider>
   );
 }

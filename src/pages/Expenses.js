@@ -8,21 +8,25 @@ import { useAuth } from '../contexts/AuthContext';
 import moment from 'moment';
 import dayjs from 'dayjs';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import '../styles/Expenses.css';
-
-const cardColors = {
-  Visa: 'linear-gradient(135deg, #1A1F71, #2E77BB)',
-  MasterCard: 'linear-gradient(135deg, #ff2500, #ff9300)',
-  'American Express': 'linear-gradient(135deg, #0080ff, #00d6ff)',
-  Cash: 'linear-gradient(135deg, #00771A, #00BF5A)',
-};
 
 const Expenses = () => {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [cards, setCards] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(dayjs());
+  const cardColors = {
+    Visa: 'linear-gradient(135deg, #1A1F71, #2E77BB)',
+    MasterCard: 'linear-gradient(135deg, #ff2500, #ff9300)',
+    'American Express': 'linear-gradient(135deg, #0080ff, #00d6ff)',
+    Cash: 'linear-gradient(135deg, #00771A, #00BF5A)',
+  };
+  
   const navigate = useNavigate();
+
+  const { t } = useTranslation();
+
 
   useEffect(() => {
     if (!currentUser) return;
@@ -152,7 +156,12 @@ const Expenses = () => {
   };
 
   const getTitle = (type, count) => {
-    return count > 1 ? `${type} Cards` : `${type} Card`;
+    if (type.toLowerCase() === 'cash') {
+      return t('userProfile.expenses.cashTitle');
+    }
+  
+    const keyBase = `userProfile.expenses.${type.toLowerCase()}Card${count === 1 ? 'Title' : 'sTitle'}`;
+    return t(keyBase);
   };
 
   const noCards = creditCards.length === 0 && debitCards.length === 0 && cashCards.length === 0;
@@ -166,18 +175,18 @@ const Expenses = () => {
   return (
     <Spin spinning={loading}>
       <div className='title-and-buttons' style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <h1 className='title'>Expenses</h1>
+        <h1 className='title' style={{ fontSize: 30, fontWeight: 300 }}>{t('userProfile.expenses.title')}</h1>
         <div className="buttons">
           <Button onClick={() => navigate('/general-expenses')}>
-            General Expenses
+            {t('userProfile.expenses.generalExpensesButton')}
           </Button>
           <Button onClick={() => navigate('/detailed-expenses')}>
-            Detailed Expenses
+          {t('userProfile.expenses.detailedExpensesButton')}
           </Button>
         </div>
       </div>
       <div className="filter" style={{ marginBottom: 24 }}>
-        <span style={{marginRight: 5 }}>Filter:</span> 
+        <span style={{marginRight: 5 }}>{t('userProfile.expenses.filter')}</span> 
         <StyledDatePicker
           picker="month"
           allowClear={false} // ✅ con esto ya no te tira error
@@ -193,13 +202,13 @@ const Expenses = () => {
         ) : (
           <>
             <div className='cards margin-top-large margin-bottom-large'>
-              {renderSection(getTitle('Credit', creditCards.length), creditCards)}
+              {renderSection(getTitle('credit', creditCards.length), creditCards)}
             </div>
             <div className='cards margin-top-large margin-bottom-large'>
-              {renderSection(getTitle('Debit', debitCards.length), debitCards)}
+              {renderSection(getTitle('debit', debitCards.length), debitCards)}
             </div>
             <div className='cards margin-top-large margin-bottom-large'>
-              {renderSection(getTitle('Cash', cashCards.length), cashCards)}
+              {renderSection(getTitle('cash', cashCards.length), cashCards)}
             </div>
           </>
         )
