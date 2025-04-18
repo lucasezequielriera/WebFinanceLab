@@ -27,160 +27,268 @@ function normalizeCurrency(raw) {
     return null;
 }
 
-// 1) Cuando el usuario escribe “gasto” (exacto), enviamos las instrucciones
-//    y activamos una sesión de “awaitingData”.
-// 2) Al siguiente mensaje, si hay sesión activa, lo parseamos
-//    esperando 5 campos (o 7 si es tarjeta).
-// 3) Guardamos en Firestore y confirmamos, borrando la sesión.
+// pasos para “nuevo gasto”
+const STEPS = [
+    { key: "description",   question: "❓ Descripción del gasto" },
+    { key: "amount",        question: "2️⃣ ❓ ¿Cuál fué el monto? (Ej: $123.45)" },
+    { key: "currency",      question: "3️⃣ ❓ ¿Cuál fué la moneda? (Ej: Pesos, Dólares)" },
+    { key: "category",      question: "4️⃣ ❓ ¿Cuál es la categoría del gasto?" },
+    {
+        key: "paymentMethod",
+        question:
+            `5️⃣ ❓ Cuál fué el método de pago (responde con el número):
+            1️⃣ Efectivo
+            2️⃣ Tarjeta de Crédito
+            3️⃣ Tarjeta de Débito`
+                },
+                {
+                key: "bank",
+                question: "❓ ¿Cuál es el Banco?",
+                dependsOn: d => ['Credit Card','Debit Card'].includes(d.paymentMethod)
+                },
+                {
+                key: "cardType",
+                question:
+            `6️⃣ ❓ Tipo de tarjeta (responde con el número):
+            1️⃣ Visa
+            2️⃣ MasterCard
+            3️⃣ American Express`,
+        dependsOn: d => ['Credit Card','Debit Card'].includes(d.paymentMethod)
+    },
+];
 
 // Telegram con OpenIA
 exports.receiveTelegramMessage = functions.https.onRequest(async (req, res) => {
     try {
-      const msg = req.body.message;
-      if (!msg?.text) return res.sendStatus(200);
-      const chatId = msg.chat.id.toString();
-      const textLc = msg.text.trim().toLowerCase();
-  
-      // ---- COMANDO PERFIL ----
-      if (textLc === 'perfil') {
-        const now = new Date();
-        const year = now.getFullYear(), month = now.getMonth();
-        const endOfMonth = new Date(year, month+1, 0);
-        const daysRemaining = Math.ceil((endOfMonth - now)/86400000);
-  
-        const userSnap = await db.collection('users').doc(FIREBASE_UID).get();
-        const jobs = (userSnap.data()||{}).jobs||[];
-        let incomeARS = 0, incomeUSD = 0;
-        jobs.forEach(j=>{
-          const s = parseFloat(j.salary||0);
-          if (j.currency==='ARS') incomeARS+=s;
-          if (j.currency==='USD') incomeUSD+=s;
-        });
-  
-        const dailyARS = incomeARS/daysRemaining;
-        const dailyUSD = incomeUSD/daysRemaining;
-        const day = now.getDate(), mth = month+1, yr = year;
-        const expSnap = await db
-          .collection(`users/${FIREBASE_UID}/expenses`)
-          .where('day','==',day)
-          .where('month','==',mth)
-          .where('year','==',yr)
-          .get();
-        let spentARS=0, spentUSD=0;
-        expSnap.forEach(d=>{
-          const e=d.data(), a=parseFloat(e.amount||0);
-          if (e.currency==='ARS') spentARS+=a;
-          if (e.currency==='USD') spentUSD+=a;
-        });
-  
-        const leftARS = (dailyARS-spentARS).toFixed(2);
-        const leftUSD = (dailyUSD-spentUSD).toFixed(2);
-        const today   = now.toISOString().slice(0,10);
-        const m = 
-  `📊 Tu Perfil Financiero
-  
-  • Restante en ARS: $${leftARS}
-  • Restante en U\$D: $${leftUSD}
-  • Gastos de hoy (${today}):
-  - ARS: $${spentARS.toFixed(2)}
-  - USD: $${spentUSD.toFixed(2)}`;
-        await reply(chatId, m);
-        return res.sendStatus(200);
-      }
-  
-      // ---- COMANDO GASTO ----
-      const sessRef  = db.collection(SESSIONS).doc(chatId);
-      const sessSnap = await sessRef.get();
-      const session  = sessSnap.exists ? sessSnap.data() : { awaitingData: false };
-  
-      if (textLc === 'nuevo gasto') {
-        await reply(chatId,
-  `📥 Registrar Nuevo Gasto
+        const msg = req.body.message;
 
-   Envía un único mensaje con los campos *separados por coma*:
+        if (!msg?.text) return res.sendStatus(200);
+        const chatId = msg.chat.id.toString();
   
-   1. Descripción
-   2. Cantidad (ej: 123.45)
-   3. Moneda (ej: pesos, dólar, USD, ARS)
-   4. Categoría
-   5. Método (efectivo, débito, crédito)
+        // 1) Normalizo: quito acentos, paso a minúsculas y recorto espacios
+        const raw = msg.text.trim();
+        const textLc = raw
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+  
+        // -- CANCELAR --
+        if (textLc === 'cancelar') {
+            await db.collection(SESSIONS).doc(chatId).delete();
+            await reply(chatId, "❎ Proceso cancelado.", true);
+            return res.sendStatus(200);
+        }
+  
+        // -- COMANDO PERFIL --
+        if (textLc === 'perfil') {
+            const now   = new Date();
+            const day   = now.getDate();
+            const month = now.getMonth() + 1;
+            const year  = now.getFullYear();
 
-   ⚠️ Si elegís débito o crédito, añade también:
+            // 1) calculas el perfil SALARIO diario
+            const userSnap    = await db.collection('users').doc(FIREBASE_UID).get();
+            const jobs        = userSnap.data()?.jobs || [];
+            let incomeARS = 0, incomeUSD = 0;
+            jobs.forEach(j => {
+            const s = parseFloat(j.salary || 0);
+            if (j.currency === 'ARS') incomeARS += s;
+            if (j.currency === 'USD') incomeUSD += s;
+            });
 
-   6. Banco
-   7. Tipo de tarjeta (Visa, MasterCard, American Express)
-  
-   Ejemplo:
-   Taxi, $345, pesos, Transporte, débito, Santander, Visa
-  `);
-        await sessRef.set({ awaitingData: true });
-        return res.sendStatus(200);
-      }
-  
-      // ---- PROCESAR GASTO ----
-      if (session.awaitingData) {
-        const parts = msg.text.split(',').map(p=>p.trim());
-        // primero, normaliza amount y currency y paymentMethod
-        const [desc, rawAmt, rawCur, cat, rawPay, bank='N/A', cardType='N/A'] = parts;
-  
-        // validar longitud
-        const methodNorm = normalizePaymentMethod(rawPay||'');
-        const needExtras = ['Credit Card','Debit Card'].includes(methodNorm);
-        if (parts.length < (needExtras?7:5)) {
-          await reply(chatId, `❌ Faltan datos. Necesito ${needExtras?7:5} campos.`);
-          return res.sendStatus(200);
+            // 2) gastos HOY (ya lo tenías)
+            const expSnapDay = await db
+            .collection(`users/${FIREBASE_UID}/expenses`)
+            .where('day','==', day)
+            .where('month','==', month)
+            .where('year','==', year)
+            .get();
+            let spentDayARS = 0, spentDayUSD = 0;
+            expSnapDay.forEach(d => {
+            const e = d.data(), a = parseFloat(e.amount||0);
+            if (e.currency === 'ARS') spentDayARS += a;
+            if (e.currency === 'USD') spentDayUSD += a;
+            });
+
+            // 3) **Total del MES** en ARS y USD
+            const expSnapMonth = await db
+                .collection(`users/${FIREBASE_UID}/expenses`)
+                .where('month', '==', month)
+                .where('year', '==', year)
+                .get();
+            let totalARS = 0, totalUSD = 0;
+            expSnapMonth.forEach(d => {
+            const e = d.data(), a = parseFloat(e.amount||0);
+            if (e.currency === 'ARS') totalARS += a;
+            if (e.currency === 'USD') totalUSD += a;
+            });
+
+            // 4) armo el mensaje
+            const leftARS = incomeARS - totalARS;
+            const leftUSD = incomeUSD - totalUSD;
+            const today   = now.toISOString().slice(0,10);
+
+            const leftBalanceARS = (incomeARS - totalARS) < 0 ? "🟥" : (incomeARS - totalARS) === 0 ? "⬜️" : "🟩"
+            const leftBalanceUSD = (incomeUSD - totalUSD) < 0 ? "🟥" : (incomeUSD - totalUSD) === 0 ? "⬜️" : "🟩"
+
+            const m = 
+            `📊 Tu Perfil Financiero
+
+            • Ingreso mensual (ARS): $${incomeARS.toFixed(2)}
+            • Ingreso mensual (USD): $${incomeUSD.toFixed(2)}
+
+            • Gastos del mes:
+            – ARS: $${totalARS.toFixed(2)}
+            – USD: $${totalUSD.toFixed(2)}
+
+            • Restante:
+            ${leftBalanceARS} ARS: $${leftARS.toFixed(2)}
+            ${leftBalanceUSD} USD: $${leftUSD.toFixed(2)}
+
+            • Gastos de hoy (${today}):
+            – ARS: $${spentDayARS.toFixed(2)}
+            – USD: $${spentDayUSD.toFixed(2)}`;
+
+            await reply(chatId, m, true);
+            return res.sendStatus(200);
         }
   
-        // monto
-        const cleanAmt = (rawAmt||'').replace(/[^0-9,.\-]/g,'').replace(',', '.');
-        const amount   = parseFloat(cleanAmt).toFixed(2);
-        if (isNaN(amount)) {
-          await reply(chatId,'❌ Monto inválido. Usa solo números.');
-          return res.sendStatus(200);
+        // -- NUEVO GASTO --
+        if ( textLc.startsWith('nuevo gasto') || textLc.startsWith('gasto') ) {
+            await reply(chatId,
+              `📥 *Registro de Nuevo Gasto*\n\n` +
+              `Responde cada pregunta. Escribe "cancelar" para abortar.\n\n` +
+              `1️⃣ ${STEPS[0].question}`, // ahora pregunta DESCRIPCIÓN
+              true
+            );
+            await db.collection(SESSIONS).doc(chatId).set({ idx: 0, data: {} });
+            return res.sendStatus(200);
         }
   
-        // moneda
-        const currency = normalizeCurrency(rawCur||'');
-        if (!currency) {
-          await reply(chatId,'❌ Moneda inválida. Usa pesos o dólar.');
-          return res.sendStatus(200);
+        // -- SESIÓN ACTIVA? --
+        const sessRef = db.collection(SESSIONS).doc(chatId);
+        const sessSnap = await sessRef.get();
+        if (!sessSnap.exists) return res.sendStatus(200);
+        const { idx, data } = sessSnap.data();
+    
+        // si el índice no es válido, limpio sesión
+        if (typeof idx !== "number" || idx < 0 || idx >= STEPS.length) {
+            await sessRef.delete();
+            return res.sendStatus(200);
         }
   
-        // método
-        if (!methodNorm) {
-          await reply(chatId,'❌ Método inválido. Usa efectivo, crédito o débito.');
-          return res.sendStatus(200);
+        // -- PROCESAR RESPUESTA PASO idx --
+        const step = STEPS[idx];
+        const ans  = raw;
+  
+        if (step.key === "description") {
+            data.description = ans;
+        } else if (step.key === "amount") {
+            const num = parseFloat(ans.replace(/[^0-9,.]/g, "").replace(",", "."));
+            if (isNaN(num)) {
+            await reply(chatId, "❌ Monto inválido, intenta de nuevo.", true);
+            return res.sendStatus(200);
+            }
+            data.amount = num.toFixed(2);
+        } else if (step.key === "currency") {
+            const cur = normalizeCurrency(ans);
+            if (!cur) {
+            await reply(chatId, '❌ Moneda inválida, escribe "pesos" o "dólar".', true);
+            return res.sendStatus(200);
+            }
+            data.currency = cur;
+        } else if (step.key === "paymentMethod") {
+            let pm;
+            switch (ans.trim()) {
+                case "1": pm = "Cash"; break;
+                case "2": pm = "Credit Card"; break;
+                case "3": pm = "Debit Card"; break;
+                default:
+                // como fallback, intentamos normalizar también por texto libre
+                pm = normalizePaymentMethod(ans);
+            }
+            if (!pm) {
+                await reply(chatId,
+                '❌ Opción inválida. Responde 1, 2 o 3.',
+                true
+                );
+                return res.sendStatus(200);
+            }
+            data.paymentMethod = pm;
+        } else if (step.key === "cardType") {
+            let ct;
+            switch (ans.trim()) {
+              case "1": ct = "Visa"; break;
+              case "2": ct = "MasterCard"; break;
+              case "3": ct = "American Express"; break;
+              default:
+                // fallback libre
+                ct = ans;
+            }
+            if (!ct) {
+              await reply(chatId,
+                '❌ Opción inválida. Responde 1, 2 o 3.',
+                true
+              );
+              return res.sendStatus(200);
+            }
+            data.cardType = ct;
+        } else {
+            data[step.key] = ans;
         }
   
-        // guardar
+        // -- AVANZAR AL SIGUIENTE PASO --
+        let next = idx + 1;
+        while (next < STEPS.length) {
+            const st = STEPS[next];
+            if (st.dependsOn && !st.dependsOn(data)) next++;
+            else break;
+        }
+  
+        if (next < STEPS.length) {
+            await sessRef.set({ idx: next, data });
+            await reply(chatId, STEPS[next].question, true);
+            return res.sendStatus(200);
+        }
+    
+        // -- TODOS LOS DATOS LISTOS: GUARDO EN FIRESTORE --
         const now = new Date();
         await db.collection(`users/${FIREBASE_UID}/expenses`).add({
-          description:   desc,
-          amount,
-          currency,
-          category:      cat,
-          paymentMethod: methodNorm,
-          bank,
-          cardType,
-          timestamp:     admin.firestore.Timestamp.fromDate(now),
-          day:           now.getDate(),
-          month:         now.getMonth()+1,
-          year:          now.getFullYear()
+            description:   data.description,
+            amount:        data.amount,
+            currency:      data.currency,
+            category:      data.category,
+            paymentMethod: data.paymentMethod,
+            bank:          data.bank      || "N/A",
+            cardType:      data.cardType  || "N/A",
+            timestamp:     admin.firestore.Timestamp.fromDate(now),
+            day:           now.getDate(),
+            month:         now.getMonth() + 1,
+            year:          now.getFullYear(),
         });
   
-        await reply(chatId,'✅ Gasto registrado correctamente.');
+        // -- CONFIRMACIÓN FINAL --
+        let ack =
+            `✅ Gasto registrado:\n\n` +
+            `• Monto: $${data.amount} ${data.currency}\n` +
+            `• Descripción: ${data.description}\n` +
+            `• Categoría: ${data.category}\n` +
+            `• Método: ${data.paymentMethod}`;
+        if (["Credit Card","Debit Card"].includes(data.paymentMethod)) {
+            ack += `\n• Banco: ${data.bank}\n• Tipo tarjeta: ${data.cardType}`;
+        }
+        await reply(chatId, ack, true);
+    
+        // -- LIMPIAR SESIÓN --
         await sessRef.delete();
         return res.sendStatus(200);
-      }
-  
-      // nada que hacer
-      return res.sendStatus(200);
-  
+    
     } catch (err) {
-      console.error('❌ receiveTelegramMessage error', err);
-      return res.sendStatus(500);
+        console.error("❌ receiveTelegramMessage error", err);
+        return res.sendStatus(500);
     }
 });
+   
 
 exports.updateDailyResults = functions.pubsub.schedule('59 23 * * *').timeZone('America/Argentina/Buenos_Aires').onRun(async (context) => {
   const db = admin.firestore();
