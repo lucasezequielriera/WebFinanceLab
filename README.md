@@ -13,5 +13,6 @@ rm package-lock.json
 and ->
 npm i
 5) firebase deploy
+5) a) if I did changes only in functions (e.g. telegram) -> firebase deploy --only functions
 
 ** REPOSITORY UPDATED IN LOCAL & GITHUB **
