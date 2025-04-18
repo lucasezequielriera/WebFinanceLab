@@ -1,14 +1,186 @@
 const functions = require('firebase-functions');
-const admin = require('firebase-admin');
-const fetch = require("node-fetch");
+const admin     = require('firebase-admin');
+const fetch     = require("node-fetch");
 
 admin.initializeApp();
-
 const db = admin.firestore();
 
 // Reemplazá esto por tu Token del Bot de Telegram
 const TELEGRAM_BOT_TOKEN = functions.config().telegram.token;
 const FIREBASE_UID       = functions.config().telegram.uid;
+const SESSIONS           = "telegramSessions";
+
+// normalize a método de pago Cash/Credit Card/Debit Card
+function normalizePaymentMethod(raw) {
+    const s = raw.trim().toLowerCase();
+    if (s.includes('crédito') || s.includes('credito') || s.includes('credit')) return 'Credit Card';
+    if (s.includes('débito')  || s.includes('debito')  || s.includes('debit'))  return 'Debit Card';
+    if (s.includes('efectivo')|| s.includes('cash'))    return 'Cash';
+    return null;
+}
+
+// normalize a moneda ARS/USD
+function normalizeCurrency(raw) {
+    const s = raw.trim().toLowerCase();
+    if (s.includes('peso'))               return 'ARS';
+    if (s.includes('dólar') || s.includes('dolar') || s.includes('usd') || s.includes('$')) return 'USD';
+    return null;
+}
+
+// 1) Cuando el usuario escribe “gasto” (exacto), enviamos las instrucciones
+//    y activamos una sesión de “awaitingData”.
+// 2) Al siguiente mensaje, si hay sesión activa, lo parseamos
+//    esperando 5 campos (o 7 si es tarjeta).
+// 3) Guardamos en Firestore y confirmamos, borrando la sesión.
+
+// Telegram con OpenIA
+exports.receiveTelegramMessage = functions.https.onRequest(async (req, res) => {
+    try {
+      const msg = req.body.message;
+      if (!msg?.text) return res.sendStatus(200);
+      const chatId = msg.chat.id.toString();
+      const textLc = msg.text.trim().toLowerCase();
+  
+      // ---- COMANDO PERFIL ----
+      if (textLc === 'perfil') {
+        const now = new Date();
+        const year = now.getFullYear(), month = now.getMonth();
+        const endOfMonth = new Date(year, month+1, 0);
+        const daysRemaining = Math.ceil((endOfMonth - now)/86400000);
+  
+        const userSnap = await db.collection('users').doc(FIREBASE_UID).get();
+        const jobs = (userSnap.data()||{}).jobs||[];
+        let incomeARS = 0, incomeUSD = 0;
+        jobs.forEach(j=>{
+          const s = parseFloat(j.salary||0);
+          if (j.currency==='ARS') incomeARS+=s;
+          if (j.currency==='USD') incomeUSD+=s;
+        });
+  
+        const dailyARS = incomeARS/daysRemaining;
+        const dailyUSD = incomeUSD/daysRemaining;
+        const day = now.getDate(), mth = month+1, yr = year;
+        const expSnap = await db
+          .collection(`users/${FIREBASE_UID}/expenses`)
+          .where('day','==',day)
+          .where('month','==',mth)
+          .where('year','==',yr)
+          .get();
+        let spentARS=0, spentUSD=0;
+        expSnap.forEach(d=>{
+          const e=d.data(), a=parseFloat(e.amount||0);
+          if (e.currency==='ARS') spentARS+=a;
+          if (e.currency==='USD') spentUSD+=a;
+        });
+  
+        const leftARS = (dailyARS-spentARS).toFixed(2);
+        const leftUSD = (dailyUSD-spentUSD).toFixed(2);
+        const today   = now.toISOString().slice(0,10);
+        const m = 
+  `📊 Tu Perfil Financiero
+  
+  • Restante en ARS: $${leftARS}
+  • Restante en U\$D: $${leftUSD}
+  • Gastos de hoy (${today}):
+  - ARS: $${spentARS.toFixed(2)}
+  - USD: $${spentUSD.toFixed(2)}`;
+        await reply(chatId, m);
+        return res.sendStatus(200);
+      }
+  
+      // ---- COMANDO GASTO ----
+      const sessRef  = db.collection(SESSIONS).doc(chatId);
+      const sessSnap = await sessRef.get();
+      const session  = sessSnap.exists ? sessSnap.data() : { awaitingData: false };
+  
+      if (textLc === 'nuevo gasto') {
+        await reply(chatId,
+  `📥 Registrar Nuevo Gasto
+
+   Envía un único mensaje con los campos *separados por coma*:
+  
+   1. Descripción
+   2. Cantidad (ej: 123.45)
+   3. Moneda (ej: pesos, dólar, USD, ARS)
+   4. Categoría
+   5. Método (efectivo, débito, crédito)
+
+   ⚠️ Si elegís débito o crédito, añade también:
+
+   6. Banco
+   7. Tipo de tarjeta (Visa, MasterCard, American Express)
+  
+   Ejemplo:
+   Taxi, $345, pesos, Transporte, débito, Santander, Visa
+  `);
+        await sessRef.set({ awaitingData: true });
+        return res.sendStatus(200);
+      }
+  
+      // ---- PROCESAR GASTO ----
+      if (session.awaitingData) {
+        const parts = msg.text.split(',').map(p=>p.trim());
+        // primero, normaliza amount y currency y paymentMethod
+        const [desc, rawAmt, rawCur, cat, rawPay, bank='N/A', cardType='N/A'] = parts;
+  
+        // validar longitud
+        const methodNorm = normalizePaymentMethod(rawPay||'');
+        const needExtras = ['Credit Card','Debit Card'].includes(methodNorm);
+        if (parts.length < (needExtras?7:5)) {
+          await reply(chatId, `❌ Faltan datos. Necesito ${needExtras?7:5} campos.`);
+          return res.sendStatus(200);
+        }
+  
+        // monto
+        const cleanAmt = (rawAmt||'').replace(/[^0-9,.\-]/g,'').replace(',', '.');
+        const amount   = parseFloat(cleanAmt).toFixed(2);
+        if (isNaN(amount)) {
+          await reply(chatId,'❌ Monto inválido. Usa solo números.');
+          return res.sendStatus(200);
+        }
+  
+        // moneda
+        const currency = normalizeCurrency(rawCur||'');
+        if (!currency) {
+          await reply(chatId,'❌ Moneda inválida. Usa pesos o dólar.');
+          return res.sendStatus(200);
+        }
+  
+        // método
+        if (!methodNorm) {
+          await reply(chatId,'❌ Método inválido. Usa efectivo, crédito o débito.');
+          return res.sendStatus(200);
+        }
+  
+        // guardar
+        const now = new Date();
+        await db.collection(`users/${FIREBASE_UID}/expenses`).add({
+          description:   desc,
+          amount,
+          currency,
+          category:      cat,
+          paymentMethod: methodNorm,
+          bank,
+          cardType,
+          timestamp:     admin.firestore.Timestamp.fromDate(now),
+          day:           now.getDate(),
+          month:         now.getMonth()+1,
+          year:          now.getFullYear()
+        });
+  
+        await reply(chatId,'✅ Gasto registrado correctamente.');
+        await sessRef.delete();
+        return res.sendStatus(200);
+      }
+  
+      // nada que hacer
+      return res.sendStatus(200);
+  
+    } catch (err) {
+      console.error('❌ receiveTelegramMessage error', err);
+      return res.sendStatus(500);
+    }
+});
 
 exports.updateDailyResults = functions.pubsub.schedule('59 23 * * *').timeZone('America/Argentina/Buenos_Aires').onRun(async (context) => {
   const db = admin.firestore();
@@ -70,97 +242,13 @@ exports.updateDailyResults = functions.pubsub.schedule('59 23 * * *').timeZone('
   return null;
 });
 
-exports.receiveTelegramMessage = functions.https.onRequest(async (req, res) => {
-    console.log("🔔 Trigger receiveTelegramMessage", JSON.stringify(req.body));
-  
-    const msg = req.body.message;
-    if (!msg?.text) {
-      console.log("⏩ Sin texto, saliendo");
-      return res.sendStatus(200);
-    }
-  
-    const chatId = msg.chat.id.toString();
-    const text   = msg.text.trim();
-    console.log("📨 chatId:", chatId, "text:", text);
-  
-    // dividimos por comas
-    const parts = text.split(',').map(p => p.trim());
-    if (parts.length < 5) {
-      await reply(chatId,
-        "❌ Formato inválido.\nUsa: `cantidad, moneda, categoría, descripción, método de pago`",
-        true
-      );
-      return res.sendStatus(200);
-    }
-  
-    // mapeo de campos
-    const [rawAmount, rawCurrency, category, description, paymentMethod] = parts;
-  
-    // amount: acepta . o ,
-    const amount = parseFloat(rawAmount.replace(',', '.')).toFixed(2);
-    const currency = rawCurrency.toUpperCase();
-    if (!['ARS', 'USD'].includes(currency)) {
-      await reply(chatId, "❌ Moneda inválida. Solo ARS o USD.", true);
-      return res.sendStatus(200);
-    }
-  
-    if (!FIREBASE_UID) {
-      await reply(chatId,
-        "❌ Usuario no configurado en Functions config.",
-        true
-      );
-      return res.sendStatus(200);
-    }
-  
-    try {
-      const now = new Date();
-      const ts  = admin.firestore.Timestamp.fromDate(now);
-  
-      await db
-        .collection(`users/${FIREBASE_UID}/expenses`)
-        .add({
-          amount,
-          currency,
-          category,
-          description,
-          paymentMethod,
-          bank:        "N/A",
-          cardType:    "N/A",
-          timestamp:   ts,
-          day:         now.getDate(),
-          month:       now.getMonth() + 1,
-          year:        now.getFullYear(),
-        });
-  
-      await reply(
-        chatId,
-        `✅ Gasto añadido:\n` +
-        `• Monto: $${amount}\n` +
-        `• Moneda: ${currency}\n` +
-        `• Categoría: ${category}\n` +
-        `• Descripción: ${description}\n` +
-        `• Pago: ${paymentMethod}`
-      );
-  
-      console.log("✅ Expense saved");
-      return res.sendStatus(200);
-  
-    } catch (err) {
-      console.error("❌ Error guardando gasto:", err);
-      await reply(chatId, "❌ Error interno, intenta más tarde.");
-      return res.sendStatus(500);
-    }
-});
+// HELPERS
 
+// helper para reenviar por Telegram
 async function reply(chatId, text, markdown = false) {
-    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-    await fetch(url, {
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id:    chatId,
-        text,
-        parse_mode: markdown ? "Markdown" : "HTML"
-      })
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: markdown ? "Markdown" : "HTML" }),
     });
 }
