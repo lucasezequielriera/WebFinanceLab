@@ -21,3 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Ignorar todos los debug logs de Firebase functions
+functions/firebase-debug.log
