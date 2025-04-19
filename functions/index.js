@@ -75,7 +75,7 @@ exports.receiveTelegramMessage = functions.https.onRequest(async (req, res) => {
         // -- CANCELAR --
         if (textLc === 'cancelar') {
             await db.collection(SESSIONS).doc(chatId).delete();
-            await reply(chatId, "❎ Proceso cancelado.", true);
+            await reply(chatId, "✅ Proceso cancelado.", true);
             return res.sendStatus(200);
         }
   
@@ -128,8 +128,8 @@ exports.receiveTelegramMessage = functions.https.onRequest(async (req, res) => {
             const leftUSD = incomeUSD - totalUSD;
             const today   = now.toISOString().slice(0,10);
 
-            const leftBalanceARS = (incomeARS - totalARS) < 0 ? "🟥" : (incomeARS - totalARS) === 0 ? "⬜️" : "🟩"
-            const leftBalanceUSD = (incomeUSD - totalUSD) < 0 ? "🟥" : (incomeUSD - totalUSD) === 0 ? "⬜️" : "🟩"
+            const leftBalanceARS = (incomeARS - totalARS) < 0 ? "❗️" : (incomeARS - totalARS) === 0 ? "-" : "✅"
+            const leftBalanceUSD = (incomeUSD - totalUSD) < 0 ? "❗️" : (incomeUSD - totalUSD) === 0 ? "-" : "✅"
 
             const m = 
             `📊 Tu Perfil Financiero
@@ -295,7 +295,10 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
         const msg = req.body.Body?.trim();
         const chatId = req.body.From?.replace("whatsapp:", "") || "undefined";
     
-        if (!msg || !chatId) return res.sendStatus(200);
+        if (!msg || !chatId) {
+            res.status(200).end();
+            return;
+        }
     
         const textLc = msg
             .toLowerCase()
@@ -309,8 +312,9 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
         // CANCELAR
         if (textLc === "cancelar") {
             await sessRef.delete();
-            await replyWhatsApp(chatId, "❎ Proceso cancelado.");
-            return res.sendStatus(200);
+            await replyWhatsApp(chatId, "✅ Proceso cancelado.");
+            res.status(200).end();
+            return;
         }
   
         // PERFIL
@@ -362,8 +366,8 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
             const leftUSD = incomeUSD - totalUSD;
             const today = now.toISOString().slice(0, 10);
 
-            const leftBalanceARS = leftARS < 0 ? "⚠️" : leftARS === 0 ? "☑️" : "✅";
-            const leftBalanceUSD = leftUSD < 0 ? "⚠️" : leftUSD === 0 ? "☑️" : "✅";
+            const leftBalanceARS = leftARS < 0 ? "❗️" : leftARS === 0 ? "-" : "✅";
+            const leftBalanceUSD = leftUSD < 0 ? "❗️" : leftUSD === 0 ? "-" : "✅";
 
             const m =
             `📊 *Tu Perfil Financiero*
@@ -383,8 +387,12 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
             – ARS: $${spentDayARS.toFixed(2)}
             – USD: $${spentDayUSD.toFixed(2)}`;
 
-            await reply(chatId, m, true);
-            return res.sendStatus(200);
+            // envia por WhatsApp en vez de reply()
+            await replyWhatsApp(chatId, m);
+
+            // responde 200 OK SIN CUERPO para que Twilio no reenvíe "OK"
+            res.status(200).end();
+            return;
         }
   
         // NUEVO GASTO
@@ -394,7 +402,8 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
         ) {
             await sessRef.set({ idx: 0, data: {} });
             await replyWhatsApp(chatId, `📥 Registro de nuevo gasto:\n\n${STEPS[0].question}`);
-            return res.sendStatus(200);
+            res.status(200).end();
+            return;
         }
     
         // SESIÓN ACTIVA
@@ -409,14 +418,16 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
             const num = parseFloat(ans.replace(/[^0-9,.]/g, "").replace(",", "."));
             if (isNaN(num)) {
                 await replyWhatsApp(chatId, "❌ Monto inválido, intenta de nuevo.");
-                return res.sendStatus(200);
+                res.status(200).end();
+                return;
             }
             session.data.amount = num.toFixed(2);
             } else if (step.key === "currency") {
             const cur = normalizeCurrency(ans);
             if (!cur) {
                 await replyWhatsApp(chatId, '❌ Moneda inválida. Escribe "pesos" o "dólar".');
-                return res.sendStatus(200);
+                res.status(200).end();
+                return;
             }
             session.data.currency = cur;
             } else if (step.key === "paymentMethod") {
@@ -436,7 +447,8 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
             }
             if (!pm) {
                 await replyWhatsApp(chatId, '❌ Opción inválida. Escribe 1, 2 o 3.');
-                return res.sendStatus(200);
+                res.status(200).end();
+                return;
             }
             session.data.paymentMethod = pm;
             } else if (step.key === "cardType") {
@@ -470,7 +482,8 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
             if (next < STEPS.length) {
             await sessRef.set({ idx: next, data: session.data });
             await replyWhatsApp(chatId, STEPS[next].question);
-            return res.sendStatus(200);
+            res.status(200).end();
+            return;
             }
     
             // guardar gasto
@@ -497,14 +510,16 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
     
             await replyWhatsApp(chatId, ack);
             await sessRef.delete();
-            return res.sendStatus(200);
+            res.status(200).end();
+            return;
         }
   
             return res.sendStatus(200);
         } catch (err) {
         
         console.error("❌ receiveWhatsAppMessage error", err);
-        return res.sendStatus(500);
+        res.status(500).end();
+        return;
     }
 });
 
@@ -594,7 +609,7 @@ async function replyWhatsApp(to, text) {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
-        From: "whatsapp:+14155238886", // número oficial de Twilio
+        From: "whatsapp:+19787344994", // número oficial de Twilio
         To:   `whatsapp:${to}`,
         Body: text,
       }),
