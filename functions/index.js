@@ -362,8 +362,8 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
             const leftUSD = incomeUSD - totalUSD;
             const today = now.toISOString().slice(0, 10);
 
-            const leftBalanceARS = leftARS < 0 ? "🟥" : leftARS === 0 ? "⬜️" : "🟩";
-            const leftBalanceUSD = leftUSD < 0 ? "🟥" : leftUSD === 0 ? "⬜️" : "🟩";
+            const leftBalanceARS = leftARS < 0 ? "⚠️" : leftARS === 0 ? "☑️" : "✅";
+            const leftBalanceUSD = leftUSD < 0 ? "⚠️" : leftUSD === 0 ? "☑️" : "✅";
 
             const m =
             `📊 *Tu Perfil Financiero*
@@ -500,7 +500,7 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
             return res.sendStatus(200);
         }
   
-        return res.sendStatus(200);
+            return res.sendStatus(200);
         } catch (err) {
         
         console.error("❌ receiveWhatsAppMessage error", err);
