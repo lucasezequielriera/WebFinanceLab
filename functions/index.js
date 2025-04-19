@@ -289,6 +289,225 @@ exports.receiveTelegramMessage = functions.https.onRequest(async (req, res) => {
     }
 });
 
+// Whatsapp sin OpenIA
+exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
+    try {
+        const msg = req.body.Body?.trim();
+        const chatId = req.body.From?.replace("whatsapp:", "") || "undefined";
+    
+        if (!msg || !chatId) return res.sendStatus(200);
+    
+        const textLc = msg
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+    
+        const sessRef = db.collection(SESSIONS).doc(chatId);
+        const sessSnap = await sessRef.get();
+        const session = sessSnap.exists ? sessSnap.data() : { idx: null, data: {} };
+    
+        // CANCELAR
+        if (textLc === "cancelar") {
+            await sessRef.delete();
+            await replyWhatsApp(chatId, "❎ Proceso cancelado.");
+            return res.sendStatus(200);
+        }
+  
+        // PERFIL
+        if (textLc === 'perfil') {
+            const now   = new Date();
+            const day   = now.getDate();
+            const month = now.getMonth() + 1;
+            const year  = now.getFullYear();
+
+            // 1) calcular ingresos mensuales
+            const userSnap = await db.collection('users').doc(FIREBASE_UID).get();
+            const jobs = userSnap.data()?.jobs || [];
+            let incomeARS = 0, incomeUSD = 0;
+            jobs.forEach(j => {
+                const s = parseFloat(j.salary || 0);
+                if (j.currency === 'ARS') incomeARS += s;
+                if (j.currency === 'USD') incomeUSD += s;
+            });
+
+            // 2) gastos del día
+            const expSnapDay = await db
+                .collection(`users/${FIREBASE_UID}/expenses`)
+                .where('day', '==', day)
+                .where('month', '==', month)
+                .where('year', '==', year)
+                .get();
+            let spentDayARS = 0, spentDayUSD = 0;
+            expSnapDay.forEach(d => {
+                const e = d.data(), a = parseFloat(e.amount || 0);
+                if (e.currency === 'ARS') spentDayARS += a;
+                if (e.currency === 'USD') spentDayUSD += a;
+            });
+
+            // 3) gastos del mes
+            const expSnapMonth = await db
+                .collection(`users/${FIREBASE_UID}/expenses`)
+                .where('month', '==', month)
+                .where('year', '==', year)
+                .get();
+            let totalARS = 0, totalUSD = 0;
+            expSnapMonth.forEach(d => {
+                const e = d.data(), a = parseFloat(e.amount || 0);
+                if (e.currency === 'ARS') totalARS += a;
+                if (e.currency === 'USD') totalUSD += a;
+            });
+
+            // 4) cálculo de saldo restante
+            const leftARS = incomeARS - totalARS;
+            const leftUSD = incomeUSD - totalUSD;
+            const today = now.toISOString().slice(0, 10);
+
+            const leftBalanceARS = leftARS < 0 ? "🟥" : leftARS === 0 ? "⬜️" : "🟩";
+            const leftBalanceUSD = leftUSD < 0 ? "🟥" : leftUSD === 0 ? "⬜️" : "🟩";
+
+            const m =
+            `📊 *Tu Perfil Financiero*
+
+            • Ingreso mensual (ARS): $${incomeARS.toFixed(2)}
+            • Ingreso mensual (USD): $${incomeUSD.toFixed(2)}
+
+            • Gastos del mes:
+            – ARS: $${totalARS.toFixed(2)}
+            – USD: $${totalUSD.toFixed(2)}
+
+            • Restante:
+            ${leftBalanceARS} ARS: $${leftARS.toFixed(2)}
+            ${leftBalanceUSD} USD: $${leftUSD.toFixed(2)}
+
+            • Gastos de hoy (${today}):
+            – ARS: $${spentDayARS.toFixed(2)}
+            – USD: $${spentDayUSD.toFixed(2)}`;
+
+            await reply(chatId, m, true);
+            return res.sendStatus(200);
+        }
+  
+        // NUEVO GASTO
+        if (
+            session.idx === null &&
+            (textLc.startsWith("nuevo gasto") || textLc.startsWith("gasto"))
+        ) {
+            await sessRef.set({ idx: 0, data: {} });
+            await replyWhatsApp(chatId, `📥 Registro de nuevo gasto:\n\n${STEPS[0].question}`);
+            return res.sendStatus(200);
+        }
+    
+        // SESIÓN ACTIVA
+        if (session.idx !== null) {
+            const idx = session.idx;
+            const step = STEPS[idx];
+            const ans = msg;
+    
+            if (step.key === "description") {
+            session.data.description = ans;
+            } else if (step.key === "amount") {
+            const num = parseFloat(ans.replace(/[^0-9,.]/g, "").replace(",", "."));
+            if (isNaN(num)) {
+                await replyWhatsApp(chatId, "❌ Monto inválido, intenta de nuevo.");
+                return res.sendStatus(200);
+            }
+            session.data.amount = num.toFixed(2);
+            } else if (step.key === "currency") {
+            const cur = normalizeCurrency(ans);
+            if (!cur) {
+                await replyWhatsApp(chatId, '❌ Moneda inválida. Escribe "pesos" o "dólar".');
+                return res.sendStatus(200);
+            }
+            session.data.currency = cur;
+            } else if (step.key === "paymentMethod") {
+            let pm;
+            switch (ans.trim()) {
+                case "1":
+                pm = "Cash";
+                break;
+                case "2":
+                pm = "Credit Card";
+                break;
+                case "3":
+                pm = "Debit Card";
+                break;
+                default:
+                pm = normalizePaymentMethod(ans);
+            }
+            if (!pm) {
+                await replyWhatsApp(chatId, '❌ Opción inválida. Escribe 1, 2 o 3.');
+                return res.sendStatus(200);
+            }
+            session.data.paymentMethod = pm;
+            } else if (step.key === "cardType") {
+            let ct;
+            switch (ans.trim()) {
+                case "1":
+                ct = "Visa";
+                break;
+                case "2":
+                ct = "MasterCard";
+                break;
+                case "3":
+                ct = "American Express";
+                break;
+                default:
+                ct = ans;
+            }
+            session.data.cardType = ct;
+            } else {
+            session.data[step.key] = ans;
+            }
+    
+            // siguiente paso
+            let next = idx + 1;
+            while (next < STEPS.length) {
+            const s = STEPS[next];
+            if (s.dependsOn && !s.dependsOn(session.data)) next++;
+            else break;
+            }
+    
+            if (next < STEPS.length) {
+            await sessRef.set({ idx: next, data: session.data });
+            await replyWhatsApp(chatId, STEPS[next].question);
+            return res.sendStatus(200);
+            }
+    
+            // guardar gasto
+            const now = new Date();
+            await db.collection(`users/${FIREBASE_UID}/expenses`).add({
+            ...session.data,
+            bank: session.data.bank || "N/A",
+            cardType: session.data.cardType || "N/A",
+            timestamp: admin.firestore.Timestamp.fromDate(now),
+            day: now.getDate(),
+            month: now.getMonth() + 1,
+            year: now.getFullYear(),
+            });
+    
+            let ack =
+            `✅ Gasto registrado:\n\n` +
+            `• Monto: $${session.data.amount} ${session.data.currency}\n` +
+            `• Descripción: ${session.data.description}\n` +
+            `• Categoría: ${session.data.category}\n` +
+            `• Método: ${session.data.paymentMethod}`;
+            if (["Credit Card", "Debit Card"].includes(session.data.paymentMethod)) {
+            ack += `\n• Banco: ${session.data.bank}\n• Tipo tarjeta: ${session.data.cardType}`;
+            }
+    
+            await replyWhatsApp(chatId, ack);
+            await sessRef.delete();
+            return res.sendStatus(200);
+        }
+  
+        return res.sendStatus(200);
+        } catch (err) {
+        
+        console.error("❌ receiveWhatsAppMessage error", err);
+        return res.sendStatus(500);
+    }
+});
+
 // Function para reportes diarios (necesito hacerlo mensual)
 exports.updateDailyResults = functions.pubsub.schedule('59 23 * * *').timeZone('America/Argentina/Buenos_Aires').onRun(async (context) => {
   const db = admin.firestore();
@@ -358,5 +577,26 @@ async function reply(chatId, text, markdown = false) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ chat_id: chatId, text, parse_mode: markdown ? "Markdown" : "HTML" }),
+    });
+}
+
+// helper para reenviar por Whatsapp
+async function replyWhatsApp(to, text) {
+    const accountSid = functions.config().twilio.sid;
+    const authToken  = functions.config().twilio.token;
+    const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+    const auth = Buffer.from(`${accountSid}:${authToken}`).toString("base64");
+    
+    await fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        From: "whatsapp:+14155238886", // número oficial de Twilio
+        To:   `whatsapp:${to}`,
+        Body: text,
+      }),
     });
 }
