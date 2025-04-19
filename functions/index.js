@@ -8,6 +8,8 @@ const db = admin.firestore();
 // Reemplazá esto por tu Token del Bot de Telegram
 const TELEGRAM_BOT_TOKEN = functions.config().telegram.token;
 const FIREBASE_UID       = functions.config().telegram.uid;
+const accountSid         = functions.config().twilio.sid;
+const authToken          = functions.config().twilio.token;
 const SESSIONS           = "telegramSessions";
 
 // normalize a método de pago Cash/Credit Card/Debit Card
@@ -57,7 +59,9 @@ const STEPS = [
     },
 ];
 
-// Telegram sin OpenIA
+// --------TELEGRAM---------- //
+
+// Telegram function
 exports.receiveTelegramMessage = functions.https.onRequest(async (req, res) => {
     try {
         const msg = req.body.message;
@@ -289,22 +293,59 @@ exports.receiveTelegramMessage = functions.https.onRequest(async (req, res) => {
     }
 });
 
-// Whatsapp sin OpenIA
+// -------------------------- //
+
+// ---------WHATSAPP--------- //
+
+function normalizePhone(phone) {
+    return phone.replace(/\D/g, ''); // Elimina todo excepto números
+}
+
+// Whatsapp function
 exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
     try {
         const msg = req.body.Body?.trim();
-        const chatId = req.body.From?.replace("whatsapp:", "") || "undefined";
-    
+        // extraemos sólo el número, sin prefijo "whatsapp:"
+        const chatId = req.body.From?.replace(/^whatsapp:/, '') || null;
+        console.log('chatId recibido:', chatId);
+
         if (!msg || !chatId) {
             res.status(200).end();
             return;
         }
-    
+
+        const normalizedChatId = normalizePhone(chatId);
+
+        // 1) buscamos al usuario cuyo campo "phone" coincida con chatId
+        const userQuery = await db.collection('users')
+        .where('phone', '==', normalizedChatId)
+        .limit(1)
+        .get();
+
+        if (userQuery.empty) {
+        await replyWhatsApp(chatId, `❌ Tu número no está registrado en la plataforma. -----> RESPONSE: ${chatId}`);
+        await replyWhatsApp(chatId, `❌ Tu número no está registrado en la plataforma. -----> RESPONSE: ${userQuery.empty}`);
+        res.status(200).end();
+            return;
+        }
+
+        const userDoc = userQuery.docs[0];
+        const userData = userDoc.data();
+        const uid = userDoc.id;
+
+        // 2) comprobamos su nivel de acceso
+        if (userData.user_access_level !== 1) {
+        await replyWhatsApp(chatId, "❌ No tienes permiso para registrar gastos.");
+        res.status(200).end();
+            return;
+        }
+
+        // 3) normalizamos el texto entrante
         const textLc = msg
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
-    
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
         const sessRef = db.collection(SESSIONS).doc(chatId);
         const sessSnap = await sessRef.get();
         const session = sessSnap.exists ? sessSnap.data() : { idx: null, data: {} };
@@ -325,7 +366,7 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
             const year  = now.getFullYear();
 
             // 1) calcular ingresos mensuales
-            const userSnap = await db.collection('users').doc(FIREBASE_UID).get();
+            const userSnap = await db.collection('users').doc(uid).get();
             const jobs = userSnap.data()?.jobs || [];
             let incomeARS = 0, incomeUSD = 0;
             jobs.forEach(j => {
@@ -336,7 +377,7 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
 
             // 2) gastos del día
             const expSnapDay = await db
-                .collection(`users/${FIREBASE_UID}/expenses`)
+                .collection(`users/${uid}/expenses`)
                 .where('day', '==', day)
                 .where('month', '==', month)
                 .where('year', '==', year)
@@ -350,7 +391,7 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
 
             // 3) gastos del mes
             const expSnapMonth = await db
-                .collection(`users/${FIREBASE_UID}/expenses`)
+                .collection(`users/${uid}/expenses`)
                 .where('month', '==', month)
                 .where('year', '==', year)
                 .get();
@@ -488,7 +529,7 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
     
             // guardar gasto
             const now = new Date();
-            await db.collection(`users/${FIREBASE_UID}/expenses`).add({
+            await db.collection(`users/${uid}/expenses`).add({
             ...session.data,
             bank: session.data.bank || "N/A",
             cardType: session.data.cardType || "N/A",
@@ -514,7 +555,9 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
             return;
         }
   
-            return res.sendStatus(200);
+            await replyWhatsApp(chatId, "🤖 No entendí tu mensaje. Escribí 'perfil' para ver tus finanzas o 'nuevo gasto' para registrar un gasto.");
+            res.status(200).end();
+            return;
         } catch (err) {
         
         console.error("❌ receiveWhatsAppMessage error", err);
@@ -522,6 +565,8 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
         return;
     }
 });
+
+// ---------------------------//
 
 // Function para reportes diarios (necesito hacerlo mensual)
 exports.updateDailyResults = functions.pubsub.schedule('59 23 * * *').timeZone('America/Argentina/Buenos_Aires').onRun(async (context) => {
@@ -597,8 +642,6 @@ async function reply(chatId, text, markdown = false) {
 
 // helper para reenviar por Whatsapp
 async function replyWhatsApp(to, text) {
-    const accountSid = functions.config().twilio.sid;
-    const authToken  = functions.config().twilio.token;
     const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
     const auth = Buffer.from(`${accountSid}:${authToken}`).toString("base64");
     
