@@ -57,7 +57,7 @@ const STEPS = [
     },
 ];
 
-// Telegram con OpenIA
+// Telegram sin OpenIA
 exports.receiveTelegramMessage = functions.https.onRequest(async (req, res) => {
     try {
         const msg = req.body.message;
@@ -288,8 +288,8 @@ exports.receiveTelegramMessage = functions.https.onRequest(async (req, res) => {
         return res.sendStatus(500);
     }
 });
-   
 
+// Function para reportes diarios (necesito hacerlo mensual)
 exports.updateDailyResults = functions.pubsub.schedule('59 23 * * *').timeZone('America/Argentina/Buenos_Aires').onRun(async (context) => {
   const db = admin.firestore();
   const usersSnapshot = await db.collection('users').get();
