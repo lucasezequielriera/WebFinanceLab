@@ -68,7 +68,7 @@
     "userProfile.addNewExpense.amount": "Amount",
     "userProfile.addNewExpense.currency": "Currency",
     "userProfile.addNewExpense.category": "Category",
-    "userProfile.addNewExpense.date": "Expense date",
+    "userProfile.addNewExpense.date": "Date",
     "userProfile.addNewExpense.defaultDataInputDate": "Today",
     "userProfile.addNewExpense.description": "Description",
     "userProfile.addNewExpense.paymentMethod": "Payment Method",
