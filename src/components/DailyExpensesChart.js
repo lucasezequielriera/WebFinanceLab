@@ -21,14 +21,19 @@ import {
 import dayjs from 'dayjs';
 import useIsMobile from '../hooks/useIsMobile';
 import { useTranslation } from 'react-i18next';
+import { calcHastaHoy } from '../utils/finance';
+import { getDailyLimit } from '../utils/limits';
 import 'dayjs/locale/es';
 import 'dayjs/locale/en';
 
 const DailyExpensesChart = ({ userId }) => {
   const [data, setData] = useState([]);
   const scrollRef = useRef(null);
+  const chartRef = useRef(null); // <-- nuevo ref al chart
   const isMobile = useIsMobile();
   const [expenseLimits, setExpenseLimits] = useState([]);
+  const [stats, setStats] = useState(null); // monthly status
+  const [startDay, setStartDay] = useState(1);
 
   const { i18n } = useTranslation();
   const { t } = useTranslation();
@@ -109,7 +114,7 @@ const DailyExpensesChart = ({ userId }) => {
       const approxScroll = (today - 4) * 60;
       scrollRef.current.scrollLeft = Math.max(approxScroll, 0);
     }
-  }, [data, isMobile]);
+  }, [data, isMobile]);        // se recalcula cada vez que llegan nuevos gastos  
 
   const chartWidth = Math.max(600, data.length * 60);
 
@@ -117,17 +122,47 @@ const DailyExpensesChart = ({ userId }) => {
     if (num >= 1_000_000) return `$${(num / 1_000_000).toFixed(1)}M`;
     if (num >= 1_000) return `$${(num / 1_000).toFixed(1)}k`;
     return `$${Number(num).toFixed(2)}`;
-  };  
+  };
+
+  useEffect(() => {
+    if (!data.length) return;
+  
+    (async () => {
+      const dailyLimit = await getDailyLimit(userId); // 🔹 llamada a Firebase
+      const found = data.find(d => (d.ars || 0) + (d.usd || 0) > 0);
+
+      if (!dailyLimit) return;
+  
+      const { spent, allowed } = calcHastaHoy(data, dailyLimit);
+      const today = dayjs().date();
+
+      // Cálculo //
+      const limiteUntilToday = (dailyLimit * (today - found.day));
+      const totalExpendedUntilToday = Number(spent.toFixed(2));
+      const balanced = Number((limiteUntilToday - totalExpendedUntilToday).toFixed(2))
+
+      setStats({ spent, allowed, balance: balanced });
+    })();
+  }, [data, userId]);
 
   return (
     <div style={{ position: 'relative' }}>
       <h3 style={{ marginBottom: 16, marginTop: 8, textAlign: 'center', fontWeight: 600 }}>
         {t('userProfile.dailyExpenses.title')} ({currentMonth})
+        <p>{ stats ? (stats.balance >= 0
+            ? <span style={{ fontSize: 12, color: 'green', fontWeight: 800 }}>+{stats.balance}</span>
+            : <span style={{ fontSize: 12, color: 'red', fontWeight: 800 }}>-{Math.abs(stats.balance)}</span>
+        ) : null }</p>
       </h3>
 
       {isMobile ? (
         <div ref={scrollRef} style={{ overflowX: 'auto', width: '100%', paddingBottom: 12 }}>
-          <LineChart width={chartWidth} height={300} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }} // ⬅️ más espacio arriba
+          <select value={startDay} onChange={e => setStartDay(Number(e.target.value))}>
+            {Array.from({ length: dayjs().date() }, (_, i) => i + 1)
+              .map(d => <option key={d} value={d}>{`Día ${d}`}</option>)}
+          </select>
+
+          <LineChart ref={chartRef} width={chartWidth} height={300} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }} // ⬅️ más espacio arriba
           >
             <CartesianGrid strokeDasharray="3 3" />
             {expenseLimits.map((limit, index) => {
@@ -165,7 +200,7 @@ const DailyExpensesChart = ({ userId }) => {
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }} // ⬅️ más espacio arriba
+          <LineChart ref={chartRef} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }} // ⬅️ más espacio arriba
           >
             <CartesianGrid strokeDasharray="3 3" />
             {expenseLimits.map((limit, index) => {
@@ -201,6 +236,7 @@ const DailyExpensesChart = ({ userId }) => {
           </LineChart>
         </ResponsiveContainer>
       )}
+
     </div>
   );
 };
