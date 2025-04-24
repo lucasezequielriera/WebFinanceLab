@@ -149,10 +149,11 @@ const DailyExpensesChart = ({ userId }) => {
     <div style={{ position: 'relative' }}>
       <h3 style={{ marginBottom: 16, marginTop: 8, textAlign: 'center', fontWeight: 600 }}>
         {t('userProfile.dailyExpenses.title')} ({currentMonth})
-        <p>{ stats ? (stats.balance >= 0
-            ? <span style={{ fontSize: 12, color: 'green', fontWeight: 800 }}>+{stats.balance}</span>
-            : <span style={{ fontSize: 12, color: 'red', fontWeight: 800 }}>-{Math.abs(stats.balance)}</span>
-        ) : null }</p>
+        <sup> { stats ? (stats.balance >= 0
+            ? <span style={{ fontSize: 12, color: 'green', fontWeight: 700 }}>+${stats.balance}</span>
+            : <span style={{ fontSize: 12, color: 'red', fontWeight: 700 }}>-${Math.abs(stats.balance)}</span>
+        ) : null }
+        </sup>
       </h3>
 
       {isMobile ? (
