@@ -108,7 +108,7 @@ export default function UserProfile() {
         try {
             setError("");
             setLoading(true);
-            let photoURL = userData.photoURL;
+            let photoURL = userData.photoURL || DEFAULT_PROFILE_PICTURE_URL;
                 if (croppedFile) {
                     const photoStorageRef = ref(storage, `profilePictures/${currentUser.uid}`);
                     await uploadBytes(photoStorageRef, croppedFile);
