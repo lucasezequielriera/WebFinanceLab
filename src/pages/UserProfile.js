@@ -108,7 +108,10 @@ export default function UserProfile() {
         try {
             setError("");
             setLoading(true);
+            console.log(userData)
             let photoURL = userData.photoURL || DEFAULT_PROFILE_PICTURE_URL;
+            const phoneSafe = userData.phone ?? '';   // '' o cualquier valor string
+
                 if (croppedFile) {
                     const photoStorageRef = ref(storage, `profilePictures/${currentUser.uid}`);
                     await uploadBytes(photoStorageRef, croppedFile);
@@ -124,7 +127,7 @@ export default function UserProfile() {
                 age: userData.age,
                 city: userData.city,
                 gender: userData.gender,
-                phone: userData.phone,
+                phone: phoneSafe,
                 photoURL: photoURL,
                 jobs: userData.jobs,
                 language: userData.language
