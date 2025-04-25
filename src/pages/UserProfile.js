@@ -26,9 +26,9 @@ export default function UserProfile() {
         lastName: "",
         age: "",
         city: "",
-        gender: DEFAULT_PROFILE_PICTURE_URL, // Inicializar como cadena vacía
+        gender: "", // Inicializar como cadena vacía
         phone: "",
-        photoURL: "",
+        photoURL: DEFAULT_PROFILE_PICTURE_URL,
         jobs: [],
         displayBalance: "", // valor por defecto
         language: ""
