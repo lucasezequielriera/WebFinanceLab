@@ -1,5 +1,6 @@
 const functions = require('firebase-functions');
 const admin     = require('firebase-admin');
+const { collection, where, getDocs } = require('firebase-admin').firestore;
 const fetch     = require("node-fetch");
 
 admin.initializeApp();
@@ -91,13 +92,22 @@ exports.receiveTelegramMessage = functions.https.onRequest(async (req, res) => {
             const year  = now.getFullYear();
 
             // 1) calculas el perfil SALARIO diario
-            const userSnap    = await db.collection('users').doc(FIREBASE_UID).get();
-            const jobs        = userSnap.data()?.jobs || [];
             let incomeARS = 0, incomeUSD = 0;
-            jobs.forEach(j => {
-            const s = parseFloat(j.salary || 0);
-            if (j.currency === 'ARS') incomeARS += s;
-            if (j.currency === 'USD') incomeUSD += s;
+
+            // lee documentos de la sub-colección incomes del MES ACTUAL
+            const start  = new Date(now.getFullYear(), now.getMonth(), 1);
+            const end    = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+            const incSnap = await db
+            .collection(`users/${FIREBASE_UID}/incomes`)
+            .where('timestamp', '>=', admin.firestore.Timestamp.fromDate(start))
+            .where('timestamp', '<',  admin.firestore.Timestamp.fromDate(end))
+            .get();
+
+            incSnap.forEach(d => {
+            const inc = d.data(), a = parseFloat(inc.amount || 0);
+            if (inc.currency === 'ARS') incomeARS += a;
+            if (inc.currency === 'USD') incomeUSD += a;
             });
 
             // 2) gastos HOY (ya lo tenías)
@@ -366,13 +376,20 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
             const year  = now.getFullYear();
 
             // 1) calcular ingresos mensuales
-            const userSnap = await db.collection('users').doc(uid).get();
-            const jobs = userSnap.data()?.jobs || [];
             let incomeARS = 0, incomeUSD = 0;
-            jobs.forEach(j => {
-                const s = parseFloat(j.salary || 0);
-                if (j.currency === 'ARS') incomeARS += s;
-                if (j.currency === 'USD') incomeUSD += s;
+            const start  = new Date(year, month - 1, 1);
+            const end    = new Date(year, month,     1);
+
+            const incSnap = await db
+            .collection(`users/${uid}/incomes`)
+            .where('timestamp', '>=', admin.firestore.Timestamp.fromDate(start))
+            .where('timestamp', '<',  admin.firestore.Timestamp.fromDate(end))
+            .get();
+
+            incSnap.forEach(d => {
+            const inc = d.data(), a = parseFloat(inc.amount || 0);
+            if (inc.currency === 'ARS') incomeARS += a;
+            if (inc.currency === 'USD') incomeUSD += a;
             });
 
             // 2) gastos del día

@@ -46,12 +46,13 @@ export default function UserProfile() {
     };
 
     return (
-        <Spin spinning={loading}>
-            <div className="user-profile">
-                <h2 className="title">{t('userProfile.aboutUs.title')}</h2>
-                <p style={{ whiteSpace: 'pre-line' }}>{t('userProfile.aboutUs.text')}</p>
-                <WhatsAppButton />
-            </div>
-        </Spin>
+        <div className="container-page">
+            <Spin spinning={loading}>
+                <div className="user-profile">
+                    <p style={{ whiteSpace: 'pre-line', marginTop: 10 }}>{t('userProfile.aboutUs.text')}</p>
+                    <WhatsAppButton />
+                </div>
+            </Spin>
+        </div>
     );
 }

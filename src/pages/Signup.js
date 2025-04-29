@@ -34,7 +34,6 @@ export default function Signup() {
         age: '',
         city: '',
         gender: '',
-        jobs: [],
         displayBalance: 'USD',
         user_access_level: 1
       });

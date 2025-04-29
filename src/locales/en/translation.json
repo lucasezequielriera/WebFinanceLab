@@ -12,6 +12,8 @@
     "userProfile.navbar.login": "Login",
     "userProfile.navbar.dashboard": "Dashboard",
     "userProfile.navbar.expenses": "Expenses",
+    "userProfile.navbar.detailedExpenses": "Monthly Expenses",
+    "userProfile.navbar.generalExpenses": "General Expenses",
     "userProfile.navbar.financialGoals": "Financial Goals",
     "userProfile.navbar.aboutUs": "About Us",
     "userProfile.navbar.profile": "Profile",
@@ -21,8 +23,6 @@
     "userProfile.navbar.addStock": "Add Stock",
 
     "userProfile.expenses.title": "My Expenses",
-    "userProfile.expenses.generalExpensesButton": "Monthly Expenses",
-    "userProfile.expenses.detailedExpensesButton": "Detailed Expenses",
     "userProfile.expenses.filter": "Filter:",
     "userProfile.expenses.creditCardsTitle": "Credit Cards",
     "userProfile.expenses.creditCardTitle": "Credit Card",

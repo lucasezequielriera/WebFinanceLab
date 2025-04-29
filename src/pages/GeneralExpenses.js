@@ -140,8 +140,7 @@ const GeneralExpenses = () => {
   }
 
   return (
-    <div>
-      <h1>General Expenses</h1>
+    <div className='container-page'>
       <Select
         style={{ width: 200, marginBottom: 16 }}
         placeholder="Select Month"

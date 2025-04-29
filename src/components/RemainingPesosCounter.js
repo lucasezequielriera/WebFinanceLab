@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, query, onSnapshot, where, Timestamp, doc, getDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, where, Timestamp, doc, getDoc, getDocs } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Statistic, Progress } from 'antd';
 import { DollarOutlined } from '@ant-design/icons';
@@ -34,20 +34,20 @@ const RemainingPesosCounter = () => {
       const startTimestamp = Timestamp.fromDate(startOfMonth);
       const endTimestamp = Timestamp.fromDate(endOfMonth);
 
-      // Obtener ingresos en pesos desde el array jobs dentro del documento del usuario
-      const userDocRef = doc(db, "users", currentUser.uid);
-      const userDocSnapshot = await getDoc(userDocRef);
+      // Obtener ingresos en pesos desde el array incomes dentro del documento del usuario
+      const incomesRef = collection(db, `users/${currentUser.uid}/incomes`);
+      const qIncomes = query(
+        incomesRef,
+        where('currency', '==', 'ARS'),
+        where('timestamp', '>=', startTimestamp),
+        where('timestamp', '<',  endTimestamp)
+      );
+
       let income = 0;
-      if (userDocSnapshot.exists()) {
-        const userData = userDocSnapshot.data();
-        if (userData.jobs) {
-          userData.jobs.forEach((job) => {
-            if (job.currency === 'ARS') {
-              income += Number(job.salary);
-            }
-          });
-        }
-      }
+      const snapIncomes = await getDocs(qIncomes);
+      snapIncomes.forEach(d => {
+        income += Number(d.data().amount);
+      });
       setTotalIncome(income);
 
       // Obtener expenses en pesos del mes actual

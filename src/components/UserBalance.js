@@ -1,9 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
+import { db } from '../firebase';
+import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
+import dayjs from 'dayjs';
 
 const UserBalance = ({ userInfo, monthlyExpenses }) => {
-    const [dollarBlue, setDollarBlue] = useState(1100); // valor default    
+    const [dollarBlue, setDollarBlue] = useState(1100); // valor default
+    const [incomes, setIncomes] = useState([]);    
 
+    useEffect(() => {
+      if (!userInfo?.uid) return;           // uid viene en userInfo
+    
+      const start = dayjs().startOf('month').toDate();
+      const end   = dayjs().endOf('month').toDate();
+    
+      const q = query(
+        collection(db, `users/${userInfo.uid}/incomes`),
+        where('timestamp', '>=', Timestamp.fromDate(start)),
+        where('timestamp', '<',  Timestamp.fromDate(end))
+      );
+    
+      const unsub = onSnapshot(q, snap => {
+        const rows = snap.docs.map(d => d.data());
+        setIncomes(rows);
+      });
+    
+      return () => unsub();
+    }, [userInfo?.uid]);
+    
     useEffect(() => {
         fetch('https://dolarapi.com/v1/dolares/blue')
         .then(res => res.json())
@@ -30,10 +54,10 @@ const UserBalance = ({ userInfo, monthlyExpenses }) => {
     let totalUSD = 0;
 
     // Sumá ingresos
-    userInfo.jobs?.forEach((job) => {
-      const salary = parseNumber(job.salary);
-      if (job.currency === "ARS") totalARS += salary;
-      if (job.currency === "USD") totalUSD += salary;
+    incomes.forEach((inc) => {
+      const amt = parseNumber(inc.amount);
+      if (inc.currency === "ARS") totalARS += amt;
+      if (inc.currency === "USD") totalUSD += amt;
     });
 
     // Filtrá solo los gastos del mes actual

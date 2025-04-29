@@ -11,6 +11,7 @@ import RemainingDollarsCounter from '../components/RemainingDollarsCounter';
 import DailyExpensesChart from '../components/DailyExpensesChart';
 import UserBalance from '../components/UserBalance';
 import { useTranslation } from 'react-i18next';
+import AccountTypeBadge from '../components/AccountTypeBadge';
 import '../styles/Dashboard.css'; // Importa el archivo CSS para los estilos
 
 const Dashboard = () => {
@@ -22,11 +23,37 @@ const Dashboard = () => {
   const [form] = Form.useForm();
   const [userInfo, setUserInfo] = useState(null);
   const [expenses, setExpenses] = useState([]);
+  const [userData, setUserData] = useState();
 
   const { t } = useTranslation();
 
   const DEFAULT_PROFILE_PICTURE_URL =
     "https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/profilePictures%2Fimage.png?alt=media&token=c7f97e78-1aa1-4b87-9c7a-a5ebe6087b3d";
+
+  useEffect(() => {
+    let isMounted = true;
+  
+    const fetchUserData = async () => {
+      if (currentUser) {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          console.log(userData)
+  
+          if (!isMounted) return;
+  
+          setUserData(data);
+        }
+      }
+    };
+  
+    fetchUserData();
+  
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser]);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -151,133 +178,128 @@ const Dashboard = () => {
   };
 
   return (
-    <Spin spinning={loading}>
-      <div className="dashboard-container">
-        <div className='margin-bottom-medium' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <img
-              src={currentUser?.photoURL || DEFAULT_PROFILE_PICTURE_URL}
-              alt="profile"
-              width={40}
-              height={40}
-              style={{
-                borderRadius: '50%',
-                objectFit: 'cover',
-                boxShadow: '0 0 6px rgba(0,0,0,0.1)'
-              }}
-            />
-            <h1 className="dashboard-title" style={{ marginBottom: 0 }}>{t('userProfile.title')}, {currentUser?.displayName || t('userProfile.username')}</h1>
+    <div className='container-page'>
+      <Spin spinning={loading}>
+        <div className="dashboard-container">
+          <div className='margin-bottom-medium' style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+            {/* <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <h1 className="dashboard-title" style={{ marginBottom: 0 }}>{t('userProfile.title')}, {currentUser?.displayName || t('userProfile.username')}</h1>
+              <AccountTypeBadge type={userData?.user_access_level === 0 ? 'admin'
+              : userData?.user_access_level === 2 ? 'premium'
+              : userData?.user_access_level === 3 ? 'gold'
+              : 'free'} />
+            </div> */}
+            {/* <div className="balance-box">
+              <UserBalance userInfo={userInfo} monthlyExpenses={expenses} />
+            </div> */}
           </div>
-          <div className="balance-box">
-            <UserBalance userInfo={userInfo} monthlyExpenses={expenses} />
-          </div>
-        </div>
-        <Row className="expenses-counters margin-bottom-large" gutter={[16, 16]}>
-          <Col xs={24} sm={12}>
-            <Card className="equal-height-card">
-              <RemainingPesosCounter />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Card className="equal-height-card">
-              <RemainingDollarsCounter />
-            </Card>
-          </Col>
-        </Row>
-        <Row className="remainings-counters margin-bottom-large" gutter={[16, 16]}>
-          <Col xs={24} sm={12}>
-            <Card className="equal-height-card">
-              <PesoExpenseCounter />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Card className="equal-height-card">
-              <DollarExpenseCounter />
-            </Card>
-          </Col>
-        </Row>
-        {targets.length > 0 && (
-          <>
-            <h2 style={{ fontWeight: 200 }}>Targets:</h2>
-            <Row className="targets-cards margin-bottom-large" gutter={[16, 16]}>
-              {targets.map((target, index) => (
-                <Col xs={24} sm={24} md={12} key={index}>
-                  <Card className="equal-height-card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                      <h2>{target.description}</h2>
-                      <div>
-                        {target.status !== 'Completed' && (
-                          <DeleteTwoTone
-                            style={{ fontSize: 20, cursor: 'pointer' }}
-                            twoToneColor="#eb2f96"
-                            onClick={() => handleDeleteTarget(target.id)}
-                          />
-                        )}
-                        {target.status !== 'Completed' ? (
-                          <DollarTwoTone
-                            style={{ fontSize: 20, marginLeft: 8, cursor: 'pointer' }}
-                            twoToneColor={target.status === 'Completed' && "#00b100"}
-                            spin={target.status === 'Pending' ? false : true}
-                            onClick={() => showEditModal(target)}
-                          />
-                        ) : (
-                          <CheckCircleTwoTone style={{ fontSize: 20 }} twoToneColor={"#00b100"} />
-                        )}
+          <Row className="expenses-counters margin-bottom-large" gutter={[16, 16]}>
+            <Col xs={24} sm={12} md={6}>
+              <Card className="equal-height-card">
+                <RemainingPesosCounter />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} md={6}>
+              <Card className="equal-height-card">
+                <RemainingDollarsCounter />
+              </Card>
+            </Col>
+          </Row>
+          <Row className="remainings-counters margin-bottom-large" gutter={[16, 16]}>
+            <Col xs={24} sm={12} md={6}>
+              <Card className="equal-height-card">
+                <PesoExpenseCounter />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} md={6}>
+              <Card className="equal-height-card">
+                <DollarExpenseCounter />
+              </Card>
+            </Col>
+          </Row>
+          {targets.length > 0 && (
+            <>
+              <h2 style={{ fontWeight: 200 }}>Targets:</h2>
+              <Row className="targets-cards margin-bottom-large" gutter={[16, 16]}>
+                {targets.map((target, index) => (
+                  <Col xs={24} sm={24} md={12} key={index}>
+                    <Card className="equal-height-card">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                        <h2>{target.description}</h2>
+                        <div>
+                          {target.status !== 'Completed' && (
+                            <DeleteTwoTone
+                              style={{ fontSize: 20, cursor: 'pointer' }}
+                              twoToneColor="#eb2f96"
+                              onClick={() => handleDeleteTarget(target.id)}
+                            />
+                          )}
+                          {target.status !== 'Completed' ? (
+                            <DollarTwoTone
+                              style={{ fontSize: 20, marginLeft: 8, cursor: 'pointer' }}
+                              twoToneColor={target.status === 'Completed' && "#00b100"}
+                              spin={target.status === 'Pending' ? false : true}
+                              onClick={() => showEditModal(target)}
+                            />
+                          ) : (
+                            <CheckCircleTwoTone style={{ fontSize: 20 }} twoToneColor={"#00b100"} />
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <Flex vertical>
-                      <Progress
-                        percent={Number((target.currentAmount / target.target * 100).toFixed(2))}
-                        status={target.status === 'Started' && "active"}
-                        showInfo={false}
-                      />
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>{target.currentAmount} / {target.target} {target.currency}</span>
-                        <span style={{ fontWeight: 600, color: target.status === 'Completed' && 'green' }}>
-                          {(target.currentAmount / target.target * 100).toFixed(2)}%
-                        </span>
-                      </div>
-                      {/* <span>Status: {target.status}</span> */}
-                    </Flex>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          </>
-        )}
-        { currentUser && (
-        <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 30, marginRight: 0, marginLeft: 0 }}>
-          <Col span={24} style={{ padding: 0 }}>
-            <Card>
-              <DailyExpensesChart userId={currentUser?.uid} />
-            </Card>
-          </Col>
-        </Row>
-        )}
+                      <Flex vertical>
+                        <Progress
+                          percent={Number((target.currentAmount / target.target * 100).toFixed(2))}
+                          status={target.status === 'Started' && "active"}
+                          showInfo={false}
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>{target.currentAmount} / {target.target} {target.currency}</span>
+                          <span style={{ fontWeight: 600, color: target.status === 'Completed' && 'green' }}>
+                            {(target.currentAmount / target.target * 100).toFixed(2)}%
+                          </span>
+                        </div>
+                        {/* <span>Status: {target.status}</span> */}
+                      </Flex>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </>
+          )}
+          { currentUser && (
+          <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 30, marginRight: 0, marginLeft: 0 }}>
+            <Col span={24} style={{ padding: 0 }}>
+              <Card>
+                <DailyExpensesChart userId={currentUser?.uid} />
+              </Card>
+            </Col>
+          </Row>
+          )}
 
-        <Modal
-          title="Add Money"
-          open={isEditModalVisible}
-          onCancel={handleCancel}
-          footer={null}
-        >
-          <Form form={form} layout="vertical" onFinish={handleUpdateTarget}>
-            <Form.Item
-              name="amount"
-              label="Add Amount"
-              rules={[{ required: true, message: 'Please input the amount to add!' }]}
-            >
-              <Input type="number" placeholder="Enter amount" />
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Add Money
-              </Button>
-            </Form.Item>
-          </Form>
-        </Modal>
-      </div>
-    </Spin>
+          <Modal
+            title="Add Money"
+            open={isEditModalVisible}
+            onCancel={handleCancel}
+            footer={null}
+          >
+            <Form form={form} layout="vertical" onFinish={handleUpdateTarget}>
+              <Form.Item
+                name="amount"
+                label="Add Amount"
+                rules={[{ required: true, message: 'Please input the amount to add!' }]}
+              >
+                <Input type="number" placeholder="Enter amount" />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Add Money
+                </Button>
+              </Form.Item>
+            </Form>
+          </Modal>
+        </div>
+      </Spin>
+    </div>
   );
 };
 

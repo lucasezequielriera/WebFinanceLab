@@ -174,10 +174,7 @@ const MonthlyExpensesPage = () => {
   }
 
   return (
-    <div>
-      <Button type="primary" onClick={() => navigate('/detailed-expenses')} style={{ marginBottom: '16px' }}>
-        Volver
-      </Button>
+    <div className='container-page'>
       <h1>Expenses for {month}</h1>
       <Row gutter={[16, 16]}>
         {Object.entries(groupedExpenses).map(([category, expenses], index) => {

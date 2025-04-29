@@ -173,47 +173,48 @@ const Expenses = () => {
 `;
 
   return (
-    <Spin spinning={loading}>
-      <div className='title-and-buttons' style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <h1 className='title' style={{ fontSize: 30, fontWeight: 300 }}>{t('userProfile.expenses.title')}</h1>
-        <div className="buttons">
-          <Button onClick={() => navigate('/general-expenses')}>
-            {t('userProfile.expenses.generalExpensesButton')}
-          </Button>
-          <Button onClick={() => navigate('/detailed-expenses')}>
-          {t('userProfile.expenses.detailedExpensesButton')}
-          </Button>
+    <div className='container-page'>
+      <Spin spinning={loading}>
+        <div className='title-and-buttons' style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+          <div className="buttons">
+            <Button onClick={() => navigate('/general-expenses')}>
+              {t('userProfile.expenses.generalExpensesButton')}
+            </Button>
+            <Button onClick={() => navigate('/detailed-expenses')}>
+            {t('userProfile.expenses.detailedExpensesButton')}
+            </Button>
+          </div>
         </div>
-      </div>
-      <div className="filter" style={{ marginBottom: 24 }}>
-        <span style={{marginRight: 5 }}>{t('userProfile.expenses.filter')}</span> 
-        <StyledDatePicker
-          picker="month"
-          allowClear={false} // ✅ con esto ya no te tira error
-          value={selectedMonth}
-          onChange={(value) => setSelectedMonth(value)}
-          style={{ margin: 0 }}
-        />
-      </div>
-      { noCards ? (
-        <div style={{ marginTop: 40 }}>
-          <Empty description="No hay gastos registrados en este mes" />
+        <div className="filter" style={{ marginBottom: 24 }}>
+          <span style={{marginRight: 5 }}>{t('userProfile.expenses.filter')}</span> 
+          <StyledDatePicker
+            picker="month"
+            allowClear={false} // ✅ con esto ya no te tira error
+            value={selectedMonth}
+            onChange={(value) => setSelectedMonth(value)}
+            style={{ margin: 0 }}
+          />
         </div>
-        ) : (
-          <>
-            <div className='cards margin-top-large margin-bottom-large'>
-              {renderSection(getTitle('credit', creditCards.length), creditCards)}
-            </div>
-            <div className='cards margin-top-large margin-bottom-large'>
-              {renderSection(getTitle('debit', debitCards.length), debitCards)}
-            </div>
-            <div className='cards margin-top-large margin-bottom-large'>
-              {renderSection(getTitle('cash', cashCards.length), cashCards)}
-            </div>
-          </>
-        )
-      }
-    </Spin>
+        { noCards ? (
+          <div style={{ marginTop: 40 }}>
+            <Empty description="No hay gastos registrados en este mes" />
+          </div>
+          ) : (
+            <>
+              <div className='cards margin-top-large margin-bottom-large'>
+                {renderSection(getTitle('credit', creditCards.length), creditCards)}
+              </div>
+              <div className='cards margin-top-large margin-bottom-large'>
+                {renderSection(getTitle('debit', debitCards.length), debitCards)}
+              </div>
+              <div className='cards margin-top-large margin-bottom-large'>
+                {renderSection(getTitle('cash', cashCards.length), cashCards)}
+              </div>
+            </>
+          )
+        }
+      </Spin>
+    </div>
   );
 };
 

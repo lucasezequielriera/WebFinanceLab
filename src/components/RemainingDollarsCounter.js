@@ -24,25 +24,6 @@ const RemainingDollarsCounter = () => {
   useEffect(() => {
     if (!currentUser) return;
 
-    // Obtener ingresos en dólares desde el array jobs dentro del documento del usuario
-    const userDocRef = doc(db, "users", currentUser.uid);
-
-    getDoc(userDocRef).then((docSnapshot) => {
-      if (docSnapshot.exists()) {
-        const userData = docSnapshot.data();
-        let income = 0;
-        if (userData.jobs) {
-          userData.jobs.forEach((job) => {
-            if (job.currency === 'USD') {
-              income += Number(job.salary);
-            }
-          });
-        }
-
-        setTotalIncome(income);
-      }
-    });
-
     // Calcular fechas de inicio y fin del mes actual
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -50,6 +31,23 @@ const RemainingDollarsCounter = () => {
 
     const startTimestamp = Timestamp.fromDate(startOfMonth);
     const endTimestamp = Timestamp.fromDate(endOfMonth);
+
+    // ── ingresos en USD del mes actual (colección incomes) ──
+    const incomesRef = collection(db, `users/${currentUser.uid}/incomes`);
+    const qIncomes = query(
+      incomesRef,
+      where('currency', '==', 'USD'),
+      where('timestamp', '>=', startTimestamp),
+      where('timestamp', '<',  endTimestamp)
+    );
+
+    const unsubscribeIncomes = onSnapshot(qIncomes, (snap) => {
+      let income = 0;
+      snap.forEach((d) => {
+        income += Number(d.data().amount);     // ← usa amount, no salary
+      });
+      setTotalIncome(income);
+    });
 
     // Obtener expenses en dólares del mes actual
     const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
@@ -68,6 +66,7 @@ const RemainingDollarsCounter = () => {
 
     return () => {
       unsubscribeExpenses();
+      unsubscribeIncomes();
     };
   }, [currentUser]);
 

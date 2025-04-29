@@ -16,6 +16,9 @@ import AddTarget from './components/AddTarget';
 import Expenses from './pages/Expenses'; // Importa el nuevo componente
 import AboutUs from './pages/AboutUs';
 import FinancialGoals from './pages/FinancialGoals';
+import AccountTypeBadge from './components/AccountTypeBadge';
+import { db } from './firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
 // Importaciones de AntD
@@ -36,14 +39,39 @@ const RedirectIfAuthenticated = ({ children }) => {
 };
 
 const AppLayout = () => {
-  const { currentUser, logout } = useAuth();
+  const {currentUser, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [expenses, setExpenses] = useState([]);
   const location = useLocation();
   const [selectedKey, setSelectedKey] = useState('1');
+  const [userData, setUserData] = useState();
 
   const { t } = useTranslation();
+
+  useEffect(() => {
+    let isMounted = true;
+  
+    const fetchUserData = async () => {
+      if (currentUser) {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+  
+          if (!isMounted) return;
+  
+          setUserData(data);
+        }
+      }
+    };
+  
+    fetchUserData();
+  
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser]);
 
   useEffect(() => {
     const path = location.pathname;
@@ -151,6 +179,18 @@ const AppLayout = () => {
     }
   ];
 
+  // --- título según la ruta ---
+  const getPageTitle = () => {
+    if (location.pathname.startsWith('/dashboard'))        return t('userProfile.navbar.dashboard');
+    if (location.pathname.startsWith('/expenses'))         return t('userProfile.navbar.expenses');
+    if (location.pathname.startsWith('/financial-goals'))  return t('userProfile.navbar.financialGoals');
+    if (location.pathname.startsWith('/about-us'))         return t('userProfile.navbar.aboutUs');
+    if (location.pathname.startsWith('/profile'))          return t('userProfile.navbar.profile');
+    if (location.pathname.startsWith('/detailed-expenses'))return t('userProfile.navbar.detailedExpenses');
+    if (location.pathname.startsWith('/general-expenses')) return t('userProfile.navbar.generalExpenses');
+    return '';
+  };
+
   const filteredMenuItems = menuItems.filter(item => !item.hidden);
 
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/forgot-password';
@@ -189,7 +229,15 @@ const AppLayout = () => {
             onClick: toggle,
           })}
         </Header>
-        <Content style={{ padding: isAuthPage ? '0' : '24px', background: isAuthPage ? 'linear-gradient(135deg, #001123, #4094e9)' : 'transparent', minHeight: 280, paddingBottom: 50 }}>
+        <Content style={{ padding: 0, background: isAuthPage ? 'linear-gradient(135deg, #001123, #4094e9)' : 'transparent', minHeight: 280, paddingBottom: 50 }}>
+          { !isAuthPage &&
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 80, background: 'linear-gradient(90deg, rgb(0 68 121), rgb(0 163 137), rgb(0, 191, 145))', padding: '0px 20px' }}>
+            <span style={{ fontSize: '20px', fontWeight: 500, color: 'white' }}>{getPageTitle()}</span>
+            <AccountTypeBadge type={userData?.user_access_level === 0 ? 'admin'
+            : userData?.user_access_level === 2 ? 'premium'
+            : userData?.user_access_level === 3 ? 'gold'
+            : 'free'} />
+          </div> }
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard expenses={expenses} handleExpenseAdded={handleExpenseAdded} /></PrivateRoute>} />

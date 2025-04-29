@@ -51,7 +51,7 @@ const DetailedExpenses = () => {
   }
 
   return (
-    <div>
+    <div className='container-page'>
       <h1>Select a Month</h1>
       <List
         bordered

@@ -11,6 +11,10 @@ code {
 
 /* PAGES */
 
+.container-page {
+  padding: 10px 20px;
+}
+
 /* User Profile */
 
 .user-profile {
