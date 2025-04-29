@@ -56,12 +56,48 @@
     "userProfile.profile.lastName": "Last Name",
     "userProfile.profile.age": "Age",
     "userProfile.profile.city": "City",
+    "userProfile.profile.country": "Country",
     "userProfile.profile.phone": "Phone",
-    "userProfile.profile.gender": "Gender",
+    "userProfile.profile.gender": {
+        "label": "Gender",
+        "male": "Male",
+        "female": "Female",
+        "other": "Otro"
+    },
     "userProfile.profile.balanceDisplay": "Balance Display",
-    "userProfile.profile.language": "Language",
+    "userProfile.profile.accountType": {
+        "label": "Account Type",
+        "user_access_level_0": "Administrator",
+        "user_access_level_1": "Free",
+        "user_access_level_2": "Premium",
+        "user_access_level_3": "Black"
+    },
+    "userProfile.profile.language": {
+        "label": "Language",
+        "es": "Spanish",
+        "en": "English"
+    },
     "userProfile.profile.button": "Save changes",
     "userProfile.profile.currentIncomes": "Current Incomes",
+    "userProfile.profile.currentIncomesModal": {
+        "title": "Nuevo Ingreso"
+    },
+    "userProfile.profile.currentIncomesTable": {
+        "jobTitle": "Job Title",
+        "currency": "Currency",
+        "salary": "Salary",
+        "contractType": {
+            "label": "Contract Type",
+            "employed": "Employed",
+            "selfEmployed": "Self Employed",
+            "contractor": "Contractor"
+        },
+        "actions": "Actions",
+        "deleteButton": "Delete",
+        "editButton": "Edit",
+        "confirmButton": "Save",
+        "cancelButton": "Cancel"
+    },
 
     "userProfile.addNewExpense.title": "Add New Expense",
     "userProfile.addNewExpense.subtitle": "Quickly log your expense and keep your finances on track.",
@@ -86,6 +122,4 @@
     },
 
     "userProfile.comingSoon": "Coming Soon"
-
-  }
-  
+}

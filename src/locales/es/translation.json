@@ -56,12 +56,48 @@
     "userProfile.profile.lastName": "Apellido/s",
     "userProfile.profile.age": "Edad",
     "userProfile.profile.city": "Ciudad",
+    "userProfile.profile.country": "País",
     "userProfile.profile.phone": "Teléfono",
-    "userProfile.profile.gender": "Género",
+    "userProfile.profile.gender": {
+        "label": "Género",
+        "male": "Masculino",
+        "female": "Femenino",
+        "other": "Otro"
+    },
     "userProfile.profile.balanceDisplay": "Moneda de Visualización",
-    "userProfile.profile.language": "Idioma",
+    "userProfile.profile.accountType": {
+        "label": "Tipo de Cuenta",
+        "user_access_level_0": "Administrador",
+        "user_access_level_1": "Gratuita",
+        "user_access_level_2": "Premium",
+        "user_access_level_3": "Black"
+    },
+    "userProfile.profile.language": {
+        "label": "Idioma",
+        "es": "Español",
+        "en": "Ingles"
+    },
     "userProfile.profile.button": "Guardar cambios",
     "userProfile.profile.currentIncomes": "Ingresos Actuales",
+    "userProfile.profile.currentIncomesModal": {
+        "title": "Nuevo Ingreso"
+    },
+    "userProfile.profile.currentIncomesTable": {
+        "jobTitle": "Trabajo",
+        "currency": "Moneda",
+        "salary": "Monto",
+        "contractType": {
+            "label": "Tipo de Contrato",
+            "employed": "Empleado",
+            "selfEmployed": "Independiente",
+            "contractor": "Contractor"
+        },
+        "actions": "Acciones",
+        "deleteButton": "Borrar",
+        "editButton": "Editar",
+        "confirmButton": "Guardar",
+        "cancelButton": "Cancelar"
+    },
 
     "userProfile.addNewExpense.title": "Agregar Nuevo Gasto",
     "userProfile.addNewExpense.subtitle": "Registre rápidamente sus gastos y mantenga sus finanzas al día.",
@@ -86,5 +122,4 @@
     },
 
     "userProfile.comingSoon": "Próximamente"
-  }
-  
+}

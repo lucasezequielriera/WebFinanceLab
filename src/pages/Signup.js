@@ -35,7 +35,8 @@ export default function Signup() {
         city: '',
         gender: '',
         jobs: [],
-        displayBalance: 'USD'
+        displayBalance: 'USD',
+        user_access_level: 1
       });
       navigate('/dashboard');
     } catch (err) {

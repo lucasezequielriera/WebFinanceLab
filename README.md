@@ -1,4 +1,4 @@
-Steps:
+** STEPS TO PUSH THE REPOSITORY TO GITHUB AND FIREBASE **
 
 // Changes to Github
 1) git add .
@@ -15,4 +15,9 @@ npm i
 5) firebase deploy
 5) a) if I did changes only in functions (e.g. telegram) -> firebase deploy --only functions
 
-** REPOSITORY UPDATED IN LOCAL & GITHUB **
+** LEVELS **
+
+- LV 0 (Admin Account)
+- LV 1 (Free Account)
+- LV 2 (Premium Account (Telegram & Whatsapp Actived))
+- LV 3 (Black Account)

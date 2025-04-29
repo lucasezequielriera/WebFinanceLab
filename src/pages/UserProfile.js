@@ -6,12 +6,18 @@ import { doc, getDoc, updateDoc } from "firebase/firestore"; // Importa Firestor
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Importa Storage
 // import { useNavigate } from "react-router-dom";
 import { PlusOutlined } from '@ant-design/icons';
-import { notification, Button, Input, Select, Table, Modal, Form, Spin, message, Row, Col } from 'antd';
+import { notification, Button, Input, Select, Table, Modal, Form, Spin, message, Row, Col, Tag } from 'antd';
 import ImageCropper from '../components/ImageCropper';
 import i18n from '../i18n'; // o './i18n' según la ruta correcta a tu archivo i18n.js
 import { useTranslation } from "react-i18next";
 import "../index.css"
 import "../styles/UserProfile.css"; // Importa el archivo CSS
+import countries   from 'i18n-iso-countries';
+import en          from 'i18n-iso-countries/langs/en.json';
+import es          from 'i18n-iso-countries/langs/es.json';
+
+countries.registerLocale(en);
+countries.registerLocale(es);
 
 const { Option } = Select;
 
@@ -26,6 +32,7 @@ export default function UserProfile() {
         lastName: "",
         age: "",
         city: "",
+        country: "",
         gender: "", // Inicializar como cadena vacía
         phone: "",
         photoURL: DEFAULT_PROFILE_PICTURE_URL,
@@ -52,8 +59,23 @@ export default function UserProfile() {
     const [imageToCrop, setImageToCrop] = useState(null);
     const [croppedFile, setCroppedFile] = useState(null);
     const [cropModalVisible, setCropModalVisible] = useState(false);
+    const [countryOptions, setCountryOptions] = useState([]);
 
     const { t } = useTranslation();
+
+    const ACCOUNT_TYPE = {
+        0: t('userProfile.profile.accountType.user_access_level_0'),
+        1: t('userProfile.profile.accountType.user_access_level_1'),
+        2: t('userProfile.profile.accountType.user_access_level_2'),
+        3: t('userProfile.profile.accountType.user_access_level_3'),
+    };
+
+    const selectCurrency = (
+        <Select defaultValue={userData.language === "es" ? "ARS" : "USD"}>
+          <Option value="ARS">ARS</Option>
+          <Option value="USD">USD</Option>
+        </Select>
+    );
 
     useEffect(() => {
         let isMounted = true;
@@ -64,6 +86,7 @@ export default function UserProfile() {
             const userDoc = await getDoc(userDocRef);
             if (userDoc.exists()) {
               const data = userDoc.data();
+              console.log(userData)
       
               if (!isMounted) return;
       
@@ -102,6 +125,17 @@ export default function UserProfile() {
         }
     }, [userData, imageLoading, initialUserData]);
 
+    useEffect(() => {
+        const locale   = i18n.language.toLowerCase();     // 'en'  ó 'es'
+        const namesObj = countries.getNames(locale, { select: 'official' });
+      
+        const opts = Object.entries(namesObj)
+          .map(([code, name]) => ({ value: name, label: name })) // value = string
+          .sort((a, b) => a.label.localeCompare(b.label, locale));
+      
+        setCountryOptions(opts);
+    }, [i18n.language]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -126,6 +160,7 @@ export default function UserProfile() {
                 lastName: userData.lastName,
                 age: userData.age,
                 city: userData.city,
+                country: userData.country || "",
                 gender: userData.gender,
                 phone: phoneSafe,
                 photoURL: photoURL,
@@ -288,7 +323,7 @@ export default function UserProfile() {
 
     const columns = [
         {
-            title: 'Job Title',
+            title: t('userProfile.profile.currentIncomesTable.jobTitle'),
             dataIndex: 'title',
             key: 'title',
             width: '20%',
@@ -300,7 +335,7 @@ export default function UserProfile() {
             ),
         },
         {
-            title: 'Currency',
+            title: t('userProfile.profile.currentIncomesTable.currency'),
             dataIndex: 'currency',
             key: 'currency',
             width: '20%',
@@ -314,41 +349,44 @@ export default function UserProfile() {
             ),
         },
         {
-            title: 'Salary',
+            title: t('userProfile.profile.currentIncomesTable.salary'),
             dataIndex: 'salary',
             key: 'salary',
             width: '20%',
             render: (text, record, index) => (
                 editJobIndex === index ? 
-                <Input name="salary" value={editJobData.salary} onChange={handleEditJobChange} /> :
-                text
+                <Input name="salary" prefix="$" value={editJobData.salary} onChange={handleEditJobChange} /> :
+                "$ "+text
             ),
         },
         {
-            title: 'Contract Type',
+            title: t('userProfile.profile.currentIncomesTable.contractType.label'),
             dataIndex: 'type',
             key: 'type',
             width: '20%',
             render: (text, record, index) => (
                 editJobIndex === index ? 
                 <Select name="type" value={editJobData.type} onChange={(value) => setEditJobData(prevData => ({ ...prevData, type: value }))}>
-                    <Option value="employed">Employed</Option>
-                    <Option value="self-employed">Self-Employed</Option>
+                    <Option value="employed">{t('userProfile.profile.currentIncomesTable.contractType.employed')}</Option>
+                    <Option value="self-employed">{t('userProfile.profile.currentIncomesTable.contractType.selfEmployed')}</Option>
+                    <Option value="contractor">{t('userProfile.profile.currentIncomesTable.contractType.contractor')}</Option>
                 </Select> :
-                text
+                ( text === "employed" ? t('userProfile.profile.currentIncomesTable.contractType.employed')
+                : text === "self-employed" ? t('userProfile.profile.currentIncomesTable.contractType.selfEmployed')
+                : t('userProfile.profile.currentIncomesTable.contractType.contractor') )
             ),
             responsive: ['md'], // Hide column in extra-small view
         },
         {
-            title: 'Actions',
+            title: t('userProfile.profile.currentIncomesTable.actions'),
             key: 'actions',
             width: '20%',
             render: (_, record, index) => (
                 editJobIndex === index ? 
-                <div style={{ textAlign: 'center' }}><Button type="link" onClick={handleConfirmEditJob} style={{ color: 'green', border: '1px solid green' }}>Confirm</Button></div> :
-                    <div style={{ textAlign: 'center' }}>
-                        <Button type="link" onClick={() => handleEditJob(index)}>Edit</Button>
-                        <Button type="primary" onClick={() => handleDeleteJob(index)} danger ghost>Delete</Button>
+                <div style={{ textAlign: 'left' }}><Button type="link" onClick={handleConfirmEditJob} style={{ color: 'green', border: '1px solid green' }}>{t('userProfile.profile.currentIncomesTable.confirmButton')}</Button></div> :
+                    <div style={{ textAlign: 'left' }}>
+                        <Button type="primary" onClick={() => handleEditJob(index)} ghost style={{ marginRight: 5 }}>{t('userProfile.profile.currentIncomesTable.editButton')}</Button>
+                        <Button type="primary" onClick={() => handleDeleteJob(index)} danger ghost>{t('userProfile.profile.currentIncomesTable.deleteButton')}</Button>
                     </div>
             ),
             responsive: ['md'], // Hide column in extra-small view
@@ -393,7 +431,9 @@ export default function UserProfile() {
         } finally {
           setUpdatingPassword(false);
         }
-    };        
+    };
+
+    console.log(userData)
 
     return (
         <Spin spinning={loading}>
@@ -435,36 +475,93 @@ export default function UserProfile() {
                     </div>
                     <div className="display-flex center">
                         <div className="display-flex w-200" style={{ flexFlow: "column" }}>
-                            <label className="label-small">{t('userProfile.profile.firstName')}</label>
-                            <Input type="text" className="margin-bottom-small"
-                                name="firstName"
-                                value={userData.firstName}
-                                onChange={handleChange}
-                                placeholder="First Name"
-                                required
-                            />
-                            <label className="label-small">{t('userProfile.profile.lastName')}</label>
-                            <Input type="text" className="margin-bottom-small"
-                                name="lastName"
-                                value={userData.lastName}
-                                onChange={handleChange}
-                                placeholder="Last Name"
-                                required
-                            />
-                            <label className="label-small">{t('userProfile.profile.age')}</label>
-                            <Input type="number" className="margin-bottom-small"
-                                name="age"
-                                value={userData.age}
-                                onChange={handleChange}
-                                placeholder="Age"
-                            />
-                            <label className="label-small">{t('userProfile.profile.city')}</label>
-                            <Input type="text" className="margin-bottom-small"
-                                name="city"
-                                value={userData.city}
-                                onChange={handleChange}
-                                placeholder="City"
-                            />
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <label className="label-small">{t('userProfile.profile.firstName')}</label>
+                                    <Input type="text" className="margin-bottom-small"
+                                        name="firstName"
+                                        style={{ marginTop: 3}}
+                                        value={userData.firstName}
+                                        onChange={handleChange}
+                                        placeholder="First Name"
+                                        required
+                                    />
+                                </Col>
+                                <Col span={12}>
+                                    <label className="label-small">{t('userProfile.profile.lastName')}</label>
+                                    <Input type="text" className="margin-bottom-small"
+                                        name="lastName"
+                                        style={{ marginTop: 3}}
+                                        value={userData.lastName}
+                                        onChange={handleChange}
+                                        placeholder="Last Name"
+                                        required
+                                    />
+                                </Col>
+                            </Row>
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <label className="label-small">{t('userProfile.profile.age')}</label>
+                                    <Input type="number" className="margin-bottom-small"
+                                        name="age"
+                                        style={{ marginTop: 3}}
+                                        value={userData.age}
+                                        onChange={handleChange}
+                                        placeholder="Age"
+                                    />
+                                </Col>
+                                {console.log(t())}
+                                <Col span={12}>
+                                    <label className="label-small">{t('userProfile.profile.gender.label')}</label>
+                                    <Select className="margin-bottom-small"
+                                        placeholder="Select gender"
+                                        style={{
+                                            width: '100%',
+                                            marginTop: 3
+                                        }}
+                                        value={userData.gender || undefined}
+                                        onChange={handleGenderChange}
+                                        options={[
+                                            {
+                                            value: 'male',
+                                            label: t('userProfile.profile.gender.male'),
+                                            },
+                                            {
+                                            value: 'female',
+                                            label: t('userProfile.profile.gender.female'),
+                                            },
+                                            {
+                                            value: 'other',
+                                            label: t('userProfile.profile.gender.other'),
+                                            }
+                                        ]}
+                                    />
+                                </Col>
+                            </Row>
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <label className="label-small">{t('userProfile.profile.city')}</label>
+                                    <Input type="text" className="margin-bottom-small"
+                                        name="city"
+                                        style={{ marginTop: 3 }}
+                                        value={userData.city}
+                                        onChange={handleChange}
+                                        placeholder="City"
+                                    />
+                                </Col>
+                                <Col span={12}>
+                                    <label className="label-small">{t('userProfile.profile.country')}</label>
+                                    <Select
+                                    showSearch
+                                    placeholder="Select country"
+                                    style={{ width: '100%', marginBottom: 8, marginTop: 3 }}
+                                    optionFilterProp="label"
+                                    value={userData.country}
+                                    onChange={(val) => setUserData(prev => ({ ...prev, country: val }))}
+                                    options={countryOptions}
+                                    />
+                                </Col>
+                            </Row>
                             <Row gutter={16}>
                                 <Col span={12}>
                                     <label className="label-small">{t('userProfile.profile.phone')}</label>
@@ -478,28 +575,14 @@ export default function UserProfile() {
                                     />
                                 </Col>
                                 <Col span={12}>
-                                    <label className="label-small">{t('userProfile.profile.gender')}</label>
-                                    <Select className="margin-bottom-small"
-                                        placeholder="Select gender"
-                                        style={{
-                                            width: '100%',
-                                            marginTop: 3
-                                        }}
-                                        value={userData.gender || undefined}
-                                        onChange={handleGenderChange}
+                                    <label className="label-small">{t('userProfile.profile.language.label')}</label>
+                                    <Select
+                                        style={{ width: '100%', marginTop: 3 }}
+                                        value={userData.language}
+                                        onChange={(value) => setUserData(prev => ({ ...prev, language: value }))}
                                         options={[
-                                            {
-                                            value: 'male',
-                                            label: 'Male',
-                                            },
-                                            {
-                                            value: 'female',
-                                            label: 'Female',
-                                            },
-                                            {
-                                            value: 'other',
-                                            label: 'Other',
-                                            }
+                                            { value: 'en', label: t('userProfile.profile.language.en') },
+                                            { value: 'es', label: t('userProfile.profile.language.es') }
                                         ]}
                                     />
                                 </Col>
@@ -514,21 +597,15 @@ export default function UserProfile() {
                                         options={[
                                             { value: 'ARS', label: 'ARS' },
                                             { value: 'USD', label: 'USD' },
-                                            { value: 'Both', label: 'Both' },
+                                            { value: 'Both', label: 'ARS / USD' },
                                         ]}
                                     />
                                 </Col>
                                 <Col span={12}>
-                                    <label className="label-small">{t('userProfile.profile.language')}</label>
-                                    <Select
-                                        style={{ width: '100%', marginTop: 3 }}
-                                        value={userData.language}
-                                        onChange={(value) => setUserData(prev => ({ ...prev, language: value }))}
-                                        options={[
-                                            { value: 'en', label: 'English' },
-                                            { value: 'es', label: 'Spanish' }
-                                        ]}
-                                    />
+                                    <label className="label-small">{t('userProfile.profile.accountType.label')}</label>
+                                    <Tag color="green" style={{ marginTop: 6 }}>
+                                        {ACCOUNT_TYPE[userData.user_access_level]}
+                                    </Tag>
                                 </Col>
                             </Row>
                         </div>
@@ -543,24 +620,25 @@ export default function UserProfile() {
                     </div>
                     <div className="display-flex center">
                         <Table className="margin-bottom-large" pagination={false} style={{width: 1200 }} columns={columns} dataSource={userData.jobs} rowKey={(record) => record.title} />
-                        <Modal title="Add New Job" open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+                        <Modal title={t('userProfile.profile.currentIncomesModal.title')} open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
                             <Form layout="vertical">
-                                <Form.Item label="Title">
-                                    <Input name="title" value={newJobData.title} onChange={handleNewJobChange} />
+                                <Form.Item style={{ marginTop: 20, fontWeight: 600, paddingBottom: 0 }}>
+                                    <Input addonBefore={t('userProfile.profile.currentIncomesTable.jobTitle')} name="title" value={newJobData.title} onChange={handleNewJobChange} />
                                 </Form.Item>
-                                <Form.Item label="Salary">
-                                    <Input name="salary" type="number" value={newJobData.salary} onChange={handleNewJobChange} />
+                                <Form.Item>
+                                    <Input addonBefore={t('userProfile.profile.currentIncomesTable.salary')} name="salary" prefix="$" type="number" value={newJobData.salary} onChange={handleNewJobChange} />
                                 </Form.Item>
-                                <Form.Item label="Type">
-                                    <Select value={newJobData.type} onChange={handleNewJobTypeChange}>
-                                    <Option value="employed">Employed</Option>
-                                    <Option value="self-employed">Self-Employed</Option>
-                                    </Select>
-                                </Form.Item>
-                                <Form.Item label="Currency">
+                                <Form.Item label={t('userProfile.profile.currentIncomesTable.currency')} style={{ fontWeight: 600 }}>
                                     <Select value={newJobData.currency} onChange={handleNewJobCurrencyChange}>
                                         <Option value="ARS">ARS</Option>
                                         <Option value="USD">USD</Option>
+                                    </Select>
+                                </Form.Item>
+                                <Form.Item label={t('userProfile.profile.currentIncomesTable.contractType.label')} style={{ fontWeight: 600 }}>
+                                    <Select value={newJobData.type} onChange={handleNewJobTypeChange}>
+                                        <Option value="employed">{t('userProfile.profile.currentIncomesTable.contractType.employed')}</Option>
+                                        <Option value="self-employed">{t('userProfile.profile.currentIncomesTable.contractType.selfEmployed')}</Option>
+                                        <Option value="contractor">{t('userProfile.profile.currentIncomesTable.contractType.contractor')}</Option>
                                     </Select>
                                 </Form.Item>
                             </Form>

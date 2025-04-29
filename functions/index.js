@@ -334,7 +334,7 @@ exports.receiveWhatsAppMessage = functions.https.onRequest(async (req, res) => {
         const uid = userDoc.id;
 
         // 2) comprobamos su nivel de acceso
-        if (userData.user_access_level !== 1) {
+        if (userData.user_access_level === 1) {
         await replyWhatsApp(chatId, "❌ No tienes permiso para registrar gastos.");
         res.status(200).end();
             return;
