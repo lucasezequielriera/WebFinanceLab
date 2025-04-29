@@ -158,11 +158,7 @@ const DailyExpensesChart = ({ userId }) => {
 
       {isMobile ? (
         <div ref={scrollRef} style={{ overflowX: 'auto', width: '100%', paddingBottom: 12 }}>
-          <select value={startDay} onChange={e => setStartDay(Number(e.target.value))}>
-            {Array.from({ length: dayjs().date() }, (_, i) => i + 1)
-              .map(d => <option key={d} value={d}>{`Día ${d}`}</option>)}
-          </select>
-
+          {/* MOBILE */}
           <LineChart ref={chartRef} width={chartWidth} height={300} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }} // ⬅️ más espacio arriba
           >
             <CartesianGrid strokeDasharray="3 3" />
@@ -199,8 +195,10 @@ const DailyExpensesChart = ({ userId }) => {
             <Line type="monotone" dataKey="usd" name={t('userProfile.dailyExpenses.tooltip') + ' (USD)'} stroke="#4CAF50" strokeWidth={2} />
           </LineChart>
         </div>
-      ) : (
+      ) :
+      (
         <ResponsiveContainer width="100%" height={300}>
+          {/* DESKTOP */}
           <LineChart ref={chartRef} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }} // ⬅️ más espacio arriba
           >
             <CartesianGrid strokeDasharray="3 3" />
