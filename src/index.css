@@ -201,6 +201,16 @@ code {
 }
 
 @media (max-width: 768px) {
+  .container-page {
+    height: calc(100vh - 80px - 62px);
+    max-height: calc(100vh - 80px - 62px);
+    overflow-y: initial;
+  }
+  .mobile-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000; /* para que quede por encima del contenido */
+  }
   .site-layout-background {
     display: none;
   }

@@ -212,6 +212,8 @@ const AppLayout = () => {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
+
+        {/* App Logo */}
         <div className="user-greeting" style={{ display: 'flex', color: 'white', padding: '10px', textAlign: 'center' }}>
           <img src={logo} alt="#" style={{ width: 60 }}/>
           <Title level={3} style={{ display: 'grid', margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center' }}>
@@ -245,17 +247,29 @@ const AppLayout = () => {
         </Header>
         <Content style={{ padding: 0, background: isAuthPage ? 'linear-gradient(135deg, #001123, #4094e9)' : 'transparent', maxHeight: '100vh', paddingBottom: 50 }}>
           { !isAuthPage &&
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 80, background: 'linear-gradient(90deg, rgb(0 68 121), rgb(0 163 137), rgb(0, 191, 145))', padding: '0px 20px' }}>
+          <div className="mobile-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 80, background: 'linear-gradient(90deg, rgb(0 68 121), rgb(0 163 137), rgb(0, 191, 145))', padding: '0px 20px' }}>
             <span style={{ fontSize: '20px', fontWeight: 500, color: 'white', display: 'flex', alignItems: 'center' }}>
-              { isMobile
+
+              {/* Title Navbar Mobile */}
+              {isMobile ?
+                (location.pathname.startsWith('/detailed-expenses') || location.pathname.startsWith('/general-expenses'))
                 ? <span style={{ display: 'flex', alignItems: 'center' }}>
                     {React.cloneElement(getPageIcon(), { style: { fontSize: 24, marginRight: 10 } })}
                     {getPageTitle()}
                   </span>
-                : location.pathname.startsWith('/detailed-expenses') || location.pathname.startsWith('/general-expenses')
+                : <div className="user-greeting" style={{ display: 'flex', color: 'white', textAlign: 'center', marginLeft: "-10px" }}>
+                    <img src={logo} alt="#" style={{ width: 60 }}/>
+                    <Title level={3} style={{ display: 'grid', margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center', width: 110 }}>
+                      <Link to="/" style={{ color: 'white' }}>
+                        Web
+                        FinanceLab
+                      </Link>
+                    </Title>
+                  </div>
+              : (location.pathname.startsWith('/detailed-expenses') || location.pathname.startsWith('/general-expenses'))
                 ? <span style={{ display: 'flex', alignItems: 'center' }}>
-                  <LeftOutlined style={{ fontSize: 24, marginRight: 10 }} onClick={() => navigate(-1)}/>
-                  {getPageTitle()}
+                    {React.cloneElement(getPageIcon(), { style: { fontSize: 24, marginRight: 10 } })}
+                    {getPageTitle()}
                   </span>
                 : getPageTitle()
               }
@@ -287,8 +301,8 @@ const AppLayout = () => {
           <div className="mobile-nav">
 
             {/* NAVBAR LOGUED */}
-            <Button type="link" icon={<DashboardOutlined />}><Link to="/dashboard"></Link>{t("userProfile.navbar.expenses")}</Button>
-            <Button type="link" icon={<CreditCardOutlined />}><Link to="/expenses"></Link>{t("userProfile.navbar.dashboard")}</Button>
+            <Button type="link" icon={<CreditCardOutlined />}><Link to="/dashboard"></Link>{t("userProfile.navbar.dashboard")}</Button>
+            <Button type="link" icon={<DashboardOutlined />}><Link to="/expenses"></Link>{t("userProfile.navbar.expenses")}</Button>
             <div className="add-expense-button-mobile">
               <Button type="primary" shape="circle" icon={<PlusOutlined />} size="large" onClick={showModal} />
             </div>
