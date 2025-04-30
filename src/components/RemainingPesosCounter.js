@@ -79,7 +79,7 @@ const RemainingPesosCounter = () => {
       <div>
           <Statistic
             className='statics-card'
-            title={t('userProfile.dasboard.card.balance.ars')}
+            title={t('userProfile.dashboard.card.balance.ars')}
             value={remaining}
             precision={2}
             prefix={'$'}

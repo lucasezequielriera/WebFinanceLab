@@ -70,7 +70,7 @@ const DollarIncomeCounter = () => {
     <Card loading={loading}>
       <Statistic
         className='statics-card'
-        title={t('userProfile.dasboard.card.incomes.usd')}
+        title={t('userProfile.dashboard.card.incomes.usd')}
         value={total}
         precision={2}
         prefix={'$'}
@@ -87,7 +87,7 @@ const DollarIncomeCounter = () => {
         }}>
           {Math.abs(pct)}%
         </span>
-        {t('userProfile.dasboard.card.vsLastMonth')}
+        {t('userProfile.dashboard.card.vsLastMonth')}
       </p>
     </Card>
   );

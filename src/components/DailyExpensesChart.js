@@ -33,7 +33,6 @@ const DailyExpensesChart = ({ userId }) => {
   const isMobile = useIsMobile();
   const [expenseLimits, setExpenseLimits] = useState([]);
   const [stats, setStats] = useState(null); // monthly status
-  const [startDay, setStartDay] = useState(1);
 
   const { i18n } = useTranslation();
   const { t } = useTranslation();
@@ -148,7 +147,7 @@ const DailyExpensesChart = ({ userId }) => {
   return (
     <div style={{ position: 'relative' }}>
       <h3 style={{ marginBottom: 16, marginTop: 10, marginLeft: 15, textAlign: 'left', fontWeight: 700, fontSize: 18 }}>
-        {t('userProfile.dasboard.dailyExpenses.title')} ({currentMonth})
+        {t('userProfile.dashboard.dailyExpenses.title')} ({currentMonth})
         <sup> { stats ? (stats.balance >= 0
             ? <span style={{ fontSize: 12, color: 'green', fontWeight: 700 }}>+${stats.balance}</span>
             : <span style={{ fontSize: 12, color: 'red', fontWeight: 700 }}>-${Math.abs(stats.balance)}</span>
@@ -205,8 +204,8 @@ const DailyExpensesChart = ({ userId }) => {
               }
             />
             <Tooltip formatter={(value, dataKey) => [formatShortNumber(value), dataKey]} />
-            <Line type="monotone" dataKey="ars" stroke="url(#gradientARS)" name={t('userProfile.dasboard.dailyExpenses.tooltip') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
-            <Line type="monotone" dataKey="usd" name={t('userProfile.dasboard.dailyExpenses.tooltip') + ' (USD)'} stroke="url(#gradientUSD)" strokeWidth={2} />
+            <Line type="monotone" dataKey="ars" stroke="url(#gradientARS)" name={t('userProfile.dashboard.dailyExpenses.tooltip') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
+            <Line type="monotone" dataKey="usd" name={t('userProfile.dashboard.dailyExpenses.tooltip') + ' (USD)'} stroke="url(#gradientUSD)" strokeWidth={2} />
           </LineChart>
         </div>
       ) :
@@ -258,8 +257,8 @@ const DailyExpensesChart = ({ userId }) => {
               }
             />
             <Tooltip formatter={(value, dataKey) => [formatShortNumber(value), dataKey]} />
-            <Line type="monotone" dataKey="ars" stroke="url(#gradientARS)" name={t('userProfile.dasboard.dailyExpenses.tooltip') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
-            <Line type="monotone" dataKey="usd" name={t('userProfile.dasboard.dailyExpenses.tooltip') + ' (USD)'} stroke="url(#gradientUSD)" strokeWidth={2} />
+            <Line type="monotone" dataKey="ars" stroke="url(#gradientARS)" name={t('userProfile.dashboard.dailyExpenses.tooltip') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
+            <Line type="monotone" dataKey="usd" name={t('userProfile.dashboard.dailyExpenses.tooltip') + ' (USD)'} stroke="url(#gradientUSD)" strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
       )}

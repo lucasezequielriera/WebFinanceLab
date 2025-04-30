@@ -170,51 +170,62 @@ const Dashboard = () => {
 
     return [...withDeadline, ...withoutDeadline, ...completedTargets];
   };
-console.log(userData)
+
   return (
     <div className='container-page'>
       <Spin spinning={loading}>
         <div className="dashboard-container margin-top-small">
+          {(hasPesosIncome || hasUsdIncome) ? (<div>
+            {/* CARDS */}
+            {hasPesosIncome && (
+              <Row className="expenses-counters margin-bottom-medium" gutter={[16, 16]}>
+                <Col xs={24} sm={24} md={24} lg={8}>
+                  <Card className="equal-height-card balance-counter">
+                    <RemainingPesosCounter />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={24} md={12} lg={8}>
+                  <Card className="equal-height-card">
+                    <PesoIncomeCounter />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={24} md={12} lg={8}>
+                  <Card className="equal-height-card">
+                    <PesoExpenseCounter />
+                  </Card>
+                </Col>
+              </Row>
+            )}
+            {hasUsdIncome && (
+              <Row className="remainings-counters margin-bottom-medium" gutter={[16, 16]}>
+                <Col xs={24} sm={24} md={24} lg={8}>
+                  <Card className="equal-height-card balance-counter">
+                    <RemainingDollarsCounter />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={24} md={12} lg={8}>
+                  <Card className="equal-height-card">
+                    <DollarIncomeCounter />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={24} md={12} lg={8}>
+                  <Card className="equal-height-card">
+                    <DollarExpenseCounter />
+                  </Card>
+                </Col>
+              </Row>
+            )}
 
-          {/* CARDS */}
-          {hasPesosIncome && (
-            <Row className="expenses-counters margin-bottom-medium" gutter={[16, 16]}>
-              <Col xs={24} sm={24} md={24} lg={8}>
-                <Card className="equal-height-card balance-counter">
-                  <RemainingPesosCounter />
-                </Card>
-              </Col>
-              <Col xs={24} sm={24} md={12} lg={8}>
-                <Card className="equal-height-card">
-                  <PesoIncomeCounter />
-                </Card>
-              </Col>
-              <Col xs={24} sm={24} md={12} lg={8}>
-                <Card className="equal-height-card">
-                  <PesoExpenseCounter />
+            {/* GRAPH */}
+            <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 30, marginRight: 0, marginLeft: 0 }}>
+              <Col span={24} style={{ padding: 0 }}>
+                <Card>
+                  <DailyExpensesChart userId={currentUser?.uid} />
                 </Card>
               </Col>
             </Row>
-          )}
-          {hasUsdIncome && (
-            <Row className="remainings-counters margin-bottom-medium" gutter={[16, 16]}>
-              <Col xs={24} sm={24} md={24} lg={8}>
-                <Card className="equal-height-card balance-counter">
-                  <RemainingDollarsCounter />
-                </Card>
-              </Col>
-              <Col xs={24} sm={24} md={12} lg={8}>
-                <Card className="equal-height-card">
-                  <DollarIncomeCounter />
-                </Card>
-              </Col>
-              <Col xs={24} sm={24} md={12} lg={8}>
-                <Card className="equal-height-card">
-                  <DollarExpenseCounter />
-                </Card>
-              </Col>
-            </Row>
-          )}
+          </div>)
+          : <div>No ay nada</div>}
 
           {targets.length > 0 && (
             <>
@@ -264,16 +275,6 @@ console.log(userData)
                 ))}
               </Row>
             </>
-          )}
-
-          { currentUser && (
-          <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 30, marginRight: 0, marginLeft: 0 }}>
-            <Col span={24} style={{ padding: 0 }}>
-              <Card>
-                <DailyExpensesChart userId={currentUser?.uid} />
-              </Card>
-            </Col>
-          </Row>
           )}
 
           <Modal

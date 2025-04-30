@@ -75,7 +75,7 @@ const PesoIncomeCounter = () => {
       <Statistic
         className='statics-card'
         contentFontSize={5}
-        title={t('userProfile.dasboard.card.incomes.ars')}
+        title={t('userProfile.dashboard.card.incomes.ars')}
         value={total}
         precision={2}
         prefix='$'
@@ -92,7 +92,7 @@ const PesoIncomeCounter = () => {
         }}>
           {Math.abs(pct)}%
         </span>
-        {t('userProfile.dasboard.card.vsLastMonth')}
+        {t('userProfile.dashboard.card.vsLastMonth')}
       </p>
     </Card>
   );
