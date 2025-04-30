@@ -8,47 +8,87 @@ import { useTranslation } from 'react-i18next';
 
 const PesoExpenseCounter = () => {
   const { currentUser } = useAuth();
+  const { t } = useTranslation();
+
   const [total, setTotal] = useState(0);
+  const [prevTotal, setPrevTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const { t } = useTranslation();
+  // Calcula rango de timestamps para mes dado
+  const getRange = (date) => {
+    const start = new Date(date.getFullYear(), date.getMonth(), 1);
+    const end = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+    return [Timestamp.fromDate(start), Timestamp.fromDate(end)];
+  };
 
   useEffect(() => {
     if (!currentUser) return;
-
-    const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
     const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), 1);
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    const startTimestamp = Timestamp.fromDate(start);
-    const endTimestamp = Timestamp.fromDate(end);
 
-    const qExpenses = query(expensesRef, where('currency', '==', 'ARS'), where('timestamp', '>=', startTimestamp), where('timestamp', '<', endTimestamp));
-
-    const unsubscribeExpenses = onSnapshot(qExpenses, (snapshot) => {
-      const totalExpenses = snapshot.docs.reduce((sum, doc) => sum + parseFloat(doc.data().amount), 0);
-      setTotal(totalExpenses);
-      setLoading(false);
+    // Mes actual
+    const [startCur, endCur] = getRange(now);
+    const qCurrent = query(
+      collection(db, `users/${currentUser.uid}/expenses`),
+      where('currency', '==', 'ARS'),
+      where('timestamp', '>=', startCur),
+      where('timestamp', '<', endCur)
+    );
+    const unsubCur = onSnapshot(qCurrent, snap => {
+      const sum = snap.docs.reduce((s, d) => s + parseFloat(d.data().amount), 0);
+      setTotal(sum);
     });
 
-    return () => unsubscribeExpenses();
+    // Mes anterior
+    const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const [startPrev, endPrev] = getRange(prevDate);
+    const qPrev = query(
+      collection(db, `users/${currentUser.uid}/expenses`),
+      where('currency', '==', 'ARS'),
+      where('timestamp', '>=', startPrev),
+      where('timestamp', '<', endPrev)
+    );
+    const unsubPrev = onSnapshot(qPrev, snap => {
+      const sum = snap.docs.reduce((s, d) => s + parseFloat(d.data().amount), 0);
+      setPrevTotal(sum);
+    });
+
+    // Cuando ambos ya estén cargados
+    Promise.all([unsubCur, unsubPrev]).then(() => setLoading(false));
+
+    return () => {
+      unsubCur();
+      unsubPrev();
+    };
   }, [currentUser]);
+
+  // Cálculo de variación
+  const diff = total - prevTotal;
+  const pct  = prevTotal > 0 ? ((diff / prevTotal) * 100).toFixed(0) : 0;
+  const isIncrease = diff >= 0;
 
   return (
     <Card loading={loading}>
       <Statistic
         className='statics-card'
-        title={t('userProfile.totalExpenses.ars')}
+        title={t('userProfile.dasboard.card.expenses.ars')}
         value={total}
         precision={2}
         prefix={'$'}
-        suffix={<span style={{ fontSize: 12 }}>AR$</span>}
       />
-      <p style={{ margin: 0, marginTop: 5 }}>
-        <RiseOutlined style={{ fontSize: 18, marginRight: 5, color: ' rgb(0, 163, 137)' }}/>
-        <FallOutlined style={{ fontSize: 18, marginRight: 5, color: 'rgb(207, 0, 0)' }}/>
-        <span style={{ color: 'rgb(0, 163, 137)', fontWeight: 800, marginRight: 5 }}>12%</span>
-        this month
+
+      <p style={{ margin: 0, marginTop: 5, display: 'flex', alignItems: 'center' }}>
+        {isIncrease
+          ? <RiseOutlined style={{ fontSize: 18, marginRight: 5, color: 'rgb(0,163,137)' }}/>
+          : <FallOutlined style={{ fontSize: 18, marginRight: 5, color: 'rgb(207,0,0)' }}/>
+        }
+        <span style={{
+          color: isIncrease ? 'rgb(0,163,137)' : 'rgb(207,0,0)',
+          fontWeight: 800,
+          marginRight: 5
+        }}>
+          {Math.abs(pct)}%
+        </span>
+        {t('userProfile.dasboard.card.vsLastMonth')}
       </p>
     </Card>
   );

@@ -69,24 +69,17 @@ const RemainingDollarsCounter = () => {
     };
   }, [currentUser]);
 
-  // Show numbers with US format
-  const formatNumber = (number) => {
-    return new Intl.NumberFormat('en-US').format(number);
-  };
-
   return (
     <Card loading={loading}>
       <div>
           <Statistic
             className='statics-card'
-            title={t('userProfile.remaining.usd')}
+            title={t('userProfile.dasboard.card.balance.usd')}
             value={remaining}
             precision={2}
             prefix={'$'}
-            suffix={<span style={{ fontSize: 12 }}>U$D</span>}
           />
-          <span style={{ fontWeight: 700, fontSize: 13 }}>/ ${formatNumber(totalIncome)}</span>
-          <Progress showInfo={false} percent={progressPercent} strokeColor={twoColors} />
+          <Progress showInfo={false} percent={progressPercent} strokeColor={twoColors} status='active' />
       </div>
     </Card>
   );

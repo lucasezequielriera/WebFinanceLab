@@ -24,10 +24,14 @@ code {
   margin: 0;
 }
 
-.statics-card .ant-statistic-content {
+.balance-counter .ant-statistic-content .ant-statistic-content-value {
+  font-size: 30px;
+}
+
+.equal-height-card .statics-card .ant-statistic-content {
   font-weight: 600;
   color: black;
-  font-size: 30px;
+  font-size: 25px;
 }
 
 /* User Profile */
@@ -243,8 +247,13 @@ code {
     bottom: 0;
     left: 0;
     width: 100%;
-    background: #000c17;
+    background: linear-gradient(90deg, rgb(0, 36, 63), rgb(0, 36, 63), rgb(0, 36, 63));
     z-index: 1000;
+    color: red;
+  }
+
+  .mobile-nav :where(.css-dev-only-do-not-override-1d4w9r2).ant-btn-color-link.ant-btn-variant-link {
+    color: white;
   }
 
   /* Button Navbar */
@@ -256,9 +265,9 @@ code {
   }
 
   .add-expense-button-mobile button {
-    background-color: #005fb8;
+    background: linear-gradient(90deg, rgb(0, 132, 105), rgb(0, 163, 137), rgb(0, 191, 145));;
     border: none;
-    box-shadow: 0px 0px 0px 7px rgb(245 245 245);
+    box-shadow: 0px 0px 0px 7px rgb(255, 255, 255);
     position: absolute;
     left: 50%;
     right: 50%;

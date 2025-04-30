@@ -147,8 +147,8 @@ const DailyExpensesChart = ({ userId }) => {
 
   return (
     <div style={{ position: 'relative' }}>
-      <h3 style={{ marginBottom: 16, marginTop: 8, textAlign: 'center', fontWeight: 600 }}>
-        {t('userProfile.dailyExpenses.title')} ({currentMonth})
+      <h3 style={{ marginBottom: 16, marginTop: 10, marginLeft: 15, textAlign: 'left', fontWeight: 700, fontSize: 18 }}>
+        {t('userProfile.dasboard.dailyExpenses.title')} ({currentMonth})
         <sup> { stats ? (stats.balance >= 0
             ? <span style={{ fontSize: 12, color: 'green', fontWeight: 700 }}>+${stats.balance}</span>
             : <span style={{ fontSize: 12, color: 'red', fontWeight: 700 }}>-${Math.abs(stats.balance)}</span>
@@ -161,6 +161,20 @@ const DailyExpensesChart = ({ userId }) => {
           {/* MOBILE */}
           <LineChart ref={chartRef} width={chartWidth} height={300} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }} // ⬅️ más espacio arriba
           >
+            {/* Definimos el gradiente */}
+            <defs>
+              <linearGradient id="gradientARS" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="rgb(0, 142, 251)" />
+                <stop offset="50%" stopColor="rgb(0, 117, 209)" />
+                <stop offset="100%" stopColor="rgb(0, 145, 255)" />
+              </linearGradient>
+              <linearGradient id="gradientUSD" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="rgb(0, 202, 169)" />
+                <stop offset="50%" stopColor="rgb(0, 191, 145)" />
+                <stop offset="100%" stopColor="rgb(0, 202, 169)" />
+              </linearGradient>
+            </defs>
+
             <CartesianGrid strokeDasharray="3 3" />
             {expenseLimits.map((limit, index) => {
               const amount = Number(Number(limit.amount).toFixed(2));
@@ -191,8 +205,8 @@ const DailyExpensesChart = ({ userId }) => {
               }
             />
             <Tooltip formatter={(value, dataKey) => [formatShortNumber(value), dataKey]} />
-            <Line type="monotone" dataKey="ars" stroke="#1890ff" name={t('userProfile.dailyExpenses.tooltip') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
-            <Line type="monotone" dataKey="usd" name={t('userProfile.dailyExpenses.tooltip') + ' (USD)'} stroke="#4CAF50" strokeWidth={2} />
+            <Line type="monotone" dataKey="ars" stroke="url(#gradientARS)" name={t('userProfile.dasboard.dailyExpenses.tooltip') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
+            <Line type="monotone" dataKey="usd" name={t('userProfile.dasboard.dailyExpenses.tooltip') + ' (USD)'} stroke="url(#gradientUSD)" strokeWidth={2} />
           </LineChart>
         </div>
       ) :
@@ -201,6 +215,20 @@ const DailyExpensesChart = ({ userId }) => {
           {/* DESKTOP */}
           <LineChart ref={chartRef} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }} // ⬅️ más espacio arriba
           >
+            {/* Definimos el gradiente */}
+            <defs>
+              <linearGradient id="gradientARS" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="rgb(0, 142, 251)" />
+                <stop offset="50%" stopColor="rgb(0, 117, 209)" />
+                <stop offset="100%" stopColor="rgb(0, 145, 255)" />
+              </linearGradient>
+              <linearGradient id="gradientUSD" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="rgb(0, 202, 169)" />
+                <stop offset="50%" stopColor="rgb(0, 191, 145)" />
+                <stop offset="100%" stopColor="rgb(0, 202, 169)" />
+              </linearGradient>
+            </defs>
+
             <CartesianGrid strokeDasharray="3 3" />
             {expenseLimits.map((limit, index) => {
               const amount = Number(Number(limit.amount).toFixed(2));
@@ -230,8 +258,8 @@ const DailyExpensesChart = ({ userId }) => {
               }
             />
             <Tooltip formatter={(value, dataKey) => [formatShortNumber(value), dataKey]} />
-            <Line type="monotone" dataKey="ars" stroke="#1890ff" name={t('userProfile.dailyExpenses.tooltip') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
-            <Line type="monotone" dataKey="usd" name={t('userProfile.dailyExpenses.tooltip') + ' (USD)'} stroke="#4CAF50" strokeWidth={2} />
+            <Line type="monotone" dataKey="ars" stroke="url(#gradientARS)" name={t('userProfile.dasboard.dailyExpenses.tooltip') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
+            <Line type="monotone" dataKey="usd" name={t('userProfile.dasboard.dailyExpenses.tooltip') + ' (USD)'} stroke="url(#gradientUSD)" strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
       )}

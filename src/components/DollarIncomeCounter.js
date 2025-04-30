@@ -6,7 +6,7 @@ import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firest
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
-const DollarExpenseCounter = () => {
+const DollarIncomeCounter = () => {
   const { currentUser } = useAuth();
   const { t } = useTranslation();
 
@@ -14,7 +14,7 @@ const DollarExpenseCounter = () => {
   const [prevTotal, setPrevTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Helper para rango de mes
+  // Utility para calcular rango de mes
   const getRange = (date) => {
     const start = new Date(date.getFullYear(), date.getMonth(), 1);
     const end   = new Date(date.getFullYear(), date.getMonth() + 1, 1);
@@ -28,7 +28,7 @@ const DollarExpenseCounter = () => {
     // Mes actual
     const [startCur, endCur] = getRange(now);
     const qCurrent = query(
-      collection(db, `users/${currentUser.uid}/expenses`),
+      collection(db, `users/${currentUser.uid}/incomes`),
       where('currency', '==', 'USD'),
       where('timestamp', '>=', startCur),
       where('timestamp', '<', endCur)
@@ -42,7 +42,7 @@ const DollarExpenseCounter = () => {
     const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const [startPrev, endPrev] = getRange(prevDate);
     const qPrev = query(
-      collection(db, `users/${currentUser.uid}/expenses`),
+      collection(db, `users/${currentUser.uid}/incomes`),
       where('currency', '==', 'USD'),
       where('timestamp', '>=', startPrev),
       where('timestamp', '<', endPrev)
@@ -52,7 +52,7 @@ const DollarExpenseCounter = () => {
       setPrevTotal(sum);
     });
 
-    // Ambos listos => quitas loading
+    // Cuando se suscriben ambos, quitamos loading
     Promise.all([unsubCur, unsubPrev]).then(() => setLoading(false));
 
     return () => {
@@ -61,7 +61,7 @@ const DollarExpenseCounter = () => {
     };
   }, [currentUser]);
 
-  // Cálculo variación
+  // Cálculo de variación
   const diff       = total - prevTotal;
   const pct        = prevTotal > 0 ? ((diff / prevTotal) * 100).toFixed(0) : 0;
   const isIncrease = diff >= 0;
@@ -70,7 +70,7 @@ const DollarExpenseCounter = () => {
     <Card loading={loading}>
       <Statistic
         className='statics-card'
-        title={t('userProfile.dasboard.card.expenses.usd')}
+        title={t('userProfile.dasboard.card.incomes.usd')}
         value={total}
         precision={2}
         prefix={'$'}
@@ -93,4 +93,4 @@ const DollarExpenseCounter = () => {
   );
 };
 
-export default DollarExpenseCounter;
+export default DollarIncomeCounter;

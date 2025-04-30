@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Spin, Row, Col, Card, Progress, Modal, Form, Input, Button, notification, Flex } from 'antd';
 import { DeleteTwoTone, DollarTwoTone, CheckCircleTwoTone } from '@ant-design/icons';
+import PesoIncomeCounter from '../components/PesoIncomeCounter';
+import DollarIncomeCounter from '../components/DollarIncomeCounter';
 import DollarExpenseCounter from '../components/DollarExpenseCounter';
 import PesoExpenseCounter from '../components/PesoExpenseCounter';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,9 +11,7 @@ import { collection, query, onSnapshot, updateDoc, doc, deleteDoc, getDoc } from
 import RemainingPesosCounter from '../components/RemainingPesosCounter';
 import RemainingDollarsCounter from '../components/RemainingDollarsCounter';
 import DailyExpensesChart from '../components/DailyExpensesChart';
-import UserBalance from '../components/UserBalance';
 import { useTranslation } from 'react-i18next';
-import AccountTypeBadge from '../components/AccountTypeBadge';
 import '../styles/Dashboard.css'; // Importa el archivo CSS para los estilos
 
 const Dashboard = () => {
@@ -24,11 +24,10 @@ const Dashboard = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [userData, setUserData] = useState();
+  const [hasPesosIncome, setHasPesosIncome] = useState(false);
+  const [hasUsdIncome, setHasUsdIncome]     = useState(false);
 
   const { t } = useTranslation();
-
-  const DEFAULT_PROFILE_PICTURE_URL =
-    "https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/profilePictures%2Fimage.png?alt=media&token=c7f97e78-1aa1-4b87-9c7a-a5ebe6087b3d";
 
   useEffect(() => {
     let isMounted = true;
@@ -58,13 +57,13 @@ const Dashboard = () => {
   useEffect(() => {
     if (!currentUser) return;
   
-    const incomesRef = collection(db, `users/${currentUser.uid}/expenses`);
+    const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
     const targetsRef = collection(db, `users/${currentUser.uid}/targets`);
-    const qIncomes = query(incomesRef);
+    const qExpenses = query(expensesRef);
     const qTargets = query(targetsRef);
   
     // Snapshot listeners
-    const unsubscribeIncomes = onSnapshot(qIncomes, (snapshot) => {
+    const unsubscribeIncomes = onSnapshot(qExpenses, (snapshot) => {
       const expenses = [];
       snapshot.forEach((doc) => {
         expenses.push({ id: doc.id, ...doc.data() });
@@ -100,7 +99,18 @@ const Dashboard = () => {
       unsubscribeIncomes();
       unsubscribeTargets();
     };
-  }, [currentUser]);    
+  }, [currentUser]);  
+  
+  useEffect(() => {
+    if (!currentUser) return;
+    const incomesRef = collection(db, `users/${currentUser.uid}/incomes`);
+    const unsub = onSnapshot(incomesRef, snap => {
+      const currencies = snap.docs.map(d => d.data().currency);
+      setHasPesosIncome(currencies.includes('ARS'));
+      setHasUsdIncome(currencies.includes('USD'));
+    });
+    return () => unsub();
+  }, [currentUser]);
 
   const showEditModal = (target) => {
     setSelectedTarget(target);
@@ -176,47 +186,51 @@ const Dashboard = () => {
 
     return [...withDeadline, ...withoutDeadline, ...completedTargets];
   };
-
+console.log(userData)
   return (
     <div className='container-page'>
       <Spin spinning={loading}>
         <div className="dashboard-container margin-top-small">
-          {/* <div className='margin-bottom-medium' style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <h1 className="dashboard-title" style={{ marginBottom: 0 }}>{t('userProfile.title')}, {currentUser?.displayName || t('userProfile.username')}</h1>
-              <AccountTypeBadge type={userData?.user_access_level === 0 ? 'admin'
-              : userData?.user_access_level === 2 ? 'premium'
-              : userData?.user_access_level === 3 ? 'gold'
-              : 'free'} />
-            </div>
-            <div className="balance-box">
-              <UserBalance userInfo={userInfo} monthlyExpenses={expenses} />
-            </div>
-          </div> */}
-          <Row className="expenses-counters margin-bottom-medium" gutter={[16, 16]}>
-            <Col xs={24} sm={12} md={6}>
-              <Card className="equal-height-card">
-                <RemainingPesosCounter />
-              </Card>
-            </Col>
-            <Col xs={24} sm={12} md={6}>
-              <Card className="equal-height-card">
-                <RemainingDollarsCounter />
-              </Card>
-            </Col>
-          </Row>
-          <Row className="remainings-counters margin-bottom-medium" gutter={[16, 16]}>
-            <Col xs={24} sm={12} md={6}>
-              <Card className="equal-height-card">
-                <PesoExpenseCounter />
-              </Card>
-            </Col>
-            <Col xs={24} sm={12} md={6}>
-              <Card className="equal-height-card">
-                <DollarExpenseCounter />
-              </Card>
-            </Col>
-          </Row>
+
+          {/* CARDS */}
+          {hasPesosIncome && (
+            <Row className="expenses-counters margin-bottom-medium" gutter={[16, 16]}>
+              <Col xs={24} sm={24} md={24} lg={8}>
+                <Card className="equal-height-card balance-counter">
+                  <RemainingPesosCounter />
+                </Card>
+              </Col>
+              <Col xs={24} sm={24} md={12} lg={8}>
+                <Card className="equal-height-card">
+                  <PesoIncomeCounter />
+                </Card>
+              </Col>
+              <Col xs={24} sm={24} md={12} lg={8}>
+                <Card className="equal-height-card">
+                  <PesoExpenseCounter />
+                </Card>
+              </Col>
+            </Row>
+          )}
+          {hasUsdIncome && (
+            <Row className="remainings-counters margin-bottom-medium" gutter={[16, 16]}>
+              <Col xs={24} sm={24} md={24} lg={8}>
+                <Card className="equal-height-card balance-counter">
+                  <RemainingDollarsCounter />
+                </Card>
+              </Col>
+              <Col xs={24} sm={24} md={12} lg={8}>
+                <Card className="equal-height-card">
+                  <DollarIncomeCounter />
+                </Card>
+              </Col>
+              <Col xs={24} sm={24} md={12} lg={8}>
+                <Card className="equal-height-card">
+                  <DollarExpenseCounter />
+                </Card>
+              </Col>
+            </Row>
+          )}
 
           {targets.length > 0 && (
             <>
@@ -299,7 +313,7 @@ const Dashboard = () => {
               </Form.Item>
             </Form>
           </Modal>
-          
+
         </div>
       </Spin>
     </div>

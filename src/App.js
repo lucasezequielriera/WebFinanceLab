@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Layout, Menu, Tag, Modal, Tooltip, Button } from 'antd';
-import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, PlusOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, PlusOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined, BarChartOutlined, LeftOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -20,10 +20,11 @@ import { db } from './firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
-// Importaciones de AntD
 import { Typography } from 'antd';
 import logo from './assets/transparent-logo.png';
 import { useTranslation } from 'react-i18next';
+import useIsMobile from './hooks/useIsMobile';
+import { useNavigate } from 'react-router-dom';
 
 const { Title } = Typography;
 const { Header, Sider, Content } = Layout;
@@ -45,6 +46,8 @@ const AppLayout = () => {
   const location = useLocation();
   const [selectedKey, setSelectedKey] = useState('1');
   const [userData, setUserData] = useState();
+  const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   const { t } = useTranslation();
 
@@ -178,6 +181,18 @@ const AppLayout = () => {
     }
   ];
 
+  const getPageIcon = () => {
+    const path = location.pathname;
+    if (path.startsWith('/dashboard'))       return <DashboardOutlined />;
+    if (path.startsWith('/expenses'))        return <CreditCardOutlined />;
+    if (path.startsWith('/financial-goals')) return <FlagOutlined />;
+    if (path.startsWith('/about-us'))        return <InfoCircleOutlined />;
+    if (path.startsWith('/profile'))         return <UserOutlined />;
+    if (path.startsWith('/detailed-expenses')) return <LeftOutlined onClick={() => navigate(-1)}/>;
+    if (path.startsWith('/general-expenses'))  return <LeftOutlined onClick={() => navigate(-1)}/>;
+    return null;
+  };
+
   // --- título según la ruta ---
   const getPageTitle = () => {
     if (location.pathname.startsWith('/dashboard'))        return t('userProfile.navbar.dashboard');
@@ -231,7 +246,15 @@ const AppLayout = () => {
         <Content style={{ padding: 0, background: isAuthPage ? 'linear-gradient(135deg, #001123, #4094e9)' : 'transparent', minHeight: 280, paddingBottom: 50 }}>
           { !isAuthPage &&
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 80, background: 'linear-gradient(90deg, rgb(0 68 121), rgb(0 163 137), rgb(0, 191, 145))', padding: '0px 20px' }}>
-            <span style={{ fontSize: '20px', fontWeight: 500, color: 'white' }}>{getPageTitle()}</span>
+            <span style={{ fontSize: '20px', fontWeight: 500, color: 'white', display: 'flex', alignItems: 'center' }}>
+              { isMobile
+                ? <span style={{ display: 'flex', alignItems: 'center' }}>
+                    {React.cloneElement(getPageIcon(), { style: { fontSize: 24, marginRight: 10 } })}
+                    {getPageTitle()}
+                  </span>
+                : getPageTitle()
+              }
+            </span>
             <AccountTypeBadge type={userData?.user_access_level === 0 ? 'admin'
             : userData?.user_access_level === 2 ? 'premium'
             : userData?.user_access_level === 3 ? 'gold'
@@ -257,20 +280,21 @@ const AppLayout = () => {
         </Modal>
         {currentUser ? (
           <div className="mobile-nav">
+
+            {/* NAVBAR LOGUED */}
             <Button type="link" icon={<DashboardOutlined />}><Link to="/dashboard"></Link>Dashboard</Button>
             <Button type="link" icon={<CreditCardOutlined />}><Link to="/expenses"></Link>Expenses</Button>
             <div className="add-expense-button-mobile">
               <Button type="primary" shape="circle" icon={<PlusOutlined />} size="large" onClick={showModal} />
             </div>
-            {/* <Button type="link" icon={<FlagOutlined />}><Link to="/financial-goals"></Link>Financial Goals</Button>
-            <Button type="link" icon={<InfoCircleOutlined />}><Link to="/about-us"></Link>About Us</Button> */}
             <Button type="link" icon={<UserOutlined />}><Link to="/profile"></Link>Profile</Button>
             <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} size="large" className="logout">Logout</Button>
           </div>
         ) :
           <div className="mobile-nav">
+            {/* NAVBAR NO LOGUED */}
             {location.pathname === '/signup' ? (
-                <Button type="link" icon={<UserOutlined />}><Link to="/login"></Link>Login</Button>
+              <Button type="link" icon={<UserOutlined />}><Link to="/login"></Link>Login</Button>
             ) : (
               <Button type="link" icon={<UserOutlined />}><Link to="/signup"></Link>Sign up</Button>
             )}
