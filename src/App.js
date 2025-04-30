@@ -211,9 +211,9 @@ const AppLayout = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
 
-        {/* App Logo */}
+      <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
+        {/* APP LOGO NAVBAR DESKTOP */}
         <div className="user-greeting" style={{ display: 'flex', color: 'white', padding: '10px', textAlign: 'center' }}>
           <img src={logo} alt="#" style={{ width: 60 }}/>
           <Title level={3} style={{ display: 'grid', margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center' }}>
@@ -238,19 +238,22 @@ const AppLayout = () => {
           </div>
         )}
       </Sider>
+
       <Layout className="site-layout">
+
         <Header className="site-layout-background" style={{ padding: 0 }}>
           {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
             className: 'trigger',
             onClick: toggle,
           })}
         </Header>
+
         <Content style={{ padding: 0, background: isAuthPage ? 'linear-gradient(135deg, #001123, #4094e9)' : 'transparent', maxHeight: '100vh', paddingBottom: 50 }}>
           { !isAuthPage &&
           <div className="mobile-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 80, background: 'linear-gradient(90deg, rgb(0 68 121), rgb(0 163 137), rgb(0, 191, 145))', padding: '0px 20px' }}>
             <span style={{ fontSize: '20px', fontWeight: 500, color: 'white', display: 'flex', alignItems: 'center' }}>
 
-              {/* Title Navbar Mobile */}
+              {/* TITLE NAVBAR UP MOBILE */}
               {isMobile ?
                 (location.pathname.startsWith('/detailed-expenses') || location.pathname.startsWith('/general-expenses'))
                 ? <span style={{ display: 'flex', alignItems: 'center' }}>
@@ -297,28 +300,16 @@ const AppLayout = () => {
         <Modal open={isModalVisible} onCancel={handleCancel} footer={null}>
           <AddExpense onExpenseAdded={handleExpenseAdded} />
         </Modal>
-        {currentUser ? (
-          <div className="mobile-nav">
-
-            {/* NAVBAR LOGUED */}
-            <Button type="link" icon={<CreditCardOutlined />}><Link to="/dashboard"></Link>{t("userProfile.navbar.dashboard")}</Button>
-            <Button type="link" icon={<DashboardOutlined />}><Link to="/expenses"></Link>{t("userProfile.navbar.expenses")}</Button>
-            <div className="add-expense-button-mobile">
-              <Button type="primary" shape="circle" icon={<PlusOutlined />} size="large" onClick={showModal} />
-            </div>
-            <Button type="link" icon={<UserOutlined />}><Link to="/profile"></Link>{t("userProfile.navbar.profile")}</Button>
-            <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} size="large" className="logout">{t("userProfile.navbar.logout")}</Button>
-          </div>
-        ) :
-          <div className="mobile-nav">
-            {/* NAVBAR NO LOGUED */}
+        {!currentUser && (<div className="mobile-nav">
+            {/* NAVBAR DOWN MOBILE NO LOGUED */}
             {location.pathname === '/signup' ? (
               <Button type="link" icon={<UserOutlined />}><Link to="/login"></Link>{t("userProfile.navbar.login")}</Button>
             ) : (
               <Button type="link" icon={<UserOutlined />}><Link to="/signup"></Link>{t("userProfile.navbar.signup")}</Button>
             )}
-          </div>}
+          </div>)}
       </Layout>
+
     </Layout>
   );
 };
