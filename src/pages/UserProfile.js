@@ -6,7 +6,7 @@ import { doc, getDoc, updateDoc, collection, query, where, Timestamp, deleteDoc,
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Importa Storage
 // import { useNavigate } from "react-router-dom";
 import { PlusOutlined } from '@ant-design/icons';
-import { notification, Button, Input, Select, Table, Modal, Form, Spin, message, Row, Col } from 'antd';
+import { notification, Button, Input, Select, Table, Modal, Form, Spin, message, Row, Col, Empty } from 'antd';
 import ImageCropper from '../components/ImageCropper';
 import i18n from '../i18n'; // o './i18n' según la ruta correcta a tu archivo i18n.js
 import { useTranslation } from "react-i18next";
@@ -16,6 +16,7 @@ import countries   from 'i18n-iso-countries';
 import en          from 'i18n-iso-countries/langs/en.json';
 import es          from 'i18n-iso-countries/langs/es.json';
 import dayjs from 'dayjs';
+import useMonthlyMovements from '../hooks/useMonthlyMovements';
 
 countries.registerLocale(en);
 countries.registerLocale(es);
@@ -60,10 +61,10 @@ export default function UserProfile() {
     const [croppedFile, setCroppedFile] = useState(null);
     const [cropModalVisible, setCropModalVisible] = useState(false);
     const [countryOptions, setCountryOptions] = useState([]);
-    // incomes
-    const [incomes, setIncomes] = useState([]);                // lista mensual
+    const [incomes, setIncomes] = useState([]);
 
     const { t } = useTranslation();
+    const { hasIncomes } = useMonthlyMovements();
 
     useEffect(() => {
         let isMounted = true;
@@ -651,80 +652,84 @@ export default function UserProfile() {
 
                     <div className="display-flex center margin-top-large margin-bottom-large" style={{ alignItems: 'center' }}>
 
-                        {/* Add Income Title */}
-                        <h1 className="margin-right-medium" style={{ fontWeight: 200, margin: 0, marginRight: 10 }}>{t('userProfile.profile.currentIncomes')}</h1>
+                      {/* Add Income Title */}
+                      <h1 className="margin-right-medium" style={{ fontWeight: 200, margin: 0, marginRight: 10 }}>{t('userProfile.profile.currentIncomes')}</h1>
 
-                        {/* Add Income Button */}
-                        <Button type="primary" size="small" shape="circle" icon={<PlusOutlined />} onClick={showModal} />
+                      {/* Add Income Button */}
+                      <Button type="primary" size="small" shape="circle" icon={<PlusOutlined />} onClick={showModal} />
                     </div>
 
                     <div className="display-flex center">
 
-                        {/* Incomes Table */}
-                        <Table className="margin-bottom-large" pagination={false} style={{width: 1200, marginBottom: 80 }} columns={incomeColumns} dataSource={incomes} rowKey="id" />
+                      {/* Incomes Table */}
+                      { hasIncomes
+                      ? <Table className="margin-bottom-large" pagination={false} style={{width: 1200, marginBottom: 80 }} columns={incomeColumns} dataSource={incomes} rowKey="id" />
+                      : <div style={{ marginTop: 40 }}>
+                          <Empty description={t("No tienes ingresos registrados durante este mes.")} />
+                        </div> }
 
-                        {/* Modal Add Income */}
-                        <Modal
-                        title={t('userProfile.profile.currentIncomesModal.title')}
-                        open={isModalVisible}
-                        onOk={handleAddIncome}          // antes handleOk
-                        onCancel={handleCancelIncome}   // antes handleCancel
-                        >
-                            <Form layout="vertical">
-                                <Form.Item style={{ marginTop: 20, fontWeight: 600, paddingBottom: 0 }}>
-                                <Input
-                                    addonBefore={t('userProfile.profile.currentIncomesTable.jobTitle')}
-                                    name="title"
-                                    value={newIncomeData.title}
-                                    onChange={handleNewIncomeChange}     // antes handleNewJobChange
-                                />
-                                </Form.Item>
+                      {/* Modal Add Income */}
+                      <Modal
+                      title={t('userProfile.profile.currentIncomesModal.title')}
+                      open={isModalVisible}
+                      onOk={handleAddIncome}          // antes handleOk
+                      onCancel={handleCancelIncome}   // antes handleCancel
+                      >
+                          <Form layout="vertical">
+                              <Form.Item style={{ marginTop: 20, fontWeight: 600, paddingBottom: 0 }}>
+                              <Input
+                                  addonBefore={t('userProfile.profile.currentIncomesTable.jobTitle')}
+                                  name="title"
+                                  value={newIncomeData.title}
+                                  onChange={handleNewIncomeChange}     // antes handleNewJobChange
+                              />
+                              </Form.Item>
 
-                                <Form.Item>
-                                <Input
-                                    addonBefore={t('userProfile.profile.currentIncomesTable.salary')}
-                                    name="amount"                        // antes salary
-                                    prefix="$"
-                                    type="number"
-                                    value={newIncomeData.amount}
-                                    onChange={handleNewIncomeChange}     // antes handleNewJobChange
-                                />
-                                </Form.Item>
+                              <Form.Item>
+                              <Input
+                                  addonBefore={t('userProfile.profile.currentIncomesTable.salary')}
+                                  name="amount"                        // antes salary
+                                  prefix="$"
+                                  type="number"
+                                  value={newIncomeData.amount}
+                                  onChange={handleNewIncomeChange}     // antes handleNewJobChange
+                              />
+                              </Form.Item>
 
-                                <Form.Item
-                                label={t('userProfile.profile.currentIncomesTable.currency')}
-                                style={{ fontWeight: 600 }}
-                                >
-                                <Select
-                                    value={newIncomeData.currency}
-                                    onChange={handleNewIncomeCurrencyChange}  // antes handleNewJobCurrencyChange
-                                >
-                                    <Option value="ARS">ARS</Option>
-                                    <Option value="USD">USD</Option>
-                                </Select>
-                                </Form.Item>
+                              <Form.Item
+                              label={t('userProfile.profile.currentIncomesTable.currency')}
+                              style={{ fontWeight: 600 }}
+                              >
+                              <Select
+                                  value={newIncomeData.currency}
+                                  onChange={handleNewIncomeCurrencyChange}  // antes handleNewJobCurrencyChange
+                              >
+                                  <Option value="ARS">ARS</Option>
+                                  <Option value="USD">USD</Option>
+                              </Select>
+                              </Form.Item>
 
-                                <Form.Item
-                                label={t('userProfile.profile.currentIncomesTable.contractType.label')}
-                                style={{ fontWeight: 600 }}
-                                >
-                                <Select
-                                    value={newIncomeData.type}
-                                    onChange={handleNewIncomeTypeChange}      // antes handleNewJobTypeChange
-                                >
-                                    <Option value="employed">
-                                    {t('userProfile.profile.currentIncomesTable.contractType.employed')}
-                                    </Option>
-                                    <Option value="self-employed">
-                                    {t('userProfile.profile.currentIncomesTable.contractType.selfEmployed')}
-                                    </Option>
-                                    <Option value="contractor">
-                                    {t('userProfile.profile.currentIncomesTable.contractType.contractor')}
-                                    </Option>
-                                </Select>
-                                </Form.Item>
-                            </Form>
-                        </Modal>
+                              <Form.Item
+                              label={t('userProfile.profile.currentIncomesTable.contractType.label')}
+                              style={{ fontWeight: 600 }}
+                              >
+                              <Select
+                                  value={newIncomeData.type}
+                                  onChange={handleNewIncomeTypeChange}      // antes handleNewJobTypeChange
+                              >
+                                  <Option value="employed">
+                                  {t('userProfile.profile.currentIncomesTable.contractType.employed')}
+                                  </Option>
+                                  <Option value="self-employed">
+                                  {t('userProfile.profile.currentIncomesTable.contractType.selfEmployed')}
+                                  </Option>
+                                  <Option value="contractor">
+                                  {t('userProfile.profile.currentIncomesTable.contractType.contractor')}
+                                  </Option>
+                              </Select>
+                              </Form.Item>
+                          </Form>
+                      </Modal>
                     </div>
 
                     <Modal

@@ -7,7 +7,7 @@
     },
     
     "userProfile.dashboard.welcome": "¡Bienvenido/a!",
-    "userProfile.dashboard.welcomeText": "Aún no has registrado ningún gasto. Empieza agregando tu primer movimiento.",
+    "userProfile.dashboard.welcomeText": "Aún no has registrado ningún ingreso o gasto. Empieza agregando tu primer movimiento.",
     "userProfile.dashboard.card.balance.ars": "Balance ARS",
     "userProfile.dashboard.card.balance.usd": "Balance USD",
     "userProfile.dashboard.card.incomes.ars": "Ingresos ARS",

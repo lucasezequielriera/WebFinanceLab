@@ -47,12 +47,12 @@ export default function AccountTypeBadge({ type = 'free' }) {
         setMenuOpen(false);
       }}
     >
-      <Menu.Item key="/dashboard">Dashboard</Menu.Item>
-      <Menu.Item key="/expenses">Expenses</Menu.Item>
-      <Menu.Item key="/financial-goals">Financial Goals</Menu.Item>
-      <Menu.Item key="/profile">Profile</Menu.Item>
+      <Menu.Item key="/dashboard">{t("userProfile.navbar.dashboard")}</Menu.Item>
+      <Menu.Item key="/expenses">{t("userProfile.navbar.expenses")}</Menu.Item>
+      <Menu.Item key="/financial-goals">{t("userProfile.navbar.financialGoals")}</Menu.Item>
+      <Menu.Item key="/profile">{t("userProfile.navbar.profile")}</Menu.Item>
       <Menu.Divider />
-      <Menu.Item key="logout">Logout</Menu.Item>
+      <Menu.Item key="logout">{t("userProfile.navbar.logout")}</Menu.Item>
     </Menu>
   );
 

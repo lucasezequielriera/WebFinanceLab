@@ -9,6 +9,7 @@ import moment from 'moment';
 import dayjs from 'dayjs';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
+import useMonthlyMovements from '../hooks/useMonthlyMovements';
 import '../styles/Expenses.css';
 
 const Expenses = () => {
@@ -16,14 +17,14 @@ const Expenses = () => {
   const [loading, setLoading] = useState(true);
   const [cards, setCards] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(dayjs());
-  const [hasPesosIncome, setHasPesosIncome] = useState(false);
-  const [hasUsdIncome, setHasUsdIncome]     = useState(false);
   const cardColors = {
     Visa: 'linear-gradient(135deg, #1A1F71, #2E77BB)',
     MasterCard: 'linear-gradient(135deg, #ff2500, #ff9300)',
     'American Express': 'linear-gradient(135deg, #0080ff, #00d6ff)',
     Cash: 'linear-gradient(135deg, #00771A, #00BF5A)',
   };
+
+  const { hasExpenses } = useMonthlyMovements();
   
   const navigate = useNavigate();
 
@@ -51,17 +52,6 @@ const Expenses = () => {
 
     return () => unsubscribe();
   }, [currentUser, selectedMonth]);
-
-  useEffect(() => {
-    if (!currentUser) return;
-    const incomesRef = collection(db, `users/${currentUser.uid}/incomes`);
-    const unsub = onSnapshot(incomesRef, snap => {
-      const currencies = snap.docs.map(d => d.data().currency);
-      setHasPesosIncome(currencies.includes('ARS'));
-      setHasUsdIncome(currencies.includes('USD'));
-    });
-    return () => unsub();
-  }, [currentUser]);
 
   const updateCreditCards = (expenses) => {
     const cardMap = new Map();
@@ -177,8 +167,6 @@ const Expenses = () => {
     return t(keyBase);
   };
 
-  const noCards = creditCards.length === 0 && debitCards.length === 0 && cashCards.length === 0;
-
   const StyledDatePicker = styled(DatePicker)`
   input {
     margin: 0;
@@ -188,7 +176,7 @@ const Expenses = () => {
   return (
     <div className='container-page'>
       <Spin spinning={loading}>
-        {(hasPesosIncome || hasUsdIncome) ? <>
+        {hasExpenses ? <>
           <div className='title-and-buttons' style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
             <div className="buttons">
               <Button onClick={() => navigate('/general-expenses')}>
@@ -221,7 +209,7 @@ const Expenses = () => {
             </div>
           </div>
         </> :
-        
+
         // EMPTY DATA MESSAGE
         <div style={{ marginTop: 40 }}>
           <Empty description={t("No hay gastos registrados en este mes")} />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Layout, Menu, Tag, Modal, Tooltip, Button } from 'antd';
-import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, PlusOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined, LeftOutlined } from '@ant-design/icons';
+import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined, LeftOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -300,14 +300,21 @@ const AppLayout = () => {
         <Modal open={isModalVisible} onCancel={handleCancel} footer={null}>
           <AddExpense onExpenseAdded={handleExpenseAdded} />
         </Modal>
-        {!currentUser && (<div className="mobile-nav">
-            {/* NAVBAR DOWN MOBILE NO LOGUED */}
-            {location.pathname === '/signup' ? (
-              <Button type="link" icon={<UserOutlined />}><Link to="/login"></Link>{t("userProfile.navbar.login")}</Button>
-            ) : (
-              <Button type="link" icon={<UserOutlined />}><Link to="/signup"></Link>{t("userProfile.navbar.signup")}</Button>
-            )}
-          </div>)}
+        {!currentUser && (
+          <div className="mobile-nav">
+          {/* NAVBAR DOWN MOBILE NO LOGUED */}
+          {location.pathname === '/signup' ? (
+            <Button type="link" icon={<UserOutlined />}><Link to="/login"></Link>{t("userProfile.navbar.login")}</Button>
+          ) : (
+            <Button type="link" icon={<UserOutlined />}><Link to="/signup"></Link>{t("userProfile.navbar.signup")}</Button>
+          )}
+        </div>
+        )}
+
+          {/* <div className="add-expense-button-mobile">
+            <Button type="primary" shape="circle" icon={<PlusOutlined />} size="large" onClick={showModal} />
+          </div> */}
+      
       </Layout>
 
     </Layout>

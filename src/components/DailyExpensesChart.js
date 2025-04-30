@@ -129,6 +129,7 @@ const DailyExpensesChart = ({ userId }) => {
     (async () => {
       const dailyLimit = await getDailyLimit(userId); // 🔹 llamada a Firebase
       const found = data.find(d => (d.ars || 0) + (d.usd || 0) > 0);
+      if (!found) return;  
 
       if (!dailyLimit) return;
   

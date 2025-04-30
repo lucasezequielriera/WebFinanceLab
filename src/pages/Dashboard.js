@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Spin, Row, Col, Card, Progress, Modal, Form, Input, Button, notification, Flex, Empty } from 'antd';
+import { Spin, Row, Col, Card, Progress, Modal, Form, Input, Button, notification, Flex } from 'antd';
 import { DeleteTwoTone, DollarTwoTone, CheckCircleTwoTone, SmileOutlined } from '@ant-design/icons';
 import PesoIncomeCounter from '../components/PesoIncomeCounter';
 import DollarIncomeCounter from '../components/DollarIncomeCounter';
@@ -12,6 +12,7 @@ import RemainingPesosCounter from '../components/RemainingPesosCounter';
 import RemainingDollarsCounter from '../components/RemainingDollarsCounter';
 import DailyExpensesChart from '../components/DailyExpensesChart';
 import { useTranslation } from 'react-i18next';
+import useMonthlyMovements from '../hooks/useMonthlyMovements';
 import '../styles/Dashboard.css'; // Importa el archivo CSS para los estilos
 
 const Dashboard = () => {
@@ -27,6 +28,7 @@ const Dashboard = () => {
   const [hasUsdIncome, setHasUsdIncome]     = useState(false);
 
   const { t } = useTranslation();
+  const { hasIncomes, hasExpenses } = useMonthlyMovements();
 
   useEffect(() => {
     let isMounted = true;
@@ -178,7 +180,7 @@ const Dashboard = () => {
     <div className='container-page'>
       <Spin spinning={loading}>
         <div className="dashboard-container margin-top-small">
-          {(hasPesosIncome || hasUsdIncome) ? (<div>
+          {(hasIncomes || hasExpenses) ? (<div>
             {/* CARDS */}
             {hasPesosIncome && (
               <Row className="expenses-counters margin-bottom-medium" gutter={[16, 16]}>
@@ -228,7 +230,7 @@ const Dashboard = () => {
               </Col>
             </Row>
           </div>) :
-          
+
           // EMPTY DATA MESSAGE
           <div style={{ textAlign: 'center', marginTop: 30 }}>
             <SmileOutlined style={{ fontSize: 48, color: 'rgb(0, 126, 222)', marginBottom: 20 }} />

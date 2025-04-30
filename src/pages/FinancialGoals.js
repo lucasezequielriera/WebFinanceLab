@@ -4,11 +4,12 @@ import "../index.css"
 import "../styles/FinancialGoals.css";
 import { Button, InputNumber, Form, notification, Spin, Tooltip, Select, Input, Space, Switch, Typography, Empty } from 'antd';
 import { QuestionCircleTwoTone } from '@ant-design/icons';
-import { collection, onSnapshot, updateDoc, doc, getDocs, getDoc } from 'firebase/firestore';
+import { collection, updateDoc, doc, getDocs, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import { useTranslation } from "react-i18next";
+import useMonthlyMovements from '../hooks/useMonthlyMovements';
 
 dayjs.extend(isBetween);
 const { Option } = Select;
@@ -24,8 +25,6 @@ export default function FinancialGoals() {
     const [userData, setUserData] = useState(null);
     const [autoCurrency, setAutoCurrency] = useState("USD");
     const [exchangeRate, setExchangeRate] = useState(1100);
-    const [hasPesosIncome, setHasPesosIncome] = useState(false);
-    const [hasUsdIncome, setHasUsdIncome]     = useState(false);
 
     const today = dayjs();
     const endOfMonth = dayjs().endOf('month');
@@ -33,6 +32,7 @@ export default function FinancialGoals() {
     const { Title, Text } = Typography;
 
     const { t } = useTranslation();
+    const { hasExpenses } = useMonthlyMovements();
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -111,17 +111,6 @@ export default function FinancialGoals() {
         }
     }, [manualMode, manualAmount, userData, autoCurrency, exchangeRate]);
 
-    useEffect(() => {
-        if (!currentUser) return;
-        const incomesRef = collection(db, `users/${currentUser.uid}/incomes`);
-        const unsub = onSnapshot(incomesRef, snap => {
-          const currencies = snap.docs.map(d => d.data().currency);
-          setHasPesosIncome(currencies.includes('ARS'));
-          setHasUsdIncome(currencies.includes('USD'));
-        });
-        return () => unsub();
-    }, [currentUser]);
-
     const handleSave = async () => {
         setLoading(true);
         try {
@@ -155,7 +144,7 @@ export default function FinancialGoals() {
     return (
         <div className="container-page">
             <Spin spinning={loading}>
-                {(hasPesosIncome || hasUsdIncome) ?
+                {hasExpenses ?
                 <div className="financial-goals">
 
                     {/* Add Limits */}
@@ -259,7 +248,7 @@ export default function FinancialGoals() {
                     <p style={{ fontSize: 12, color: '#363636' }}>{t('userProfile.financialGoals.suggestedLimit.helpText')}</p>
                     <hr />
                 </div> :
-                
+
                 // EMPTY DATA MESSAGE
                 <div style={{ marginTop: 40 }}>
                     <Empty description={t("userProfile.financialGoals.withoutData")} />
