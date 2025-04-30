@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, query, onSnapshot, where, Timestamp, doc, getDoc, getDocs } from 'firebase/firestore';
+import { collection, query, onSnapshot, where, Timestamp, getDocs } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Statistic, Progress } from 'antd';
-import { DollarOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
 const RemainingPesosCounter = () => {
@@ -12,10 +11,10 @@ const RemainingPesosCounter = () => {
   const [remaining, setRemaining] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0); // Nuevo estado para el ingreso total
   const progressPercent = totalIncome > 0 ? ((remaining / totalIncome) * 100).toFixed(0) : 0;
-  const conicColors = {
-    '0%': '#87d068',
-    '50%': '#ffe58f',
-    '100%': '#ffccc7',
+  const twoColors = {
+    '0%': 'rgb(0, 143, 226)',
+    '50%': 'rgb(0, 201, 167)',
+    '100%': 'rgb(0, 191, 145)',
   };
 
   const { t } = useTranslation();
@@ -82,19 +81,17 @@ const RemainingPesosCounter = () => {
 
   return (
     <Card loading={loading}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', flexFlow: 'column' }}>
+      <div>
           <Statistic
+            className='statics-card'
             title={t('userProfile.remaining.ars')}
             value={remaining}
             precision={2}
-            valueStyle={{ color: remaining < 50000 ? '#cf1322' : '#3f8600' }}
-            prefix={<DollarOutlined />}
-            suffix={<span style={{ fontSize: 12 }}>ARS</span>}
+            prefix={'$'}
+            suffix={<span style={{ fontSize: 12 }}>AR$</span>}
           />
-          <span style={{ fontWeight: 600, fontSize: 13 }}>/ ${formatNumber(totalIncome)}</span>
-        </div>
-        <Progress type="circle" percent={progressPercent} strokeColor={conicColors} size="small" style={{ marginLeft: 30 }} />
+          <span style={{ fontWeight: 700, fontSize: 12 }}>/ ${formatNumber(totalIncome)}</span>
+          <Progress showInfo={false} percent={progressPercent} strokeColor={twoColors} />
       </div>
     </Card>
   );

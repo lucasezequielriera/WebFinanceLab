@@ -10,7 +10,6 @@ import PrivateRoute from './components/PrivateRoute';
 import UserProfile from './pages/UserProfile';
 import DetailedExpenses from './pages/DetailedExpenses';
 import GeneralExpenses from './pages/GeneralExpenses';
-import MonthlyExpensesPage from './pages/MonthlyExpensesPage';
 import AddExpense from './components/AddExpense';
 import AddTarget from './components/AddTarget';
 import Expenses from './pages/Expenses'; // Importa el nuevo componente
@@ -250,7 +249,6 @@ const AppLayout = () => {
             <Route path="/about-us" element={<PrivateRoute><AboutUs /></PrivateRoute>} />
             <Route path="/detailed-expenses" element={<PrivateRoute><DetailedExpenses /></PrivateRoute>} />
             <Route path="/general-expenses" element={<PrivateRoute><GeneralExpenses /></PrivateRoute>} />
-            <Route path="/monthly-expenses/:month" element={<PrivateRoute><MonthlyExpensesPage /></PrivateRoute>} />
             <Route path="*" element={<Navigate to="/dashboard" />} /> {/* Catch-all route */}
           </Routes>
         </Content>

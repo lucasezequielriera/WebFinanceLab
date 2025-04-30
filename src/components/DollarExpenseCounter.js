@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Statistic } from 'antd';
-import { DollarOutlined } from '@ant-design/icons';
+import { RiseOutlined, FallOutlined } from '@ant-design/icons';
 import { db } from '../firebase';
 import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
@@ -37,13 +37,19 @@ const DollarExpenseCounter = () => {
   return (
     <Card loading={loading}>
       <Statistic
+        className='statics-card'
         title={t('userProfile.totalExpenses.usd')}
         value={total}
         precision={2}
-        valueStyle={{ color: '#cf1322' }}
-        prefix={<DollarOutlined />}
+        prefix={'$'}
         suffix={<span style={{ fontSize: 12 }}>U$D</span>}
       />
+      <p style={{ margin: 0, marginTop: 5, fontWeight: 500 }}>
+        <RiseOutlined style={{ fontSize: 18, marginRight: 5, color: 'rgb(0, 163, 137)' }}/>
+        <FallOutlined style={{ fontSize: 18, marginRight: 5, color: 'rgb(207, 0, 0)' }}/>
+        <span style={{ color: 'rgb(0, 163, 137)', fontWeight: 800, marginRight: 5 }}>12%</span>
+        this month
+      </p>
     </Card>
   );
 };

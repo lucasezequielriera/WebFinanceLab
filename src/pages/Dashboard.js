@@ -180,20 +180,20 @@ const Dashboard = () => {
   return (
     <div className='container-page'>
       <Spin spinning={loading}>
-        <div className="dashboard-container">
-          <div className='margin-bottom-medium' style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-            {/* <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="dashboard-container margin-top-small">
+          {/* <div className='margin-bottom-medium' style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <h1 className="dashboard-title" style={{ marginBottom: 0 }}>{t('userProfile.title')}, {currentUser?.displayName || t('userProfile.username')}</h1>
               <AccountTypeBadge type={userData?.user_access_level === 0 ? 'admin'
               : userData?.user_access_level === 2 ? 'premium'
               : userData?.user_access_level === 3 ? 'gold'
               : 'free'} />
-            </div> */}
-            {/* <div className="balance-box">
+            </div>
+            <div className="balance-box">
               <UserBalance userInfo={userInfo} monthlyExpenses={expenses} />
-            </div> */}
-          </div>
-          <Row className="expenses-counters margin-bottom-large" gutter={[16, 16]}>
+            </div>
+          </div> */}
+          <Row className="expenses-counters margin-bottom-medium" gutter={[16, 16]}>
             <Col xs={24} sm={12} md={6}>
               <Card className="equal-height-card">
                 <RemainingPesosCounter />
@@ -205,7 +205,7 @@ const Dashboard = () => {
               </Card>
             </Col>
           </Row>
-          <Row className="remainings-counters margin-bottom-large" gutter={[16, 16]}>
+          <Row className="remainings-counters margin-bottom-medium" gutter={[16, 16]}>
             <Col xs={24} sm={12} md={6}>
               <Card className="equal-height-card">
                 <PesoExpenseCounter />
@@ -217,6 +217,7 @@ const Dashboard = () => {
               </Card>
             </Col>
           </Row>
+
           {targets.length > 0 && (
             <>
               <h2 style={{ fontWeight: 200 }}>Targets:</h2>
@@ -266,6 +267,7 @@ const Dashboard = () => {
               </Row>
             </>
           )}
+
           { currentUser && (
           <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 30, marginRight: 0, marginLeft: 0 }}>
             <Col span={24} style={{ padding: 0 }}>
@@ -297,6 +299,7 @@ const Dashboard = () => {
               </Form.Item>
             </Form>
           </Modal>
+          
         </div>
       </Spin>
     </div>

@@ -53,7 +53,7 @@ const DailyExpensesChart = ({ userId }) => {
     const q = query(
       expensesRef,
       where('timestamp', '>=', startOfMonth),
-      where('timestamp', '<=', endOfMonth)
+      where('timestamp', '<', endOfMonth)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
