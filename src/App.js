@@ -311,9 +311,9 @@ const AppLayout = () => {
         </div>
         )}
 
-          <div className="add-expense-button-mobile">
+          {currentUser && <div className="add-expense-button-mobile">
             <Button type="primary" shape="circle" icon={<PlusOutlined style={{ fontSize: 25 }}/>} size="large" onClick={showModal} />
-          </div>
+          </div>}
       
       </Layout>
 
