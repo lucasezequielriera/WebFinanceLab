@@ -274,20 +274,29 @@ code {
   /* Button Navbar */
   .add-expense-button-mobile {
     position: relative;
-    min-width: 50px;
-    height: 20px;
+    height: 0px;
     text-align: center;
   }
 
   .add-expense-button-mobile button {
-    background: linear-gradient(90deg, rgb(0, 132, 105), rgb(0, 163, 137), rgb(0, 191, 145));;
+    /* background: linear-gradient(90deg, rgb(0, 132, 105), rgb(0, 163, 137), rgb(0, 191, 145)); */
+    background: linear-gradient(90deg, rgb(0, 132, 105), rgb(0, 163, 137), rgb(0, 191, 145));                /* color de base (rojo) */
+    filter: hue-rotate(0deg);        /* sin rotación inicial */
+    animation: hue-cycle 8s linear infinite;
     border: none;
-    box-shadow: 0px 0px 0px 7px rgb(255, 255, 255);
+    box-shadow: 0px 0px 11px 8px rgb(154 154 154 / 37%);
     position: absolute;
-    left: 50%;
-    right: 50%;
-    bottom: 0;
+    left: 90%;
+    right: 0%;
+    bottom: -10px;
     transform: translate(-50%, -50%);
+    width: 60px !important;
+    height: 60px;
+    position: fixed;
+  }
+
+  .add-expense-button-mobile :where(.css-dev-only-do-not-override-1d4w9r2).ant-btn-variant-solid:not(:disabled):not(.ant-btn-disabled):hover {
+    background: linear-gradient(90deg, rgb(0, 132, 105), rgb(0, 163, 137), rgb(0, 191, 145));
   }
 
   /* NOTIFICATIONs */

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Layout, Menu, Tag, Modal, Tooltip, Button } from 'antd';
-import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined, LeftOutlined } from '@ant-design/icons';
+import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined, LeftOutlined, PlusOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -311,9 +311,9 @@ const AppLayout = () => {
         </div>
         )}
 
-          {/* <div className="add-expense-button-mobile">
-            <Button type="primary" shape="circle" icon={<PlusOutlined />} size="large" onClick={showModal} />
-          </div> */}
+          <div className="add-expense-button-mobile">
+            <Button type="primary" shape="circle" icon={<PlusOutlined style={{ fontSize: 25 }}/>} size="large" onClick={showModal} />
+          </div>
       
       </Layout>
 
