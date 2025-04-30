@@ -16,6 +16,8 @@ const Expenses = () => {
   const [loading, setLoading] = useState(true);
   const [cards, setCards] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(dayjs());
+  const [hasPesosIncome, setHasPesosIncome] = useState(false);
+  const [hasUsdIncome, setHasUsdIncome]     = useState(false);
   const cardColors = {
     Visa: 'linear-gradient(135deg, #1A1F71, #2E77BB)',
     MasterCard: 'linear-gradient(135deg, #ff2500, #ff9300)',
@@ -49,6 +51,17 @@ const Expenses = () => {
 
     return () => unsubscribe();
   }, [currentUser, selectedMonth]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const incomesRef = collection(db, `users/${currentUser.uid}/incomes`);
+    const unsub = onSnapshot(incomesRef, snap => {
+      const currencies = snap.docs.map(d => d.data().currency);
+      setHasPesosIncome(currencies.includes('ARS'));
+      setHasUsdIncome(currencies.includes('USD'));
+    });
+    return () => unsub();
+  }, [currentUser]);
 
   const updateCreditCards = (expenses) => {
     const cardMap = new Map();
@@ -175,44 +188,44 @@ const Expenses = () => {
   return (
     <div className='container-page'>
       <Spin spinning={loading}>
-        <div className='title-and-buttons' style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
-          <div className="buttons">
-            <Button onClick={() => navigate('/general-expenses')}>
-              {t('userProfile.expenses.generalExpensesButton')}
-            </Button>
-            <Button onClick={() => navigate('/detailed-expenses')}>
-            {t('userProfile.expenses.detailedExpensesButton')}
-            </Button>
+        {(hasPesosIncome || hasUsdIncome) ? <>
+          <div className='title-and-buttons' style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+            <div className="buttons">
+              <Button onClick={() => navigate('/general-expenses')}>
+                {t('userProfile.expenses.generalExpensesButton')}
+              </Button>
+              <Button onClick={() => navigate('/detailed-expenses')}>
+              {t('userProfile.expenses.detailedExpensesButton')}
+              </Button>
+            </div>
           </div>
-        </div>
-        <div className="filter" style={{ marginBottom: 24 }}>
-          <span style={{marginRight: 5 }}>{t('userProfile.expenses.filter')}</span> 
-          <StyledDatePicker
-            picker="month"
-            allowClear={false} // ✅ con esto ya no te tira error
-            value={selectedMonth}
-            onChange={(value) => setSelectedMonth(value)}
-            style={{ margin: 0 }}
-          />
-        </div>
-        { noCards ? (
-          <div style={{ marginTop: 40 }}>
-            <Empty description="No hay gastos registrados en este mes" />
+          <div className="filter" style={{ marginBottom: 24 }}>
+            <span style={{marginRight: 5 }}>{t('userProfile.expenses.filter')}</span> 
+            <StyledDatePicker
+              picker="month"
+              allowClear={false} // ✅ con esto ya no te tira error
+              value={selectedMonth}
+              onChange={(value) => setSelectedMonth(value)}
+              style={{ margin: 0 }}
+            />
           </div>
-          ) : (
-            <>
-              <div className='cards margin-top-large margin-bottom-large'>
-                {renderSection(getTitle('credit', creditCards.length), creditCards)}
-              </div>
-              <div className='cards margin-top-large margin-bottom-large'>
-                {renderSection(getTitle('debit', debitCards.length), debitCards)}
-              </div>
-              <div className='cards margin-top-large margin-bottom-large'>
-                {renderSection(getTitle('cash', cashCards.length), cashCards)}
-              </div>
-            </>
-          )
-        }
+          <div>
+            <div className='cards margin-top-large margin-bottom-large'>
+              {renderSection(getTitle('credit', creditCards.length), creditCards)}
+            </div>
+            <div className='cards margin-top-large margin-bottom-large'>
+              {renderSection(getTitle('debit', debitCards.length), debitCards)}
+            </div>
+            <div className='cards margin-top-large margin-bottom-large'>
+              {renderSection(getTitle('cash', cashCards.length), cashCards)}
+            </div>
+          </div>
+        </> :
+        
+        // EMPTY DATA MESSAGE
+        <div style={{ marginTop: 40 }}>
+          <Empty description={t("No hay gastos registrados en este mes")} />
+        </div>}
       </Spin>
     </div>
   );

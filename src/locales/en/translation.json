@@ -41,6 +41,7 @@
     "userProfile.expenses.debitCardsTitle": "Debit Cards",
     "userProfile.expenses.debitCardTitle": "Debit Card",
     "userProfile.expenses.cashTitle": "Cash",
+    "userProfile.expenses.withoutData": "No expenses recorded this month.",
 
     "userProfile.financialGoals.title": "Financial Goals",
     "userProfile.financialGoals.subtitle": "You can check your financial goals here and configure everything.",
@@ -56,6 +57,7 @@
     "userProfile.financialGoals.suggestedLimit.automaticModeTooltip": "Your income minus current expenses, converted to the selected currency, divided by the number of days remaining.",
     "userProfile.financialGoals.suggestedLimit.manualModeTooltip": "You can calculate how much money you can spend by entering your available money. It will be divided by the number of days remaining in the month.",
     "userProfile.financialGoals.suggestedLimit.helpText": "* This suggestion is for information only.",
+    "userProfile.financialGoals.withoutData": "No expenses recorded this month to set your limits and suggestions.",
 
     "userProfile.aboutUs.title": "About Us",
     "userProfile.aboutUs.text": "At WebFinanceLab, we believe that personal finance should not be a mystery or a burden. We were born with a clear mission: to help you take control of your money simply, visually and from anywhere in the world.\n\nWe are a team passionate about technology, design and finance. We created an intuitive, modern and accessible platform, designed for real people who want to organize their income, control their expenses and achieve their financial goals without complications.\n\nEvery feature of Web Finance was designed to make your life easier: from recording your daily expenses with a single click, to visualizing your financial health in clear and motivating graphs. We want to make making decisions about your money as easy as using your favorite app.\n\nThis is just the beginning. We keep growing, learning and improving every day, driven by the community that trusts us.\n\nWebFinanceLab: Your money, under control.",

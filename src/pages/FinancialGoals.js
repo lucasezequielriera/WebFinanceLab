@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import "../index.css"
 import "../styles/FinancialGoals.css";
-import { Button, InputNumber, Form, notification, Spin, Tooltip, Select, Input, Space, Switch, Typography } from 'antd';
+import { Button, InputNumber, Form, notification, Spin, Tooltip, Select, Input, Space, Switch, Typography, Empty } from 'antd';
 import { QuestionCircleTwoTone } from '@ant-design/icons';
-import { collection, getDoc, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, onSnapshot, updateDoc, doc, getDocs, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -24,6 +24,8 @@ export default function FinancialGoals() {
     const [userData, setUserData] = useState(null);
     const [autoCurrency, setAutoCurrency] = useState("USD");
     const [exchangeRate, setExchangeRate] = useState(1100);
+    const [hasPesosIncome, setHasPesosIncome] = useState(false);
+    const [hasUsdIncome, setHasUsdIncome]     = useState(false);
 
     const today = dayjs();
     const endOfMonth = dayjs().endOf('month');
@@ -109,6 +111,17 @@ export default function FinancialGoals() {
         }
     }, [manualMode, manualAmount, userData, autoCurrency, exchangeRate]);
 
+    useEffect(() => {
+        if (!currentUser) return;
+        const incomesRef = collection(db, `users/${currentUser.uid}/incomes`);
+        const unsub = onSnapshot(incomesRef, snap => {
+          const currencies = snap.docs.map(d => d.data().currency);
+          setHasPesosIncome(currencies.includes('ARS'));
+          setHasUsdIncome(currencies.includes('USD'));
+        });
+        return () => unsub();
+    }, [currentUser]);
+
     const handleSave = async () => {
         setLoading(true);
         try {
@@ -142,7 +155,10 @@ export default function FinancialGoals() {
     return (
         <div className="container-page">
             <Spin spinning={loading}>
-                <div className="user-profile">
+                {(hasPesosIncome || hasUsdIncome) ?
+                <div className="financial-goals">
+
+                    {/* Add Limits */}
                     <p style={{ marginBottom: 30, marginRight: 10, marginTop: 10 }}>{t('userProfile.financialGoals.subtitle')}</p>
                     <Form layout="vertical" onFinish={handleSave}>
                         <div style={{ display: 'flex', marginBottom: 0 }}>
@@ -192,6 +208,8 @@ export default function FinancialGoals() {
                     </Form>
 
                     <hr />
+
+                    {/* Suggested Limits */}
                     <div style={{ marginTop: 30, marginBottom: 40 }}>
                         <Title level={4}>
                             {t('userProfile.financialGoals.suggestedLimit.title')}
@@ -240,7 +258,12 @@ export default function FinancialGoals() {
                     </div>
                     <p style={{ fontSize: 12, color: '#363636' }}>{t('userProfile.financialGoals.suggestedLimit.helpText')}</p>
                     <hr />
-                </div>
+                </div> :
+                
+                // EMPTY DATA MESSAGE
+                <div style={{ marginTop: 40 }}>
+                    <Empty description={t("userProfile.financialGoals.withoutData")} />
+                </div>}
             </Spin>
         </div>
     );

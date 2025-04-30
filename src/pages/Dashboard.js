@@ -227,12 +227,14 @@ const Dashboard = () => {
                 </Card>
               </Col>
             </Row>
-          </div>)
-          : <div style={{ textAlign: 'center', marginTop: 30 }}>
-              <SmileOutlined style={{ fontSize: 48, color: 'rgb(0, 126, 222)', marginBottom: 20 }} />
-              <h2>{t("userProfile.dashboard.welcome")}</h2>
-              <p>{t("userProfile.dashboard.welcomeText")}</p>
-            </div> }
+          </div>) :
+          
+          // EMPTY DATA MESSAGE
+          <div style={{ textAlign: 'center', marginTop: 30 }}>
+            <SmileOutlined style={{ fontSize: 48, color: 'rgb(0, 126, 222)', marginBottom: 20 }} />
+            <h2>{t("userProfile.dashboard.welcome")}</h2>
+            <p>{t("userProfile.dashboard.welcomeText")}</p>
+          </div> }
 
           {targets.length > 0 && (
             <>
