@@ -11,6 +11,7 @@ import { collection, query, onSnapshot, updateDoc, doc, deleteDoc, getDoc } from
 import RemainingPesosCounter from '../components/RemainingPesosCounter';
 import RemainingDollarsCounter from '../components/RemainingDollarsCounter';
 import DailyExpensesChart from '../components/DailyExpensesChart';
+import { useTranslation } from 'react-i18next';
 import '../styles/Dashboard.css'; // Importa el archivo CSS para los estilos
 
 const Dashboard = () => {
@@ -24,6 +25,8 @@ const Dashboard = () => {
   const [userData, setUserData] = useState();
   const [hasPesosIncome, setHasPesosIncome] = useState(false);
   const [hasUsdIncome, setHasUsdIncome]     = useState(false);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     let isMounted = true;
@@ -227,8 +230,8 @@ const Dashboard = () => {
           </div>)
           : <div style={{ textAlign: 'center', marginTop: 30 }}>
               <SmileOutlined style={{ fontSize: 48, color: 'rgb(0, 126, 222)', marginBottom: 20 }} />
-              <h2>¡Bienvenido!</h2>
-              <p>Aún no has registrado ningún gasto. Empieza agregando tu primer movimiento.</p>
+              <h2>{t("userProfile.dashboard.welcome")}</h2>
+              <p>{t("userProfile.dashboard.welcomeText")}</p>
             </div> }
 
           {targets.length > 0 && (
