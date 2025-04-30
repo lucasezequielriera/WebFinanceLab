@@ -224,7 +224,7 @@ const AppLayout = () => {
         <Menu theme="dark" mode="inline" selectedKeys={[selectedKey]} items={filteredMenuItems} />
         {currentUser && (
           <div className="sidebar-tags">
-            <Tag color="red" className="sidebar-tag" onClick={showModal}>
+            <Tag color="green" className="sidebar-tag" onClick={showModal}>
               {t('userProfile.navbar.addExpense')}
             </Tag>
             <AddTarget />
@@ -243,7 +243,7 @@ const AppLayout = () => {
             onClick: toggle,
           })}
         </Header>
-        <Content style={{ padding: 0, background: isAuthPage ? 'linear-gradient(135deg, #001123, #4094e9)' : 'transparent', minHeight: 280, paddingBottom: 50 }}>
+        <Content style={{ padding: 0, background: isAuthPage ? 'linear-gradient(135deg, #001123, #4094e9)' : 'transparent', maxHeight: '100vh', paddingBottom: 50 }}>
           { !isAuthPage &&
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 80, background: 'linear-gradient(90deg, rgb(0 68 121), rgb(0 163 137), rgb(0, 191, 145))', padding: '0px 20px' }}>
             <span style={{ fontSize: '20px', fontWeight: 500, color: 'white', display: 'flex', alignItems: 'center' }}>
@@ -251,6 +251,11 @@ const AppLayout = () => {
                 ? <span style={{ display: 'flex', alignItems: 'center' }}>
                     {React.cloneElement(getPageIcon(), { style: { fontSize: 24, marginRight: 10 } })}
                     {getPageTitle()}
+                  </span>
+                : location.pathname.startsWith('/detailed-expenses') || location.pathname.startsWith('/general-expenses')
+                ? <span style={{ display: 'flex', alignItems: 'center' }}>
+                  <LeftOutlined style={{ fontSize: 24, marginRight: 10 }} onClick={() => navigate(-1)}/>
+                  {getPageTitle()}
                   </span>
                 : getPageTitle()
               }
@@ -282,21 +287,21 @@ const AppLayout = () => {
           <div className="mobile-nav">
 
             {/* NAVBAR LOGUED */}
-            <Button type="link" icon={<DashboardOutlined />}><Link to="/dashboard"></Link>Dashboard</Button>
-            <Button type="link" icon={<CreditCardOutlined />}><Link to="/expenses"></Link>Expenses</Button>
+            <Button type="link" icon={<DashboardOutlined />}><Link to="/dashboard"></Link>{t("userProfile.navbar.expenses")}</Button>
+            <Button type="link" icon={<CreditCardOutlined />}><Link to="/expenses"></Link>{t("userProfile.navbar.dashboard")}</Button>
             <div className="add-expense-button-mobile">
               <Button type="primary" shape="circle" icon={<PlusOutlined />} size="large" onClick={showModal} />
             </div>
-            <Button type="link" icon={<UserOutlined />}><Link to="/profile"></Link>Profile</Button>
-            <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} size="large" className="logout">Logout</Button>
+            <Button type="link" icon={<UserOutlined />}><Link to="/profile"></Link>{t("userProfile.navbar.profile")}</Button>
+            <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} size="large" className="logout">{t("userProfile.navbar.logout")}</Button>
           </div>
         ) :
           <div className="mobile-nav">
             {/* NAVBAR NO LOGUED */}
             {location.pathname === '/signup' ? (
-              <Button type="link" icon={<UserOutlined />}><Link to="/login"></Link>Login</Button>
+              <Button type="link" icon={<UserOutlined />}><Link to="/login"></Link>{t("userProfile.navbar.login")}</Button>
             ) : (
-              <Button type="link" icon={<UserOutlined />}><Link to="/signup"></Link>Sign up</Button>
+              <Button type="link" icon={<UserOutlined />}><Link to="/signup"></Link>{t("userProfile.navbar.signup")}</Button>
             )}
           </div>}
       </Layout>

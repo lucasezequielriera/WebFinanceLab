@@ -668,9 +668,7 @@ export default function UserProfile() {
                     <div className="display-flex center">
 
                         {/* Incomes Table */}
-                        <Table className="margin-bottom-large" pagination={false} style={{width: 1200 }} columns={incomeColumns} dataSource={incomes} rowKey="id" />
-                            {console.log(userData)}
-                            {console.log(incomes)}
+                        <Table className="margin-bottom-large" pagination={false} style={{width: 1200, marginBottom: 80 }} columns={incomeColumns} dataSource={incomes} rowKey="id" />
 
                         {/* Modal Add Income */}
                         <Modal

@@ -3,6 +3,7 @@ body {
   font-family: 'system-ui';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  max-height: 100vh;
 }
 
 code {
@@ -13,6 +14,8 @@ code {
 
 .container-page {
   padding: 10px 20px;
+  max-height: calc(100vh - 80px);
+  overflow-y: scroll;
 }
 
 /* Dashboard */
@@ -173,6 +176,7 @@ code {
   cursor: pointer;
   border-radius: 4px;
   border: 1px solid transparent !important;
+  font-weight: 500;
 }
 
 .sidebar-tag:hover {
