@@ -6,7 +6,7 @@ import { doc, getDoc, updateDoc, collection, query, where, Timestamp, deleteDoc,
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Importa Storage
 // import { useNavigate } from "react-router-dom";
 import { PlusOutlined } from '@ant-design/icons';
-import { notification, Button, Input, Select, Table, Modal, Form, Spin, message, Row, Col, Tag } from 'antd';
+import { notification, Button, Input, Select, Table, Modal, Form, Spin, message, Row, Col } from 'antd';
 import ImageCropper from '../components/ImageCropper';
 import i18n from '../i18n'; // o './i18n' según la ruta correcta a tu archivo i18n.js
 import { useTranslation } from "react-i18next";
@@ -64,13 +64,6 @@ export default function UserProfile() {
     const [incomes, setIncomes] = useState([]);                // lista mensual
 
     const { t } = useTranslation();
-
-    const ACCOUNT_TYPE = {
-        0: t('userProfile.profile.accountType.user_access_level_0'),
-        1: t('userProfile.profile.accountType.user_access_level_1'),
-        2: t('userProfile.profile.accountType.user_access_level_2'),
-        3: t('userProfile.profile.accountType.user_access_level_3'),
-    };
 
     useEffect(() => {
         let isMounted = true;

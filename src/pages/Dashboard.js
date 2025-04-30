@@ -11,7 +11,6 @@ import { collection, query, onSnapshot, updateDoc, doc, deleteDoc, getDoc } from
 import RemainingPesosCounter from '../components/RemainingPesosCounter';
 import RemainingDollarsCounter from '../components/RemainingDollarsCounter';
 import DailyExpensesChart from '../components/DailyExpensesChart';
-import { useTranslation } from 'react-i18next';
 import '../styles/Dashboard.css'; // Importa el archivo CSS para los estilos
 
 const Dashboard = () => {
@@ -22,12 +21,9 @@ const Dashboard = () => {
   const [selectedTarget, setSelectedTarget] = useState(null);
   const [form] = Form.useForm();
   const [userInfo, setUserInfo] = useState(null);
-  const [expenses, setExpenses] = useState([]);
   const [userData, setUserData] = useState();
   const [hasPesosIncome, setHasPesosIncome] = useState(false);
   const [hasUsdIncome, setHasUsdIncome]     = useState(false);
-
-  const { t } = useTranslation();
 
   useEffect(() => {
     let isMounted = true;
@@ -57,19 +53,8 @@ const Dashboard = () => {
   useEffect(() => {
     if (!currentUser) return;
   
-    const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
     const targetsRef = collection(db, `users/${currentUser.uid}/targets`);
-    const qExpenses = query(expensesRef);
     const qTargets = query(targetsRef);
-  
-    // Snapshot listeners
-    const unsubscribeIncomes = onSnapshot(qExpenses, (snapshot) => {
-      const expenses = [];
-      snapshot.forEach((doc) => {
-        expenses.push({ id: doc.id, ...doc.data() });
-      });
-      setExpenses(expenses);
-    });
   
     const unsubscribeTargets = onSnapshot(qTargets, (snapshot) => {
       const targetsData = [];
@@ -96,7 +81,6 @@ const Dashboard = () => {
     });
   
     return () => {
-      unsubscribeIncomes();
       unsubscribeTargets();
     };
   }, [currentUser]);  
