@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Spin, Row, Col, Card, Progress, Modal, Form, Input, Button, notification, Flex } from 'antd';
-import { DeleteTwoTone, DollarTwoTone, CheckCircleTwoTone } from '@ant-design/icons';
+import { Spin, Row, Col, Card, Progress, Modal, Form, Input, Button, notification, Flex, Empty } from 'antd';
+import { DeleteTwoTone, DollarTwoTone, CheckCircleTwoTone, SmileOutlined } from '@ant-design/icons';
 import PesoIncomeCounter from '../components/PesoIncomeCounter';
 import DollarIncomeCounter from '../components/DollarIncomeCounter';
 import DollarExpenseCounter from '../components/DollarExpenseCounter';
@@ -225,7 +225,11 @@ const Dashboard = () => {
               </Col>
             </Row>
           </div>)
-          : <div>No ay nada</div>}
+          : <div style={{ textAlign: 'center', marginTop: 30 }}>
+              <SmileOutlined style={{ fontSize: 48, color: 'rgb(0, 126, 222)', marginBottom: 20 }} />
+              <h2>¡Bienvenido!</h2>
+              <p>Aún no has registrado ningún gasto. Empieza agregando tu primer movimiento.</p>
+            </div> }
 
           {targets.length > 0 && (
             <>

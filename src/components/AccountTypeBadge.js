@@ -6,10 +6,10 @@ import { useAuth } from '../contexts/AuthContext';
 
 /* 1. Mapa tipo → estilo + texto */
 const INFO = {
-admin   : { bg: '#00000080',                  label: 'Administrador' },
-  free    : { bg: '#8c8c8c',                  label: 'Gratuita' },
-  premium : { bg: '#1890ff',                 label: 'Premium' },
-  gold    : { bg: '#faad14',                 label: 'Gold' },
+  admin   : { bg: '#00000080', label: 'Administrador' },
+  free    : { bg: '#00000080', label: 'Gratuita' },
+  premium : { bg: '#00000080', label: 'Premium' },
+  gold    : { bg: '#00000080', label: 'Gold' },
 };
 
 /* 2. Tag con borde redondo y fondo custom */
