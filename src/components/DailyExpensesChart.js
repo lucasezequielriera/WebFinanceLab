@@ -206,9 +206,7 @@ const DailyExpensesChart = ({ userId }) => {
       </div>
     );
   };
-
-  console.log(stats)
-
+  
   return (
     <div style={{ position: 'relative' }}>
       <h3 style={{ marginBottom: 16, marginTop: 10, marginLeft: 15, textAlign: 'left', fontWeight: 700, fontSize: 18 }}>

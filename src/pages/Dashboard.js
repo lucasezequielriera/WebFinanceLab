@@ -1,56 +1,30 @@
-import React, { useState, useEffect }           from 'react';
-import { Spin, Row, Col, Card }                 from 'antd';
-import { SmileOutlined }                        from '@ant-design/icons';
-import { useAuth }                              from '../contexts/AuthContext';
-import { db }                                   from '../firebase';
-import { collection, onSnapshot, doc, getDoc }  from 'firebase/firestore';
-import { useTranslation }                       from 'react-i18next';
-import useMonthlyMovements                      from '../hooks/useMonthlyMovements';
+import React, { useState, useEffect } from 'react';
+import { Spin, Row, Col, Card }       from 'antd';
+import { SmileOutlined }              from '@ant-design/icons';
+import { useAuth }                    from '../contexts/AuthContext';
+import { db }                         from '../firebase';
+import { collection, onSnapshot }     from 'firebase/firestore';
+import { useTranslation }             from 'react-i18next';
+import useMonthlyMovements            from '../hooks/useMonthlyMovements';
 // Components
-import PesoIncomeCounter                        from '../components/PesoIncomeCounter';
-import DollarIncomeCounter                      from '../components/DollarIncomeCounter';
-import DollarExpenseCounter                     from '../components/DollarExpenseCounter';
-import PesoExpenseCounter                       from '../components/PesoExpenseCounter';
-import BalancePesosCounter                      from '../components/BalancePesosCounter';
-import BalanceDollarsCounter                    from '../components/BalanceDollarsCounter';
-import DailyExpensesChart                       from '../components/DailyExpensesChart';
+import PesoIncomeCounter              from '../components/PesoIncomeCounter';
+import DollarIncomeCounter            from '../components/DollarIncomeCounter';
+import DollarExpenseCounter           from '../components/DollarExpenseCounter';
+import PesoExpenseCounter             from '../components/PesoExpenseCounter';
+import BalancePesosCounter            from '../components/BalancePesosCounter';
+import BalanceDollarsCounter          from '../components/BalanceDollarsCounter';
+import DailyExpensesChart             from '../components/DailyExpensesChart';
 // Styles //
 import '../styles/Dashboard.css';
 
 const Dashboard = () => {
   const [loading, setLoading]               = useState(true);
-  const [userData, setUserData]             = useState();
   const [hasPesosIncome, setHasPesosIncome] = useState(false);
   const [hasUsdIncome, setHasUsdIncome]     = useState(false);
 
   const { currentUser } = useAuth();
   const { t } = useTranslation();
   const { hasIncomes, hasExpenses } = useMonthlyMovements();
-
-  useEffect(() => {
-    let isMounted = true;
-  
-    const fetchUserData = async () => {
-      if (currentUser) {
-        const userDocRef = doc(db, "users", currentUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          console.log(userData)
-  
-          if (!isMounted) return;
-  
-          setUserData(data);
-        }
-      }
-    };
-  
-    fetchUserData();
-  
-    return () => {
-      isMounted = false;
-    };
-  }, [currentUser, userData]);
 
   useEffect(() => {
     if (!currentUser) return;

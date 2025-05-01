@@ -1,13 +1,12 @@
 import React, { useState, useEffect }                                   from 'react';
 import { useNavigate }                                                  from 'react-router-dom';
-import { Button, Spin, DatePicker, Empty }                              from 'antd';
+import { Button, Spin, Empty, DatePicker }                              from 'antd';
 import { doc, onSnapshot, updateDoc, collection, getDoc, query, where } from 'firebase/firestore';
 import { db }                                                           from '../firebase';
 import { useAuth }                                                      from '../contexts/AuthContext';
 import { useTranslation }                                               from 'react-i18next';
 import moment                                                           from 'moment';
 import dayjs                                                            from 'dayjs';
-import styled                                                           from 'styled-components';
 import useMonthlyMovements                                              from '../hooks/useMonthlyMovements';
 // Components
 import CreditCard                                                       from '../components/CreditCard';
@@ -50,7 +49,7 @@ const Expenses = () => {
     setLoading(false);
 
     return () => unsubscribe();
-  }, [currentUser, selectedMonth]);
+  }, [currentUser, selectedMonth ]);
 
   const updateCreditCards = (expenses) => {
     const cardMap = new Map();
@@ -179,12 +178,6 @@ const Expenses = () => {
     return t(keyBase);
   };
 
-  const StyledDatePicker = styled(DatePicker)`
-  input {
-    margin: 0;
-  }
-`;
-
   return (
     <div className='container-page'>
       <Spin spinning={loading}>
@@ -206,7 +199,7 @@ const Expenses = () => {
           {/* Cards filter per month */}
           <div className="filter" style={{ marginBottom: 24 }}>
             <span style={{marginRight: 5 }}>{t('userProfile.expenses.filter')}</span> 
-            <StyledDatePicker
+            <DatePicker
               picker="month"
               allowClear={false}
               value={selectedMonth}

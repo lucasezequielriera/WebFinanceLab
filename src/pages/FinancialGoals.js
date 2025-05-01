@@ -137,10 +137,7 @@ const FinancialGoals = () => {
             setCalculatedDaily(manualAmount && daysRemaining ? manualAmount / daysRemaining : null);
         } else {
             setCalculatedDaily(net / daysRemaining);
-            console.log(Number(net.toFixed(2)))
-            console.log("income", totalIncome)
-            console.log("expense", totalExpenses)
-            setManualAmount(Number(net.toFixed(2))); // Valor inicial cuando cambia a manual
+            setManualAmount(Number(net.toFixed(2)));
         }
     }, [manualMode, manualAmount, userData, autoCurrency, exchangeRate]);
 

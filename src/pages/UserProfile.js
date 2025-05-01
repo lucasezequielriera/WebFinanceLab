@@ -323,7 +323,6 @@ const UserProfile = () => {
                                         placeholder="Age"
                                     />
                                 </Col>
-                                {console.log(t())}
                                 <Col span={12}>
                                     <label className="label-small">{t('userProfile.profile.gender.label')}</label>
                                     <Select className="margin-bottom-small"

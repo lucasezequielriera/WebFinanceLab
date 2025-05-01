@@ -54,10 +54,7 @@ const BalanceDollarsCounter = () => {
 
     const unsubscribeExpenses = onSnapshot(qExpenses, (snapshot) => {
       let expenses = 0;
-      snapshot.forEach((doc) => {
-        console.log('Expense Document Data:', doc.data());
-        expenses += Number(doc.data().amount);
-      });
+      snapshot.forEach((doc) => expenses += Number(doc.data().amount));
 
       setTotalExpenses(expenses);
       setLoading(false);
