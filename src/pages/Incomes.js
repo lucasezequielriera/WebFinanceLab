@@ -1,42 +1,15 @@
 // src/pages/Income.js
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Table,
-  Spin,
-  Select,
-  Modal,
-  Form,
-  Input,
-  InputNumber,
-  DatePicker,
-  Tag,
-  Popconfirm,
-  Button,
-  notification,
-  Empty,
-  Row,
-  Col,
-} from 'antd';
-import {
-  EditOutlined,
-  DeleteOutlined,
-  DollarOutlined,
-} from '@ant-design/icons';
+import { Table, Spin, Select, Modal, Form, Input, InputNumber, DatePicker, Tag, Popconfirm, Button, notification, Empty, Row, Col } from 'antd';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { db } from '../firebase';
-import {
-  collection,
-  query,
-  onSnapshot,
-  doc,
-  deleteDoc,
-  updateDoc,
-  Timestamp,
-} from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, deleteDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
+import { Typography } from 'antd';
 import CurrencyTagPicker from '../components/CurrencyTagPicker';
 
 const Income = () => {
@@ -53,6 +26,7 @@ const Income = () => {
   const { t } = useTranslation();
 
   const { Option } = Select;
+  const { Title } = Typography;
 
   // Fetch incomes and months
   useEffect(() => {
@@ -106,7 +80,7 @@ const Income = () => {
   // Table columns
   const columns = [
     {
-      title: 'Fecha',
+      title: t('userProfile.incomes.table.date'),
       dataIndex: 'timestamp',
       key: 'date',
       render: ts => {
@@ -116,26 +90,26 @@ const Income = () => {
       width: 120,
     },
     {
-      title: 'Descripción',
+      title: t('userProfile.incomes.table.description'),
       dataIndex: 'title',
       key: 'title',
       ellipsis: true,
     },
     {
-      title: 'Monto',
+      title: t('userProfile.incomes.table.amount'),
       dataIndex: 'amount',
       key: 'amount',
       render: (amt, rec) => `$${Number(amt).toFixed(2)}`,
       width: 120,
     },
     {
-      title: 'Moneda',
+      title: t('userProfile.incomes.table.currency'),
       dataIndex: 'currency',
       key: 'currency',
       width: 100,
     },
     {
-      title: 'Acciones',
+      title: t('userProfile.incomes.table.actions'),
       key: 'actions',
       width: 120,
       render: (_, rec) => (
@@ -153,15 +127,15 @@ const Income = () => {
             style={{ cursor: 'pointer' }}
           />
           <Popconfirm
-            title="¿Eliminar ingreso?"
+            title={t("userProfile.incomes.table.deleteIncome.ask")}
             onConfirm={async () => {
               try {
                 await deleteDoc(
                   doc(db, `users/${currentUser.uid}/incomes`, rec.id)
                 );
-                notification.success({ message: 'Ingreso eliminado' });
+                notification.success({ message: t("userProfile.incomes.table.deleteIncome.deleted") });
               } catch {
-                notification.error({ message: 'Error al eliminar' });
+                notification.error({ message: t("userProfile.incomes.table.deleteIncome.error") });
               }
             }}
           >
@@ -184,12 +158,12 @@ const Income = () => {
           timestamp: Timestamp.fromDate(values.timestamp.toDate()),
         }
       );
-      notification.success({ message: 'Ingreso actualizado' });
+      notification.success({ message: t("userProfile.incomes.table.editIncome.edited") });
       setEditModalVisible(false);
       setEditingIncome(null);
       form.resetFields();
     } catch {
-      notification.error({ message: 'Error al actualizar' });
+      notification.error({ message: t("userProfile.incomes.table.editIncome.error") });
     } finally {
       setUpdating(false);
     }
@@ -214,7 +188,7 @@ const Income = () => {
     <div className="container-page">
       <Select
         style={{ width: 250, marginBottom: 16 }}
-        placeholder="Selecciona mes"
+        placeholder={t("userProfile.incomes.filter.placeholder")}
         value={selectedMonth}
         onChange={handleMonthChange}
       >
@@ -253,12 +227,11 @@ const Income = () => {
         </>
       ) : (
         <div style={{ marginTop: 40 }}>
-          <Empty description={t("No hay ingresos para este mes")} />
+          <Empty description={t("userProfile.emptyData.noIncomes")} />
         </div>
       )}
 
       <Modal className="add-expense-modal"
-        title="Editar Ingreso"
         open={editModalVisible}
         onCancel={() => {
           setEditModalVisible(false);
@@ -267,18 +240,21 @@ const Income = () => {
         }}
         footer={null}
       >
+        <Title level={3} style={{ textAlign: 'center', marginBottom: 8 }}>
+          {t('userProfile.incomes.table.editIncome.title')}
+        </Title>
         <Form form={form} layout="vertical" onFinish={handleEdit}>
           <Form.Item
             name="timestamp"
-            label="Fecha"
-            rules={[{ required: true, message: 'Selecciona una fecha' }]}
+            label={t('userProfile.incomes.table.editIncome.date')}
+            rules={[{ required: true, message: t('userProfile.incomes.table.editIncome.dateRequiredLabel') }]}
           >
             <DatePicker style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item
             name="title"
-            label="Descripción"
-            rules={[{ required: true, message: 'Ingresa descripción' }]}
+            label={t('userProfile.incomes.table.editIncome.description')}
+            rules={[{ required: true, message: t('userProfile.incomes.table.editIncome.descriptionRequiredLabel') }]}
           >
             <Input />
           </Form.Item>
@@ -287,8 +263,8 @@ const Income = () => {
             <Col xs={12} style={{ display: 'flex', alignItems: 'center' }}>
               <Form.Item
                 name="amount"
-                label="Monto"
-                rules={[{ required: true, message: 'Ingresa monto' }]}
+                label={t('userProfile.incomes.table.editIncome.amount')}
+                rules={[{ required: true, message: t('userProfile.incomes.table.editIncome.amountRequiredLabel') }]}
               >
                 <InputNumber style={{ width: '100%' }} prefix="$" />
               </Form.Item>
@@ -296,7 +272,7 @@ const Income = () => {
             <Col span={12}>
               <Form.Item
                 name="currency"
-                label="Moneda"
+                label={t('userProfile.incomes.table.editIncome.currency')}
                 rules={[{ required: true }]}
               >
               <CurrencyTagPicker />
@@ -304,11 +280,9 @@ const Income = () => {
             </Col>
           </Row>
 
-          <Form.Item style={{ textAlign: 'right' }}>
-            <Button type="primary" htmlType="submit" loading={updating}>
-              Guardar
-            </Button>
-          </Form.Item>
+          <Button type="primary" htmlType="submit" size="large" block style={{ marginTop: 10 }} loading={updating}>
+            {t('userProfile.incomes.table.editIncome.saveButton')}
+          </Button>
         </Form>
       </Modal>
     </div>

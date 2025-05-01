@@ -6,6 +6,11 @@
         "goldAccount": "Gold"
     },
 
+    "userProfile.emptyData": {
+        "noIncomes": "No income for this month.",
+        "noExpenses": "No expenses for this month."
+    },
+
     "userProfile.dashboard.welcome": "Welcome!",
     "userProfile.dashboard.welcomeText": "You have not yet registered any income or expenses. Start adding your first movement.",
     "userProfile.dashboard.card.balance.ars": "Balance ARS",
@@ -37,20 +42,31 @@
     "userProfile.navbar.addTarget": "Add Target",
     "userProfile.navbar.addStock": "Add Stock",
 
-    "userProfile.expenses.table": {
-        "date": "Fecha",
-        "description": "Descripción",
-        "amount": "Monto",
-        "currency": "Moneda",
-        "actions": "Acciones"
-    },
-    "userProfile.expenses.table.editIncome": {
-        "title": "Editar ingreso",
-        "date": "Fecha",
-        "description": "Descripción",
-        "amount": "Monto",
-        "currency": "Moneda",
-        "saveButton": "Guardar"
+    "userProfile.incomes.filter.placeholder": "Select month",
+    "userProfile.incomes.table": {
+        "date": "Date",
+        "description": "Description",
+        "amount": "Amount",
+        "currency": "Currency",
+        "actions": "Actions",
+        "editIncome": {
+            "title": "Edit Income",
+            "date": "Date",
+            "dateRequiredLabel": "Select date",
+            "description": "Description",
+            "descriptionRequiredLabel": "Enter a description",
+            "amount": "Amount",
+            "amountRequiredLabel": "Enter the amount",
+            "currency": "Currency",
+            "saveButton": "Save Changes",
+            "edited": "Income Updated",
+            "error": "Error updating"
+        },
+        "deleteIncome": {
+            "ask": "Delete Income?",
+            "deleted": "Income Deleted",
+            "error": "Error Deleting"
+        }
     },
 
     "userProfile.expenses.title": "My Expenses",

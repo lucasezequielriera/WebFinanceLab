@@ -5,6 +5,11 @@
         "premiumAccount": "Premium",
         "goldAccount": "Gold"
     },
+
+    "userProfile.emptyData": {
+        "noExpenses": "No tienes gastos este mes",
+        "noIncomes": "No hay ingresos para este mes"
+    },
     
     "userProfile.dashboard.welcome": "¡Bienvenido/a!",
     "userProfile.dashboard.welcomeText": "Aún no has registrado ningún ingreso o gasto. Empieza agregando tu primer movimiento.",
@@ -37,20 +42,31 @@
     "userProfile.navbar.addTarget": "Agregar Objetivo",
     "userProfile.navbar.addStock": "Agregar Acción",
 
-    "userProfile.expenses.table": {
+    "userProfile.incomes.filter.placeholder": "Selecciona mes",
+    "userProfile.incomes.table": {
         "date": "Fecha",
         "description": "Descripción",
         "amount": "Monto",
         "currency": "Moneda",
-        "actions": "Acciones"
-    },
-    "userProfile.expenses.table.editIncome": {
-        "title": "Editar ingreso",
-        "date": "Fecha",
-        "description": "Descripción",
-        "amount": "Monto",
-        "currency": "Moneda",
-        "saveButton": "Guardar"
+        "actions": "Acciones",
+        "editIncome": {
+            "title": "Editar ingreso",
+            "date": "Fecha",
+            "dateRequiredLabel": "Selecciona una fecha",
+            "description": "Descripción",
+            "descriptionRequiredLabel": "Ingresa una descripción",
+            "amount": "Monto",
+            "amountRequiredLabel": "Ingresa un monto",
+            "currency": "Moneda",
+            "saveButton": "Guardar Cambios",
+            "edited": "Ingreso actualizado",
+            "error": "Error al actualizar"
+        },
+        "deleteIncome": {
+            "ask": "¿Eliminar ingreso?",
+            "deleted": "Ingreso eliminado",
+            "error": "Error al eliminar"
+        }
     },
 
     "userProfile.expenses.title": "Mis Gastos",

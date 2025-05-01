@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-import { Form, Layout, Menu, Tag, Modal, Tooltip, Button, notification, Space, DatePicker, Input, Col, Row } from 'antd';
+import { Form, Layout, Menu, Tag, Modal, Button, notification, Space, DatePicker, Input, Col, Row } from 'antd';
 import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined, LeftOutlined, PlusOutlined, DollarOutlined, RiseOutlined, FallOutlined, FileTextOutlined, StockOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
@@ -12,7 +12,6 @@ import DetailedExpenses from './pages/DetailedExpenses';
 import GeneralExpenses from './pages/GeneralExpenses';
 import Incomes from './pages/Incomes';
 import AddExpense from './components/AddExpense';
-import AddTarget from './components/AddTarget';
 import Expenses from './pages/Expenses'; // Importa el nuevo componente
 import AboutUs from './pages/AboutUs';
 import FinancialGoals from './pages/FinancialGoals';
@@ -56,11 +55,14 @@ const AppLayout = () => {
 
   const location = useLocation();
   const isMobile = useIsMobile();
+  
   const navigate = useNavigate();
 
   const { t } = useTranslation();
 
   useEffect(() => {
+    const path = location.pathname;
+    
     let isMounted = true;
   
     const fetchUserData = async () => {
@@ -76,16 +78,7 @@ const AppLayout = () => {
         }
       }
     };
-  
-    fetchUserData();
-  
-    return () => {
-      isMounted = false;
-    };
-  }, [currentUser]);
 
-  useEffect(() => {
-    const path = location.pathname;
     if (path.startsWith('/dashboard')) {
       setSelectedKey('1');
     } else if (path.startsWith('/expenses')) {
@@ -109,7 +102,13 @@ const AppLayout = () => {
     } else {
       setSelectedKey('');
     }
-  }, [location]);
+  
+    fetchUserData();
+  
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser, location]);
 
   const toggle = () => {
     setCollapsed(!collapsed);
@@ -210,7 +209,7 @@ const AppLayout = () => {
     return null;
   };
 
-  // --- título según la ruta ---
+  // Title in Up Navbar
   const getPageTitle = () => {
     if (location.pathname.startsWith('/dashboard'))        return t('userProfile.navbar.dashboard');
     if (location.pathname.startsWith('/expenses'))         return t('userProfile.navbar.expenses');
@@ -224,11 +223,10 @@ const AppLayout = () => {
   };
 
   const filteredMenuItems = menuItems.filter(item => !item.hidden);
-
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/forgot-password';
 
-  const openActions  = () => setActionsVisible(true);
   const closeActions = () => setActionsVisible(false);
+  const toggleActions = () => setActionsVisible(v => !v);
 
   const openExpense = () => {
     closeActions();
@@ -261,12 +259,11 @@ const AppLayout = () => {
     }
   };
 
-  const toggleActions = () => setActionsVisible(v => !v);
-
   return (
     <Layout style={{ minHeight: '100vh' }}>
 
       <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
+
         {/* APP LOGO NAVBAR DESKTOP */}
         <div className="user-greeting" style={{ display: 'flex', color: 'white', padding: '10px', textAlign: 'center' }}>
           <img src={logo} alt="#" style={{ width: 60 }}/>
@@ -277,8 +274,10 @@ const AppLayout = () => {
             </Link>
           </Title>
         </div>
+
         {/* LOGUED VERTICAL NAVBAR */}
         <Menu theme="dark" mode="inline" selectedKeys={[selectedKey]} items={filteredMenuItems} />
+
         {/* IF I'M LOGUED */}
         {currentUser && (
           <div className="sidebar-tags">
@@ -293,14 +292,9 @@ const AppLayout = () => {
               border: '1px solid white !important', textShadow: '0 0 16px black', borderColor: '#344e6d' }}>
               {t('userProfile.navbar.addIncome')}
             </Tag>
-            {/* <AddTarget /> */}
-            {/* <Tooltip title={t('userProfile.comingSoon')} placement="right" style={{ marginRight: '30px' }}>
-              <Tag color="blue" className="sidebar-tag disabled-tag" style={{ marginTop: '10px' }}>
-              {t('userProfile.navbar.addStock')}
-              </Tag>
-            </Tooltip> */}
           </div>
         )}
+        
       </Sider>
 
       <Layout className="site-layout">
@@ -483,12 +477,11 @@ const AppLayout = () => {
               </Col>
             </Row>
 
-              <Button type="primary" htmlType="submit" size="large" block style={{ marginTop: 10 }}>
-                {t('userProfile.addNewIncome.saveButton')}
-              </Button>
+            <Button type="primary" htmlType="submit" size="large" block style={{ marginTop: 10 }}>
+              {t('userProfile.addNewIncome.saveButton')}
+            </Button>
           </Form>
         </Modal>
-
       
       </Layout>
 
