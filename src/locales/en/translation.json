@@ -37,6 +37,22 @@
     "userProfile.navbar.addTarget": "Add Target",
     "userProfile.navbar.addStock": "Add Stock",
 
+    "userProfile.expenses.table": {
+        "date": "Fecha",
+        "description": "Descripción",
+        "amount": "Monto",
+        "currency": "Moneda",
+        "actions": "Acciones"
+    },
+    "userProfile.expenses.table.editIncome": {
+        "title": "Editar ingreso",
+        "date": "Fecha",
+        "description": "Descripción",
+        "amount": "Monto",
+        "currency": "Moneda",
+        "saveButton": "Guardar"
+    },
+
     "userProfile.expenses.title": "My Expenses",
     "userProfile.expenses.generalExpensesButton": "General Expenses",
     "userProfile.expenses.detailedExpensesButton": "Detailed Expenses",

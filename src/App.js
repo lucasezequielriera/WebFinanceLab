@@ -282,7 +282,14 @@ const AppLayout = () => {
         {/* IF I'M LOGUED */}
         {currentUser && (
           <div className="sidebar-tags">
-            <Tag color="green" className="sidebar-tag" onClick={showModal}>
+            <Tag color="green" className="sidebar-tag" onClick={() => {
+                setActionsVisible(false);
+                openIncome();
+              }} style={{ marginBottom: 10, fontSize: 14, color: 'white', fontWeight: 500, background: 'linear-gradient(90deg, rgb(0, 163, 137), rgb(0, 191, 145))', border: 'none !important', textShadow: '0 0 16px black' }}>
+              {t('userProfile.navbar.addIncome')}
+            </Tag>
+            <Tag color="red" className="sidebar-tag" onClick={showModal} style={{ fontSize: 14, color: 'white', fontWeight: 500,
+              background: 'linear-gradient(90deg, rgb(0, 145, 255), rgb(0, 71, 147))', border: 'none !important', textShadow: '0 0 16px black' }}>
               {t('userProfile.navbar.addExpense')}
             </Tag>
             <AddTarget />
