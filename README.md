@@ -18,6 +18,6 @@ npm i
 ** LEVELS **
 
 - LV 0 (Admin Account)
-- LV 1 (Free Account)
+- LV 1 (Free Account) (Just 1 limit in Financial Goals)
 - LV 2 (Premium Account (Telegram & Whatsapp Actived))
 - LV 3 (Black Account)

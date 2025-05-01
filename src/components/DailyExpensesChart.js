@@ -90,22 +90,32 @@ const DailyExpensesChart = ({ userId }) => {
   }, [userId]);
 
   useEffect(() => {
-    const fetchUserLimits = async () => {
+    if (!userId) return;
+  
+    const fetchMonthlyLimits = async () => {
       try {
-        const userRef = doc(db, 'users', userId);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          const limits = userData.expenseLimits || [];
-          setExpenseLimits(limits);
+        const monthKey = dayjs().format('MM-DD-YYYY');
+        const limitsDocRef = doc(
+          db,
+          'users',
+          userId,
+          'expenseLimitsByMonth',
+          monthKey
+        );
+        const limitsSnap = await getDoc(limitsDocRef);
+        if (limitsSnap.exists()) {
+          const { limits } = limitsSnap.data();
+          setExpenseLimits(Array.isArray(limits) ? limits : []);
+        } else {
+          setExpenseLimits([]);
         }
       } catch (error) {
-        console.error("Failed to fetch expense limits:", error);
+        console.error("Failed to fetch monthly expense limits:", error);
       }
     };
   
-    if (userId) fetchUserLimits();
-  }, [userId]);  
+    fetchMonthlyLimits();
+  }, [userId]);
 
   useEffect(() => {
     if (isMobile && scrollRef.current) {
@@ -124,26 +134,80 @@ const DailyExpensesChart = ({ userId }) => {
   };
 
   useEffect(() => {
-    if (!data.length) return;
+    if (!data.length || !userId) return;
   
-    (async () => {
-      const dailyLimit = await getDailyLimit(userId); // 🔹 llamada a Firebase
-      const found = data.find(d => (d.ars || 0) + (d.usd || 0) > 0);
-      if (!found) return;  
-
-      if (!dailyLimit) return;
+    const computeStats = async () => {
+      try {
+        const dailyLimit = await getDailyLimit(userId);
+        // Si no hay límite definido, mostramos cero en todo
+        if (!dailyLimit) {
+          setStats({ spent: 0, allowed: 0, balance: 0 });
+          return;
+        }
   
-      const { spent, allowed } = calcHastaHoy(data, dailyLimit);
-      const today = dayjs().date();
+        const today = dayjs().date();
+  
+        // Gasto acumulado hasta hoy
+        const spentUntilToday = data
+          .filter(d => d.day <= today)
+          .reduce((sum, d) => sum + (d.ars || 0) + (d.usd || 0), 0);
+  
+        // La porción "allowed" es simplemente dailyLimit * días transcurridos
+        const allowedUntilToday = Number((dailyLimit * today).toFixed(2));
+  
+        // Balance restante
+        const balance = Number((allowedUntilToday - spentUntilToday).toFixed(2));
+  
+        setStats({
+          spent: Number(spentUntilToday.toFixed(2)),
+          allowed: allowedUntilToday,
+          balance
+        });
+      } catch (error) {
+        console.error("Error calculando stats:", error);
+        setStats({ spent: 0, allowed: 0, balance: 0 });
+      }
+    };
+  
+    computeStats();
+  }, [data, userId]);  
 
-      // Cálculo //
-      const limiteUntilToday = (dailyLimit * (today - found.day));
-      const totalExpendedUntilToday = Number(spent.toFixed(2));
-      const balanced = Number((limiteUntilToday - totalExpendedUntilToday).toFixed(2))
+  const formatShort = num => {
+    if (num >= 1e6) return `$${(num/1e6).toFixed(1)}M`;
+    if (num >= 1e3) return `$${(num/1e3).toFixed(1)}k`;
+    return `$${num.toFixed(2)}`;
+  };
 
-      setStats({ spent, allowed, balance: balanced });
-    })();
-  }, [data, userId]);
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (!active || !payload?.length) return null;
+    
+    const colorMap = {
+      ars: 'rgb(0, 105, 185)',
+      usd: 'rgb(0, 165, 138)'
+    };
+
+    return (
+      <div style={{
+        background: '#fff',
+        border: '1px solid #ccc',
+        padding: 8,
+        borderRadius: 4
+      }}>
+        <p style={{ margin: 0, fontWeight: 'bold' }}>{t('userProfile.dashboard.dailyExpenses.tooltip.expensesDay')} {label}</p>
+        {payload.map((entry, i) => (
+          <p key={i} style={{
+            margin: '4px 0',
+            color: colorMap[entry.dataKey] || '#000',
+            fontWeight: 600
+          }}>
+            {entry.name}: {formatShort(entry.value)}
+          </p>
+        ))}
+      </div>
+    );
+  };
+
+  console.log(stats)
 
   return (
     <div style={{ position: 'relative' }}>
@@ -159,7 +223,7 @@ const DailyExpensesChart = ({ userId }) => {
       {isMobile ? (
         <div ref={scrollRef} style={{ overflowX: 'auto', width: '100%', paddingBottom: 12 }}>
           {/* MOBILE */}
-          <LineChart ref={chartRef} width={chartWidth} height={300} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }} // ⬅️ más espacio arriba
+          <LineChart ref={chartRef} width={chartWidth} height={300} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
           >
             {/* Definimos el gradiente */}
             <defs>
@@ -204,17 +268,16 @@ const DailyExpensesChart = ({ userId }) => {
                   : ['auto', 'auto']
               }
             />
-            <Tooltip formatter={(value, dataKey) => [formatShortNumber(value), dataKey]} />
-            <Line type="monotone" dataKey="ars" stroke="url(#gradientARS)" name={t('userProfile.dashboard.dailyExpenses.tooltip') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
-            <Line type="monotone" dataKey="usd" name={t('userProfile.dashboard.dailyExpenses.tooltip') + ' (USD)'} stroke="url(#gradientUSD)" strokeWidth={2} />
+            <Tooltip content={<CustomTooltip />} />
+            <Line type="monotone" dataKey="ars" stroke="url(#gradientARS)" name={t('userProfile.dashboard.dailyExpenses.tooltip.expensesAmount') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
+            <Line type="monotone" dataKey="usd" name={t('userProfile.dashboard.dailyExpenses.tooltip.expensesAmount') + ' (USD)'} stroke="url(#gradientUSD)" strokeWidth={2} />
           </LineChart>
         </div>
       ) :
       (
         <ResponsiveContainer width="100%" height={300}>
           {/* DESKTOP */}
-          <LineChart ref={chartRef} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }} // ⬅️ más espacio arriba
-          >
+          <LineChart ref={chartRef} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
             {/* Definimos el gradiente */}
             <defs>
               <linearGradient id="gradientARS" x1="0" y1="0" x2="1" y2="0">
@@ -257,9 +320,9 @@ const DailyExpensesChart = ({ userId }) => {
                   : ['auto', 'auto']
               }
             />
-            <Tooltip formatter={(value, dataKey) => [formatShortNumber(value), dataKey]} />
-            <Line type="monotone" dataKey="ars" stroke="url(#gradientARS)" name={t('userProfile.dashboard.dailyExpenses.tooltip') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
-            <Line type="monotone" dataKey="usd" name={t('userProfile.dashboard.dailyExpenses.tooltip') + ' (USD)'} stroke="url(#gradientUSD)" strokeWidth={2} />
+            <Tooltip content={<CustomTooltip />} />
+            <Line type="monotone" dataKey="ars" stroke="url(#gradientARS)" name={t('userProfile.dashboard.dailyExpenses.tooltip.expensesAmount') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
+            <Line type="monotone" dataKey="usd" name={t('userProfile.dashboard.dailyExpenses.tooltip.expensesAmount') + ' (USD)'} stroke="url(#gradientUSD)" strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
       )}

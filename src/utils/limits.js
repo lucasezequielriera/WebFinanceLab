@@ -1,14 +1,17 @@
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';           // ajustá la ruta si tu init está en otra carpeta
+import { db } from '../firebase';
+import dayjs from 'dayjs';
 
-export async function getDailyLimit(uid) {
-  const snap = await getDoc(doc(db, 'users', uid));
-  if (!snap.exists()) return 0;
+export async function getDailyLimit(userId) {
+  // usa la misma clave de mes que tu subcolección
+  const monthKey = dayjs().format('MM-DD-YYYY');
+  const limitsDocRef = doc(db, 'users', userId, 'expenseLimitsByMonth', monthKey);
+  const snap = await getDoc(limitsDocRef);
+  if (!snap.exists()) return null;
 
-  const limits = snap.data().expenseLimits || [];
-  const chosen =
-    limits.find(l => (l.label || '').toLowerCase().includes('daily')) ||
-    limits[0];
+  const { limits } = snap.data();
+  if (!Array.isArray(limits) || limits.length === 0) return null;
 
-  return Number(chosen?.amount || 0);
+  // suma todos los límites definidos para el mes
+  return limits.reduce((sum, lim) => sum + (Number(lim.amount) || 0), 0);
 }

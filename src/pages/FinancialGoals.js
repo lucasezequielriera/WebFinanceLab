@@ -4,7 +4,7 @@ import "../index.css"
 import "../styles/FinancialGoals.css";
 import { Button, InputNumber, Form, notification, Spin, Tooltip, Select, Input, Space, Switch, Typography, Empty } from 'antd';
 import { QuestionCircleTwoTone } from '@ant-design/icons';
-import { collection, updateDoc, doc, getDocs, getDoc } from 'firebase/firestore';
+import { collection, updateDoc, doc, getDocs, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -16,7 +16,7 @@ const { Option } = Select;
 
 export default function FinancialGoals() {
     const { currentUser } = useAuth();
-    const [limits, setLimits] = useState([{ amount: null, color: '#ff0000', label: 'Limit 1' }]);
+    const [limits, setLimits] = useState([{ amount: null, color: '#ff0000', label: '' }]);
     const [loading, setLoading] = useState(true);
     const [limitCount, setLimitCount] = useState(1);
     const [manualMode, setManualMode] = useState(false);
@@ -32,32 +32,47 @@ export default function FinancialGoals() {
     const { Title, Text } = Typography;
 
     const { t } = useTranslation();
-    const { hasExpenses } = useMonthlyMovements();
+    const { hasIncomes } = useMonthlyMovements();
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const [userDoc, expensesSnap, incomesSnap] = await Promise.all([
-                    getDoc(doc(db, 'users', currentUser.uid)),
-                    getDocs(collection(db, `users/${currentUser.uid}/expenses`)),
-                    getDocs(collection(db, `users/${currentUser.uid}/incomes`))
-                ]);
-
-                if (userDoc.exists()) {
-                    const data = userDoc.data();
-                    data.expenses = expensesSnap.docs.map(doc => doc.data());
-                    data.incomes  = incomesSnap.docs.map(d => d.data());
-
-                    setUserData(data);
-                    if (Array.isArray(data.expenseLimits)) {
-                        setLimits(data.expenseLimits);
-                        setLimitCount(data.expenseLimits.length);
-                    }
-                }
+              // 1) Trae el perfil y los arrays de expenses/incomes
+              const [userDoc, expensesSnap, incomesSnap] = await Promise.all([
+                getDoc(doc(db, 'users', currentUser.uid)),
+                getDocs(collection(db, `users/${currentUser.uid}/expenses`)),
+                getDocs(collection(db, `users/${currentUser.uid}/incomes`))
+              ]);
+              if (!userDoc.exists()) return;
+              const data = userDoc.data();
+              data.expenses = expensesSnap.docs.map(d => d.data());
+              data.incomes  = incomesSnap.docs.map(d => d.data());
+      
+              // 2) Intenta leer el documento del mes actual en la subcolección
+              const monthKey = dayjs().format('MM-DD-YYYY');
+              const monthlyDocRef = doc(
+                db,
+                'users',
+                currentUser.uid,
+                'expenseLimitsByMonth',
+                monthKey
+              );
+              const monthlySnap = await getDoc(monthlyDocRef);
+      
+              if (monthlySnap.exists()) {
+                // Usa los límites versionados de este mes
+                const { limits: monthlyLimits } = monthlySnap.data();
+                setLimits(monthlyLimits);
+                setLimitCount(monthlyLimits.length);
+              } else if (Array.isArray(data.expenseLimits)) {
+                // Fallback al global
+                setLimits([{ amount: null, color: '#ff0000', label: 'Limit 1' }]);
+                setLimitCount(1);
+              }
             } catch (e) {
-                console.error("Error fetching data", e);
+              console.error("Error fetching data", e);
             } finally {
-                setLoading(false);
+              setLoading(false);
             }
         };
 
@@ -114,9 +129,19 @@ export default function FinancialGoals() {
     const handleSave = async () => {
         setLoading(true);
         try {
-            await updateDoc(doc(db, 'users', currentUser.uid), {
-                expenseLimits: limits
-            });
+            // guardo en subcolección expenseLimitsByMonth/2025-05
+            const monthKey = dayjs().format('MM-DD-YYYY');
+            const monthlyDocRef = doc(
+                db,
+                'users',
+                currentUser.uid,
+                'expenseLimitsByMonth',
+                monthKey
+            );
+
+            // setDoc con merge: así si vuelves a guardar en el mismo mes, se sobreescribe
+            await setDoc(monthlyDocRef, { limits }, { merge: true });
+
             notification.success({
                 message: 'Limits Saved',
                 description: 'Your expense limits have been saved successfully.',
@@ -144,7 +169,7 @@ export default function FinancialGoals() {
     return (
         <div className="container-page">
             <Spin spinning={loading}>
-                {hasExpenses ?
+                {hasIncomes ?
                 <div className="financial-goals">
 
                     {/* Add Limits */}
@@ -159,7 +184,7 @@ export default function FinancialGoals() {
                                     </Tooltip>
                                 </span>
                             }>
-                                <Select value={limitCount} onChange={handleLimitCountChange} style={{ width: 100 }} disabled>
+                                <Select value={limitCount} onChange={handleLimitCountChange} style={{ width: 70 }} disabled>
                                     {[1, 2, 3, 4, 5].map(num => <Option key={num} value={num}>{num}</Option>)}
                                 </Select>
                                 <Button type="primary" className="margin-left-small" htmlType="submit" loading={loading}>
@@ -175,6 +200,7 @@ export default function FinancialGoals() {
                                         value={limit.label}
                                         onChange={e => handleLimitChange(index, 'label', e.target.value)}
                                         style={{ width: '80%' }}
+                                        placeholder={t('userProfile.financialGoals.dailyLimitSelector.placeholder')}
                                     />
                                     <Input
                                         type="color"

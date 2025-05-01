@@ -85,7 +85,7 @@ const DollarIncomeCounter = () => {
           fontWeight: 800,
           marginRight: 5
         }}>
-          {Math.abs(pct)}%
+          {isIncrease ? "+" : "-"}{Math.abs(pct)}%
         </span>
         {t('userProfile.dashboard.card.vsLastMonth')}
       </p>

@@ -5,8 +5,8 @@ const { CheckableTag } = Tag;
 
 /* Colores fijos */
 const COLORS = {
-  ARS: '#1677ff', // azul Ant Design
-  USD: '#52c41a', // verde Ant Design
+  ARS: 'rgb(0 132 197)', // azul Ant Design
+  USD: 'rgb(1 163 90)', // verde Ant Design
 };
 
 const CurrencyTagPicker = ({ value, onChange }) => {

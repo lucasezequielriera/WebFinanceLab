@@ -77,15 +77,15 @@ const DollarExpenseCounter = () => {
       />
       <p style={{ margin: 0, marginTop: 5, display: 'flex', alignItems: 'center' }}>
         {isIncrease
-          ? <RiseOutlined style={{ fontSize: 18, marginRight: 5, color: 'rgb(0,163,137)' }} />
-          : <FallOutlined style={{ fontSize: 18, marginRight: 5, color: 'rgb(207,0,0)' }} />
+          ? <RiseOutlined style={{ fontSize: 18, marginRight: 5, color: 'rgb(207,0,0)' }} />
+          : <FallOutlined style={{ fontSize: 18, marginRight: 5, color: 'rgb(0,163,137)' }} />
         }
         <span style={{
-          color: isIncrease ? 'rgb(0,163,137)' : 'rgb(207,0,0)',
+          color: isIncrease ? 'rgb(207,0,0)' : 'rgb(0,163,137)',
           fontWeight: 800,
           marginRight: 5
         }}>
-          {Math.abs(pct)}%
+          {isIncrease ? "+" : "-"}{Math.abs(pct)}%
         </span>
         {t('userProfile.dashboard.card.vsLastMonth')}
       </p>

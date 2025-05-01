@@ -8,8 +8,8 @@ import PesoExpenseCounter from '../components/PesoExpenseCounter';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, updateDoc, doc, deleteDoc, getDoc } from 'firebase/firestore';
-import RemainingPesosCounter from '../components/RemainingPesosCounter';
-import RemainingDollarsCounter from '../components/RemainingDollarsCounter';
+import BalancePesosCounter from '../components/BalancePesosCounter';
+import BalanceDollarsCounter from '../components/BalanceDollarsCounter';
 import DailyExpensesChart from '../components/DailyExpensesChart';
 import { useTranslation } from 'react-i18next';
 import useMonthlyMovements from '../hooks/useMonthlyMovements';
@@ -180,63 +180,65 @@ const Dashboard = () => {
     <div className='container-page'>
       <Spin spinning={loading}>
         <div className="dashboard-container margin-top-small">
-          {(hasIncomes || hasExpenses) ? (<div>
-            {/* CARDS */}
-            {hasPesosIncome && (
-              <Row className="expenses-counters margin-bottom-medium" gutter={[16, 16]}>
-                <Col xs={24} sm={24} md={24} lg={8}>
-                  <Card className="equal-height-card balance-counter">
-                    <RemainingPesosCounter />
-                  </Card>
-                </Col>
-                <Col xs={24} sm={24} md={12} lg={8}>
-                  <Card className="equal-height-card">
-                    <PesoIncomeCounter />
-                  </Card>
-                </Col>
-                <Col xs={24} sm={24} md={12} lg={8}>
-                  <Card className="equal-height-card">
-                    <PesoExpenseCounter />
+          {(hasIncomes || hasExpenses) ? (
+            <div>
+              {/* CARDS */}
+              {hasPesosIncome && (
+                <Row className="expenses-counters margin-bottom-medium" gutter={[16, 16]}>
+                  <Col xs={24} sm={24} md={24} lg={8}>
+                    <Card className="equal-height-card balance-counter">
+                      <BalancePesosCounter />
+                    </Card>
+                  </Col>
+                  <Col xs={24} sm={24} md={12} lg={8}>
+                    <Card className="equal-height-card">
+                      <PesoIncomeCounter />
+                    </Card>
+                  </Col>
+                  <Col xs={24} sm={24} md={12} lg={8}>
+                    <Card className="equal-height-card">
+                      <PesoExpenseCounter />
+                    </Card>
+                  </Col>
+                </Row>
+              )}
+              {hasUsdIncome && (
+                <Row className="remainings-counters margin-bottom-medium" gutter={[16, 16]}>
+                  <Col xs={24} sm={24} md={24} lg={8}>
+                    <Card className="equal-height-card balance-counter">
+                      <BalanceDollarsCounter />
+                    </Card>
+                  </Col>
+                  <Col xs={24} sm={24} md={12} lg={8}>
+                    <Card className="equal-height-card">
+                      <DollarIncomeCounter />
+                    </Card>
+                  </Col>
+                  <Col xs={24} sm={24} md={12} lg={8}>
+                    <Card className="equal-height-card">
+                      <DollarExpenseCounter />
+                    </Card>
+                  </Col>
+                </Row>
+              )}
+
+              {/* GRAPH */}
+              <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 30, marginRight: 0, marginLeft: 0 }}>
+                <Col span={24} style={{ padding: 0 }}>
+                  <Card>
+                    <DailyExpensesChart userId={currentUser?.uid} />
                   </Card>
                 </Col>
               </Row>
-            )}
-            {hasUsdIncome && (
-              <Row className="remainings-counters margin-bottom-medium" gutter={[16, 16]}>
-                <Col xs={24} sm={24} md={24} lg={8}>
-                  <Card className="equal-height-card balance-counter">
-                    <RemainingDollarsCounter />
-                  </Card>
-                </Col>
-                <Col xs={24} sm={24} md={12} lg={8}>
-                  <Card className="equal-height-card">
-                    <DollarIncomeCounter />
-                  </Card>
-                </Col>
-                <Col xs={24} sm={24} md={12} lg={8}>
-                  <Card className="equal-height-card">
-                    <DollarExpenseCounter />
-                  </Card>
-                </Col>
-              </Row>
-            )}
+            </div>) :
 
-            {/* GRAPH */}
-            <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 30, marginRight: 0, marginLeft: 0 }}>
-              <Col span={24} style={{ padding: 0 }}>
-                <Card>
-                  <DailyExpensesChart userId={currentUser?.uid} />
-                </Card>
-              </Col>
-            </Row>
-          </div>) :
-
-          // EMPTY DATA MESSAGE
-          <div style={{ textAlign: 'center', marginTop: 30 }}>
-            <SmileOutlined style={{ fontSize: 48, color: 'rgb(0, 126, 222)', marginBottom: 20 }} />
-            <h2>{t("userProfile.dashboard.welcome")}</h2>
-            <p>{t("userProfile.dashboard.welcomeText")}</p>
-          </div> }
+            // EMPTY DATA MESSAGE
+            <div style={{ textAlign: 'center', marginTop: 30 }}>
+              <SmileOutlined style={{ fontSize: 48, color: 'rgb(0, 126, 222)', marginBottom: 20 }} />
+              <h2>{t("userProfile.dashboard.welcome")}</h2>
+              <p>{t("userProfile.dashboard.welcomeText")}</p>
+            </div>
+          }
 
           {targets.length > 0 && (
             <>

@@ -1,46 +1,80 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
+/* cubre toda la pantalla */
+.actions-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);  /* negro semi-transparente */
+  z-index: 999;                  /* justo por debajo del FAB */
+  transition: opacity 0.3s;
+  opacity: 0;
   pointer-events: none;
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.actions-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-.App-header {
-  background-color: #282c34;
-  max-height: 100vh;
+/* contenedor fijo en esquina */
+.fab-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  z-index: 1000;
+}
+
+/* el FAB “+” */
+.fab-main {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, rgb(0, 132, 105), rgb(0, 163, 137), rgb(0, 191, 145));
+  color: white;
+  font-size: 24px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform 0.3s;
 }
 
-.App-link {
-  color: #61dafb;
+/* los botones secundarios */
+.fab-action {
+  position: absolute;
+  background: linear-gradient(90deg, rgb(0, 132, 105), rgb(0, 163, 137), rgb(0, 191, 145)) !important;
+  bottom: 0;
+  right: 0;
+  width: 120px !important;
+  height: 35px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 9px !important;
+  border: none;
+  box-shadow: none;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.3s ease-out,
+    opacity 0.2s ease-out;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* estado “abierto” */
+.fab-container.open .fab-main {
+  transform: rotate(45deg);
+}
+.fab-container.open .fab-action {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-/* Ajuste específico para dispositivos móviles */
-@media (max-width: 768px) {
-  .ant-notification-notice {
-  max-width: 90%;
-  font-size: 14px; /* Ajusta el tamaño de la fuente según sea necesario */
-  }
+/* posición radial */
+.fab-container.open .fab-action.expense {
+  transform: translate(-70px, -10px);
+}
+.fab-container.open .fab-action.income {
+  transform: translate(-10px, -70px);
 }

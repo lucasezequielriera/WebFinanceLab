@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Card, Statistic, Progress } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-const RemainingPesosCounter = () => {
+const BalancePesosCounter = () => {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [remaining, setRemaining] = useState(0);
@@ -90,4 +90,4 @@ const RemainingPesosCounter = () => {
   );
 };
 
-export default RemainingPesosCounter;
+export default BalancePesosCounter;

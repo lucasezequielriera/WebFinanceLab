@@ -16,7 +16,10 @@
     "userProfile.dashboard.card.expenses.usd": "Expenses USD",
     "userProfile.dashboard.card.vsLastMonth": "this month",
     "userProfile.dashboard.dailyExpenses.title": "Cash Flow",
-    "userProfile.dashboard.dailyExpenses.tooltip": "Expenses",
+    "userProfile.dashboard.dailyExpenses.tooltip": {
+        "expensesDay": "Day",
+        "expensesAmount": "Expenses"
+    },
 
     "userProfile.navbar.signup": "Sign Up",
     "userProfile.navbar.login": "Login",
@@ -28,6 +31,7 @@
     "userProfile.navbar.aboutUs": "About Us",
     "userProfile.navbar.profile": "Profile",
     "userProfile.navbar.logout": "Logout",
+    "userProfile.navbar.addIncome": "Add Income",
     "userProfile.navbar.addExpense": "Add Expense",
     "userProfile.navbar.addTarget": "Add Target",
     "userProfile.navbar.addStock": "Add Stock",
@@ -46,6 +50,7 @@
     "userProfile.financialGoals.title": "Financial Goals",
     "userProfile.financialGoals.subtitle": "You can check your financial goals here and configure everything.",
     "userProfile.financialGoals.dailyLimitSelector.title": "How many limits do you want to set?",
+    "userProfile.financialGoals.dailyLimitSelector.placeholder": "Limit 1",
     "userProfile.financialGoals.dailyLimitSelector.tooltip": "You will see this on the Daily Expenses chart.",
     "userProfile.financialGoals.dailyLimitSelector.button": "Save",
     "userProfile.financialGoals.dailyLimitSelector.labelInput": "Limit Label",
@@ -113,6 +118,20 @@
         "cancelButton": "Cancel"
     },
 
+    "userProfile.addNewIncome.title": "Add New Income",
+    "userProfile.addNewIncome.subtitle": "Record your income to start calculating your expenses.",
+    "userProfile.addNewIncome.date": "Date",
+    "userProfile.addNewIncome.defaultDataInputDate": "Today",
+    "userProfile.addNewIncome.description": "Description",
+    "userProfile.addNewIncome.amount": "Amount",
+    "userProfile.addNewIncome.currency": "Currency",
+    "userProfile.addNewIncome.saveButton": "Add Income",
+    "userProfile.addNewIncome.errorMessages": {
+        "descriptionRequired": "Please, input a description.",
+        "amountRequired": "Please, input the amount.",
+        "currencyRequired": "Please, select the currency."
+    },
+
     "userProfile.addNewExpense.title": "Add New Expense",
     "userProfile.addNewExpense.subtitle": "Quickly log your expense and keep your finances on track.",
     "userProfile.addNewExpense.amount": "Amount",
@@ -124,7 +143,7 @@
     "userProfile.addNewExpense.paymentMethod": "Payment Method",
     "userProfile.addNewExpense.bank": "Bank",
     "userProfile.addNewExpense.cardType": "Card Type",
-    "userProfile.addNewExpense.addExpenseButton": "Add expense",
+    "userProfile.addNewExpense.addExpenseButton": "Add Expense",
     "userProfile.addNewExpense.errorMessages": {
         "amountRequired": "Please, input the amount.",
         "currencyRequired": "Please, select the currency.",

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-import { Layout, Menu, Tag, Modal, Tooltip, Button } from 'antd';
-import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined, LeftOutlined, PlusOutlined } from '@ant-design/icons';
+import { Form, Layout, Menu, Tag, Modal, Tooltip, Button, notification, Space, Select, DatePicker, Input, Col, Row } from 'antd';
+import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined, LeftOutlined, PlusOutlined, DollarOutlined, RiseOutlined, FallOutlined, FileTextOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -17,16 +17,19 @@ import AboutUs from './pages/AboutUs';
 import FinancialGoals from './pages/FinancialGoals';
 import AccountTypeBadge from './components/AccountTypeBadge';
 import { db } from './firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, Timestamp, addDoc } from 'firebase/firestore';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import './index.css';
 import { Typography } from 'antd';
 import logo from './assets/transparent-logo.png';
 import { useTranslation } from 'react-i18next';
 import useIsMobile from './hooks/useIsMobile';
 import { useNavigate } from 'react-router-dom';
+import CurrencyTagPicker from './components/CurrencyTagPicker'
+import dayjs from 'dayjs';
+import './index.css';
+import './App.css';
 
-const { Title } = Typography;
+const { Title, Paragraph } = Typography;
 const { Header, Sider, Content } = Layout;
 
 const RedirectIfAuthenticated = ({ children }) => {
@@ -43,9 +46,14 @@ const AppLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [expenses, setExpenses] = useState([]);
-  const location = useLocation();
   const [selectedKey, setSelectedKey] = useState('1');
   const [userData, setUserData] = useState();
+  const [actionsVisible, setActionsVisible] = useState(false);
+  const [incomeModalVisible, setIncomeModalVisible] = useState(false);
+
+  const [incomeForm] = Form.useForm();
+
+  const location = useLocation();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
 
@@ -209,6 +217,42 @@ const AppLayout = () => {
 
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/forgot-password';
 
+  const openActions  = () => setActionsVisible(true);
+  const closeActions = () => setActionsVisible(false);
+
+  const openExpense = () => {
+    closeActions();
+    setIsModalVisible(true);
+  };
+  
+  const openIncome = () => {
+    closeActions();
+    setIncomeModalVisible(true);
+    incomeForm.setFieldsValue({ date: dayjs() });
+  };
+  
+  const handleIncomeSubmit = async (values) => {
+    try {
+      await addDoc(
+        collection(db, `users/${currentUser.uid}/incomes`),
+        {
+          title:    values.title,
+          amount:   Number(values.amount),
+          currency: values.currency,
+          timestamp: Timestamp.now(),
+          date:     values.date.toDate()
+        }
+      );
+      notification.success({ message: 'Ingreso agregado' });
+      setIncomeModalVisible(false);
+      incomeForm.resetFields();
+    } catch (e) {
+      notification.error({ message: 'Error al agregar ingreso' });
+    }
+  };
+
+  const toggleActions = () => setActionsVisible(v => !v);
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
 
@@ -223,7 +267,9 @@ const AppLayout = () => {
             </Link>
           </Title>
         </div>
+        {/* LOGUED VERTICAL NAVBAR */}
         <Menu theme="dark" mode="inline" selectedKeys={[selectedKey]} items={filteredMenuItems} />
+        {/* IF I'M LOGUED */}
         {currentUser && (
           <div className="sidebar-tags">
             <Tag color="green" className="sidebar-tag" onClick={showModal}>
@@ -296,6 +342,15 @@ const AppLayout = () => {
             <Route path="/general-expenses" element={<PrivateRoute><GeneralExpenses /></PrivateRoute>} />
             <Route path="*" element={<Navigate to="/dashboard" />} /> {/* Catch-all route */}
           </Routes>
+
+          {actionsVisible && (
+            <Space>
+            <div
+              className="actions-overlay visible"
+              onClick={() => setActionsVisible(false)}
+            />
+            </Space>
+          )}
         </Content>
         <Modal open={isModalVisible} onCancel={handleCancel} footer={null}>
           <AddExpense onExpenseAdded={handleExpenseAdded} />
@@ -311,9 +366,110 @@ const AppLayout = () => {
         </div>
         )}
 
-          {currentUser && <div className="add-expense-button-mobile">
-            <Button type="primary" shape="circle" icon={<PlusOutlined style={{ fontSize: 25 }}/>} size="large" onClick={showModal} />
-          </div>}
+
+        {/* MENU ADD INCOME AND EXPENSE BUTTON */}
+
+        {/* SHADOW SCREEN */}
+        <div
+          className={`actions-overlay ${actionsVisible ? 'visible' : ''}`}
+          onClick={() => setActionsVisible(false)}
+        />
+        {/* ADD INCOME & EXPENSE BUTTON */}
+        {currentUser && isMobile && (<div className={`fab-container ${actionsVisible ? 'open' : ''}`}>
+          <div className="fab-main" onClick={toggleActions}>
+            <PlusOutlined />
+          </div>
+          <Button
+            className="fab-action expense"
+            type="primary"
+            icon={<RiseOutlined style={{ fontSize: 18 }}/>}
+            onClick={() => {
+              setActionsVisible(false);
+              openIncome();
+            }}
+            style={{ width: 100 }}
+          > Ingreso</Button>
+          <Button
+            className="fab-action income"
+            type="primary"
+            shape="circle"
+            icon={<FallOutlined />}
+            onClick={() => {
+              setActionsVisible(false);
+              openExpense()
+            }}
+          > Gasto</Button>
+        </div>)}
+
+        {/* ——— Modal para Agregar Ingreso ——— */}
+        <Modal className="add-expense-modal"
+          open={incomeModalVisible}
+          onCancel={() => setIncomeModalVisible(false)}
+          footer={null}
+        >
+          <Title level={3} style={{ textAlign: 'center', marginBottom: 8 }}>
+            {t('userProfile.addNewIncome.title')}
+          </Title>
+          <Paragraph type="secondary" style={{ textAlign: 'center', marginBottom: 24 }}>
+            {t('userProfile.addNewIncome.subtitle')}
+          </Paragraph>
+
+          <Form
+            form={incomeForm}
+            layout="vertical"
+            onFinish={handleIncomeSubmit}
+            initialValues={{ date: dayjs(), currency: 'USD' }}
+          >
+
+            <Form.Item
+              name="date"
+              label={t('userProfile.addNewIncome.date') || "Fecha"}
+              rules={[{ required: true, message: t('userProfile.addNewIncome.errorMessages') || "Seleccione una fecha" }]}
+            >
+              <DatePicker style={{ width: '100%' }}
+              format={(val) =>
+                dayjs().isSame(val, 'day')
+                  ? t('userProfile.addNewExpense.defaultDataInputDate')
+                  : val.format('DD/MM/YYYY')
+              } />
+            </Form.Item>
+
+            <Form.Item
+              name="title"
+              label={t('userProfile.addNewIncome.description') || "Título"}
+              rules={[{ required: true, message: t('userProfile.addNewIncome.errorMessages.descriptionRequired') }]}
+            >
+              <Input prefix={<FileTextOutlined />} placeholder={'Salary'} />
+            </Form.Item>
+            
+            <Row gutter={[16, 16]}>
+              <Col xs={12} style={{ display: 'flex', alignItems: 'center' }}>
+                <Form.Item
+                  name="amount"
+                  label={t('userProfile.addNewIncome.amount') || "Monto"}
+                  rules={[{ required: true, message: t('userProfile.addNewIncome.errorMessages.amountRequired') }]}
+                >
+                  <Input
+                    type="number"
+                    prefix={<DollarOutlined />}
+                    placeholder={'125.50'}
+                  />
+                </Form.Item>
+              </Col>
+
+              <Col span={12}>
+                <Form.Item name="currency" label={t('userProfile.addNewIncome.currency') || "Moneda"} rules={[{ required: true, message: t('userProfile.addNewIncome.errorMessages.currencyRequired') }]}>
+                  <CurrencyTagPicker />
+                </Form.Item>
+              </Col>
+            </Row>
+
+              <Button type="primary" htmlType="submit" size="large" block style={{ marginTop: 10 }}>
+                {t('userProfile.addNewIncome.saveButton')}
+              </Button>
+          </Form>
+        </Modal>
+
       
       </Layout>
 
