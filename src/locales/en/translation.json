@@ -25,6 +25,7 @@
     "userProfile.navbar.login": "Login",
     "userProfile.navbar.dashboard": "Dashboard",
     "userProfile.navbar.expenses": "Expenses",
+    "userProfile.navbar.incomes": "Incomes",
     "userProfile.navbar.detailedExpenses": "Monthly Expenses",
     "userProfile.navbar.generalExpenses": "General Expenses",
     "userProfile.navbar.financialGoals": "Financial Goals",

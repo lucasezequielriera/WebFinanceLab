@@ -48,6 +48,7 @@ export default function AccountTypeBadge({ type = 'free' }) {
       }}
     >
       <Menu.Item key="/dashboard">{t("userProfile.navbar.dashboard")}</Menu.Item>
+      <Menu.Item key="/incomes">{t("userProfile.navbar.incomes")}</Menu.Item>
       <Menu.Item key="/expenses">{t("userProfile.navbar.expenses")}</Menu.Item>
       <Menu.Item key="/financial-goals">{t("userProfile.navbar.financialGoals")}</Menu.Item>
       <Menu.Item key="/profile">{t("userProfile.navbar.profile")}</Menu.Item>
