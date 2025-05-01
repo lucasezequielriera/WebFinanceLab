@@ -47,6 +47,9 @@ export default function FinancialGoals() {
               const data = userDoc.data();
               data.expenses = expensesSnap.docs.map(d => d.data());
               data.incomes  = incomesSnap.docs.map(d => d.data());
+
+                // Guarda la info en el estado para los cálculos
+                setUserData(data);
       
               // 2) Intenta leer el documento del mes actual en la subcolección
               const monthKey = dayjs().format('MM-DD-YYYY');
@@ -95,16 +98,24 @@ export default function FinancialGoals() {
     useEffect(() => {
         if (!userData) return;
 
-        const totalIncome = userData.incomes?.reduce((acc, inc) => {
+        const today         = dayjs();
+        const startOfMonth  = today.startOf('month');
+        const endOfMonth    = today.endOf('month');
+
+        // Filtrar ingresos del mes actual
+        const filteredIncomes = userData.incomes?.filter(inc => {
+            const date = dayjs(inc.timestamp?.toDate?.() || inc.timestamp);
+            return date.isBetween(startOfMonth, endOfMonth, 'day', '[]');
+        }) || [];
+
+        const totalIncome = filteredIncomes.reduce((acc, inc) => {
             const amt = parseFloat(inc.amount || 0);
 
             return acc + (inc.currency === autoCurrency
               ? amt
               : (autoCurrency === "USD" ? amt / exchangeRate : amt * exchangeRate));
-        }, 0) || 0;          
-
-        const startOfMonth = dayjs().startOf('month');
-        const endOfMonth = dayjs().endOf('month');
+        }, 0);
+        console.log("userData", userData)      
 
         const totalExpenses = userData.expenses?.reduce((acc, expense) => {
             const date = dayjs(expense.timestamp?.toDate?.() || expense.timestamp);
@@ -122,6 +133,9 @@ export default function FinancialGoals() {
             setCalculatedDaily(manualAmount && daysRemaining ? manualAmount / daysRemaining : null);
         } else {
             setCalculatedDaily(net / daysRemaining);
+            console.log(Number(net.toFixed(2)))
+            console.log("income", totalIncome)
+            console.log("expense", totalExpenses)
             setManualAmount(Number(net.toFixed(2))); // Valor inicial cuando cambia a manual
         }
     }, [manualMode, manualAmount, userData, autoCurrency, exchangeRate]);
