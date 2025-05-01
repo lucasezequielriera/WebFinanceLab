@@ -1,81 +1,84 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "../contexts/AuthContext";
+import React, { useState, useEffect }                                       from "react";
+import { useAuth }                                                          from "../contexts/AuthContext";
+import { Button, InputNumber, Form, notification, Spin, Tooltip,
+    Select, Input, Space, Switch, Typography, Empty }                       from 'antd';
+import { QuestionCircleTwoTone }                                            from '@ant-design/icons';
+import { collection, doc, getDocs, getDoc, setDoc }                         from 'firebase/firestore';
+import { db }                                                               from '../firebase';
+import dayjs                                                                from 'dayjs';
+import isBetween                                                            from 'dayjs/plugin/isBetween';
+import { useTranslation }                                                   from "react-i18next";
+import useMonthlyMovements                                                  from '../hooks/useMonthlyMovements';
+// Styles
 import "../index.css"
 import "../styles/FinancialGoals.css";
-import { Button, InputNumber, Form, notification, Spin, Tooltip, Select, Input, Space, Switch, Typography, Empty } from 'antd';
-import { QuestionCircleTwoTone } from '@ant-design/icons';
-import { collection, updateDoc, doc, getDocs, getDoc, setDoc, Timestamp } from 'firebase/firestore';
-import { db } from '../firebase';
-import dayjs from 'dayjs';
-import isBetween from 'dayjs/plugin/isBetween';
-import { useTranslation } from "react-i18next";
-import useMonthlyMovements from '../hooks/useMonthlyMovements';
 
 dayjs.extend(isBetween);
-const { Option } = Select;
 
-export default function FinancialGoals() {
-    const { currentUser } = useAuth();
-    const [limits, setLimits] = useState([{ amount: null, color: '#ff0000', label: '' }]);
-    const [loading, setLoading] = useState(true);
-    const [limitCount, setLimitCount] = useState(1);
-    const [manualMode, setManualMode] = useState(false);
-    const [manualAmount, setManualAmount] = useState(0);
+const FinancialGoals = () => {
+    const [limits, setLimits]                   = useState([{ amount: null, color: '#ff0000', label: '' }]);
+    const [loading, setLoading]                 = useState(true);
+    const [limitCount, setLimitCount]           = useState(1);
+    const [manualMode, setManualMode]           = useState(false);
+    const [manualAmount, setManualAmount]       = useState(0);
     const [calculatedDaily, setCalculatedDaily] = useState(null);
-    const [userData, setUserData] = useState(null);
-    const [autoCurrency, setAutoCurrency] = useState("USD");
-    const [exchangeRate, setExchangeRate] = useState(1100);
+    const [userData, setUserData]               = useState(null);
+    const [autoCurrency, setAutoCurrency]       = useState("USD");
+    const [exchangeRate, setExchangeRate]       = useState(1100);
+
+    const { currentUser } = useAuth();
+    const { t } = useTranslation();
+    const { hasIncomes } = useMonthlyMovements();
+    
+    const { Title, Text } = Typography;
+    const { Option } = Select;
 
     const today = dayjs();
     const endOfMonth = dayjs().endOf('month');
     const daysRemaining = endOfMonth.diff(today, 'day') + 1;
-    const { Title, Text } = Typography;
-
-    const { t } = useTranslation();
-    const { hasIncomes } = useMonthlyMovements();
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-              // 1) Trae el perfil y los arrays de expenses/incomes
-              const [userDoc, expensesSnap, incomesSnap] = await Promise.all([
-                getDoc(doc(db, 'users', currentUser.uid)),
-                getDocs(collection(db, `users/${currentUser.uid}/expenses`)),
-                getDocs(collection(db, `users/${currentUser.uid}/incomes`))
-              ]);
-              if (!userDoc.exists()) return;
-              const data = userDoc.data();
-              data.expenses = expensesSnap.docs.map(d => d.data());
-              data.incomes  = incomesSnap.docs.map(d => d.data());
+                const [userDoc, expensesSnap, incomesSnap] = await Promise.all([
+                    getDoc(doc(db, 'users', currentUser.uid)),
+                    getDocs(collection(db, `users/${currentUser.uid}/expenses`)),
+                    getDocs(collection(db, `users/${currentUser.uid}/incomes`))
+                ]);
 
-                // Guarda la info en el estado para los cálculos
-                setUserData(data);
-      
-              // 2) Intenta leer el documento del mes actual en la subcolección
-              const monthKey = dayjs().format('MM-DD-YYYY');
-              const monthlyDocRef = doc(
-                db,
-                'users',
-                currentUser.uid,
-                'expenseLimitsByMonth',
-                monthKey
-              );
-              const monthlySnap = await getDoc(monthlyDocRef);
-      
-              if (monthlySnap.exists()) {
-                // Usa los límites versionados de este mes
-                const { limits: monthlyLimits } = monthlySnap.data();
-                setLimits(monthlyLimits);
-                setLimitCount(monthlyLimits.length);
-              } else if (Array.isArray(data.expenseLimits)) {
-                // Fallback al global
-                setLimits([{ amount: null, color: '#ff0000', label: 'Limit 1' }]);
-                setLimitCount(1);
-              }
+                    if (!userDoc.exists()) return;
+
+                    const data = userDoc.data();
+
+                    data.expenses = expensesSnap.docs.map(d => d.data());
+                    data.incomes  = incomesSnap.docs.map(d => d.data());
+
+                    setUserData(data);
+        
+                const monthKey = dayjs().format('MM-DD-YYYY');
+                const monthlyDocRef = doc(
+                    db,
+                    'users',
+                    currentUser.uid,
+                    'expenseLimitsByMonth',
+                    monthKey
+                );
+
+                const monthlySnap = await getDoc(monthlyDocRef);
+        
+                if (monthlySnap.exists()) {
+                    const { limits: monthlyLimits } = monthlySnap.data();
+
+                    setLimits(monthlyLimits);
+                    setLimitCount(monthlyLimits.length);
+                } else if (Array.isArray(data.expenseLimits)) {
+                    setLimits([{ amount: null, color: '#ff0000', label: 'Limit 1' }]);
+                    setLimitCount(1);
+                }
             } catch (e) {
-              console.error("Error fetching data", e);
+                console.error("Error fetching data", e);
             } finally {
-              setLoading(false);
+                setLoading(false);
             }
         };
 
@@ -83,6 +86,7 @@ export default function FinancialGoals() {
             try {
                 const res = await fetch("https://dolarapi.com/v1/dolares/blue");
                 const data = await res.json();
+
                 if (data?.venta) setExchangeRate(data.venta);
             } catch (error) {
                 console.warn("No se pudo obtener el valor del dólar blue, se usará 1100 por defecto.");
@@ -102,7 +106,6 @@ export default function FinancialGoals() {
         const startOfMonth  = today.startOf('month');
         const endOfMonth    = today.endOf('month');
 
-        // Filtrar ingresos del mes actual
         const filteredIncomes = userData.incomes?.filter(inc => {
             const date = dayjs(inc.timestamp?.toDate?.() || inc.timestamp);
             return date.isBetween(startOfMonth, endOfMonth, 'day', '[]');
@@ -115,13 +118,14 @@ export default function FinancialGoals() {
               ? amt
               : (autoCurrency === "USD" ? amt / exchangeRate : amt * exchangeRate));
         }, 0);
-        console.log("userData", userData)      
 
         const totalExpenses = userData.expenses?.reduce((acc, expense) => {
             const date = dayjs(expense.timestamp?.toDate?.() || expense.timestamp);
+
             if (!date.isBetween(startOfMonth, endOfMonth, 'day', '[]')) return acc;
 
             const amount = parseFloat(expense.amount || 0);
+
             return acc + (expense.currency === autoCurrency
                 ? amount
                 : (autoCurrency === "USD" ? amount / exchangeRate : amount * exchangeRate));
@@ -142,8 +146,8 @@ export default function FinancialGoals() {
 
     const handleSave = async () => {
         setLoading(true);
+
         try {
-            // guardo en subcolección expenseLimitsByMonth/2025-05
             const monthKey = dayjs().format('MM-DD-YYYY');
             const monthlyDocRef = doc(
                 db,
@@ -153,7 +157,6 @@ export default function FinancialGoals() {
                 monthKey
             );
 
-            // setDoc con merge: así si vuelves a guardar en el mismo mes, se sobreescribe
             await setDoc(monthlyDocRef, { limits }, { merge: true });
 
             notification.success({
@@ -170,19 +173,23 @@ export default function FinancialGoals() {
 
     const handleLimitChange = (index, field, value) => {
         const newLimits = [...limits];
+
         newLimits[index][field] = value;
         setLimits(newLimits);
     };
 
     const handleLimitCountChange = (value) => {
         setLimitCount(value);
+
         const newLimits = Array.from({ length: value }, (_, i) => limits[i] || { amount: null, color: '#ff0000', label: `Limit ${i + 1}` });
+
         setLimits(newLimits);
     };
 
     return (
         <div className="container-page">
             <Spin spinning={loading}>
+
                 {hasIncomes ?
                 <div className="financial-goals">
 
@@ -293,7 +300,10 @@ export default function FinancialGoals() {
                 <div style={{ marginTop: 40 }}>
                     <Empty description={t("userProfile.financialGoals.withoutData")} />
                 </div>}
+                
             </Spin>
         </div>
     );
 }
+
+export default FinancialGoals;

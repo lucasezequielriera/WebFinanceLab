@@ -1,31 +1,35 @@
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { updateProfile } from "firebase/auth"; 
-import { db } from '../firebase'; // Importa db
-import { setDoc, doc } from "firebase/firestore"; // Importa Firestore
+import React, { useState }                              from 'react';
 import { Form, Input, Button, Typography, Alert, Card } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { useAuth }                                      from '../contexts/AuthContext';
+import { useNavigate }                                  from 'react-router-dom';
+import { updateProfile }                                from "firebase/auth"; 
+import { db }                                           from '../firebase';
+import { setDoc, doc }                                  from "firebase/firestore";
+import { UserOutlined, LockOutlined }                   from '@ant-design/icons';
+// Styles
 import '../styles/Auth.css';
 
-const { Title } = Typography;
-
-export default function Signup() {
-  const { signup } = useAuth();
+const Signup = () => {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // Estado de carga
+
+  const { signup } = useAuth();
+  const { Title } = Typography;
+
   const navigate = useNavigate();
 
   async function handleSubmit(values) {
     try {
       setError('');
-      setLoading(true); // Iniciar la carga
-      const { firstName, lastName, email, password } = values;
+      setLoading(true);
 
+      const { firstName, lastName, email, password } = values;
       const userCredential = await signup(email, password);
+
       await updateProfile(userCredential.user, {
         displayName: `${firstName} ${lastName}`
       });
+
       await setDoc(doc(db, "users", userCredential.user.uid), {
         firstName: firstName,
         lastName: lastName,
@@ -37,22 +41,27 @@ export default function Signup() {
         displayBalance: 'USD',
         user_access_level: 1
       });
+
       navigate('/dashboard');
     } catch (err) {
       console.error('Error during signup:', err);
       setError('Failed to create an account');
-      setLoading(false); // Terminar la carga en caso de error
+      setLoading(false);
     }
   }
 
   return (
     <div className="auth-container">
+
       <Card className="auth-card">
         <div className="auth-avatar">
           <img src={require('../assets/transparent-logo.png')} alt="Web Finance" style={{ width: 100 }} />
         </div>
+
         <Title level={3} className="auth-title">Sign Up</Title>
+
         {error && <Alert message={error} type="error" showIcon />}
+
         <Form onFinish={handleSubmit} className="auth-form">
           <Form.Item name="firstName" rules={[{ required: true, message: 'Please input your first name!' }]}>
             <Input prefix={<UserOutlined />} placeholder="First Name" />
@@ -72,10 +81,11 @@ export default function Signup() {
             </Button>
           </Form.Item>
         </Form>
-        {/* <div className="auth-links">
-          <Text>Already have an account? <Link to="/login">Log In</Link></Text>
-        </div> */}
+        
       </Card>
+
     </div>
   );
 }
+
+export default Signup;

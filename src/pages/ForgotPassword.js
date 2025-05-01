@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Form, Input, Button, Typography, Card, notification } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
+import React, { useState }                                      from 'react';
+import { useAuth }                                              from '../contexts/AuthContext';
+import { useNavigate }                                          from 'react-router-dom';
+import { Form, Input, Button, Typography, Card, notification }  from 'antd';
+import { UserOutlined }                                         from '@ant-design/icons';
+// Styles
 import '../styles/Auth.css';
 
 const { Title } = Typography;
 
-export default function ForgotPassword() {
-  const { resetPassword } = useAuth();
+const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
+
+  const { resetPassword } = useAuth();
+
   const navigate = useNavigate();
 
   const openNotificationWithIcon = (type, message, description) => {
@@ -22,14 +25,17 @@ export default function ForgotPassword() {
   async function handleSubmit(values) {
     try {
       setLoading(true);
+
       await resetPassword(values.email);
       openNotificationWithIcon('success', 'Success', 'Check your inbox for further instructions');
+
       setTimeout(() => {
         navigate('/login');
-      }, 3000); // Redirige a la página de inicio de sesión después de 3 segundos
+      }, 3000);
     } catch {
         openNotificationWithIcon('error', 'Error', 'Failed to reset password');
     }
+
     setLoading(false);
   }
 
@@ -54,3 +60,5 @@ export default function ForgotPassword() {
     </div>
   );
 }
+
+export default ForgotPassword;

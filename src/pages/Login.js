@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
-import { Form, Input, Button, Typography, Card, notification } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import React, { useState }                                       from 'react';
+import { useAuth }                                               from '../contexts/AuthContext';
+import { useNavigate, Link }                                     from 'react-router-dom';
+import { Form, Input, Button, Typography, Card, notification }   from 'antd';
+import { UserOutlined, LockOutlined }                            from '@ant-design/icons';
+// Styles
 import '../styles/Auth.css';
 
-const { Title } = Typography;
-
-export default function Login() {
-  const { login } = useAuth();
+const Login = () => {
   const [loading, setLoading] = useState(false);
+
+  const { login } = useAuth();
+  const { Title } = Typography;
+
   const navigate = useNavigate();
 
   const openNotificationWithIcon = (type, message, description) => {
@@ -23,6 +25,7 @@ export default function Login() {
     try {
       setLoading(true);
       const { email, password } = values;
+
       await login(email, password );
       navigate('/dashboard');
     } catch {
@@ -58,3 +61,5 @@ export default function Login() {
     </div>
   );
 }
+
+export default Login;
