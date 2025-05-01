@@ -282,22 +282,23 @@ const AppLayout = () => {
         {/* IF I'M LOGUED */}
         {currentUser && (
           <div className="sidebar-tags">
+            <Tag color="red" className="sidebar-tag" onClick={showModal} style={{ fontSize: 14, color: 'white', fontWeight: 500,
+              background: 'linear-gradient(90deg, rgb(0, 163, 137), rgb(0, 191, 145))', border: '1px solid white !important', borderColor: '#344e6d', textShadow: '0 0 16px black', marginBottom: 10 }}>
+              {t('userProfile.navbar.addExpense')}
+            </Tag>
             <Tag color="green" className="sidebar-tag" onClick={() => {
                 setActionsVisible(false);
                 openIncome();
-              }} style={{ marginBottom: 10, fontSize: 14, color: 'white', fontWeight: 500, background: 'linear-gradient(90deg, rgb(0, 163, 137), rgb(0, 191, 145))', border: 'none !important', textShadow: '0 0 16px black' }}>
+              }} style={{ fontSize: 14, color: 'white', fontWeight: 500, background: 'transparent',
+              border: '1px solid white !important', textShadow: '0 0 16px black', borderColor: '#344e6d' }}>
               {t('userProfile.navbar.addIncome')}
             </Tag>
-            <Tag color="red" className="sidebar-tag" onClick={showModal} style={{ fontSize: 14, color: 'white', fontWeight: 500,
-              background: 'linear-gradient(90deg, rgb(0, 145, 255), rgb(0, 71, 147))', border: 'none !important', textShadow: '0 0 16px black' }}>
-              {t('userProfile.navbar.addExpense')}
-            </Tag>
-            <AddTarget />
-            <Tooltip title={t('userProfile.comingSoon')} placement="right" style={{ marginRight: '30px' }}>
+            {/* <AddTarget /> */}
+            {/* <Tooltip title={t('userProfile.comingSoon')} placement="right" style={{ marginRight: '30px' }}>
               <Tag color="blue" className="sidebar-tag disabled-tag" style={{ marginTop: '10px' }}>
               {t('userProfile.navbar.addStock')}
               </Tag>
-            </Tooltip>
+            </Tooltip> */}
           </div>
         )}
       </Sider>
