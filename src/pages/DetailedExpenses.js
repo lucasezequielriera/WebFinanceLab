@@ -128,7 +128,11 @@ const DetailedExpenses = () => {
       amount: record.amount,
       currency: record.currency,
       category: record.category,
-      timestamp: new Date(record.timestamp.seconds * 1000)
+      timestamp: dayjs(
+        record.timestamp && record.timestamp.seconds
+          ? new Date(record.timestamp.seconds * 1000)
+          : record.timestamp
+      )
     });
   };
 
@@ -140,7 +144,10 @@ const DetailedExpenses = () => {
   const saveEdit = async id => {
     try {
       const { description, amount, currency, category, timestamp } = rowEdits;
-
+      if (!timestamp || !dayjs.isDayjs(timestamp)) {
+        notification.error({ message: 'La fecha/hora es inválida.' });
+        return;
+      }
       await updateDoc(
         doc(db, `users/${currentUser.uid}/expenses`, id),
         {
@@ -148,10 +155,9 @@ const DetailedExpenses = () => {
           amount: Number(amount),
           currency,
           category,
-          timestamp: Timestamp.fromDate(timestamp)
+          timestamp: Timestamp.fromDate(timestamp.toDate())
         }
       );
-
       notification.success({ message: 'Gasto actualizado' });
       cancelEdit();
     } catch {
@@ -159,7 +165,12 @@ const DetailedExpenses = () => {
     }
   };
 
-  const onChangeCell = (field, value) => setRowEdits(prev => ({ ...prev, [field]: value }));
+  const onChangeCell = (field, value) => setRowEdits(prev => ({
+    ...prev,
+    [field]: field === 'timestamp'
+      ? (value && dayjs.isDayjs(value) ? value : value ? dayjs(value) : prev.timestamp)
+      : value
+  }));
 
   const handleNewCategory = (value) => {
     if (value.trim()) {
@@ -269,13 +280,17 @@ const DetailedExpenses = () => {
       width: '10%',
       sorter: (a, b) => b.timestamp.seconds - a.timestamp.seconds,
       sortDirections: ['descend', 'ascend'],
-      render: ts => {
+      render: (ts, rec) => {
         const d = new Date(ts.seconds * 1000);
-        return isEditing({ timestamp: ts })
+        const value = (rowEdits.timestamp && dayjs.isDayjs(rowEdits.timestamp)) ? rowEdits.timestamp : dayjs(rowEdits.timestamp || d);
+        return isEditing(rec)
           ? <DatePicker
-              value={dayjs(rowEdits.timestamp)}
-              onChange={(_, date) => onChangeCell('timestamp', date.toDate())}
+              value={value}
+              onChange={value => onChangeCell('timestamp', value)}
               style={{ width: '100%' }}
+              showTime={{ format: 'HH:mm' }}
+              format="DD/MM/YYYY HH:mm"
+              getPopupContainer={trigger => document.body}
             />
           : format(d, 'HH:mm');
       }
