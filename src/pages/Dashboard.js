@@ -33,13 +33,14 @@ const Dashboard = () => {
 
     const unsub = onSnapshot(incomesRef, snap => {
       const currencies = snap.docs.map(d => d.data().currency);
+
       setHasPesosIncome(currencies.includes('ARS'));
       setHasUsdIncome(currencies.includes('USD'));
+      setLoading(false);
     });
   
     return () => {
       unsub();
-      setLoading(false);
     }
   }, [currentUser]);
 
