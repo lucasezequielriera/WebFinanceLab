@@ -1,31 +1,29 @@
 // src/pages/DetailedExpenses.js
-import React, { useState, useEffect, useMemo }                                  from 'react';
-import { Spin, Row, Col, Select, Table, Tooltip, Tag, Popconfirm,
-  notification, Input, InputNumber, DatePicker }                                from 'antd';
-import { useAuth }                                                              from '../contexts/AuthContext';
-import { db }                                                                   from '../firebase';
-import { collection, query, onSnapshot, Timestamp, deleteDoc, doc, updateDoc }  from 'firebase/firestore';
-import { EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined }           from '@ant-design/icons';
-import { format }                                                               from 'date-fns';
-import { es }                                                                   from 'date-fns/locale';
-import dayjs                                                                    from 'dayjs';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Spin, Table, Select, DatePicker, Tag, Popconfirm, notification, Input, InputNumber, Card, Space, Divider } from 'antd';
+import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase';
+import { collection, query, onSnapshot, Timestamp, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, CalendarOutlined, TagOutlined, DollarOutlined, CreditCardOutlined, FilterOutlined } from '@ant-design/icons';
+import { format } from 'date-fns';
+import dayjs from 'dayjs';
 // Styles
 import '../styles/ExpensesPage.css';
 
+const { Option } = Select;
+
 const DetailedExpenses = () => {
-  const [loading, setLoading]             = useState(true);
-  const [expenses, setExpenses]           = useState([]);
-  const [months, setMonths]               = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(null);
-  const [editingId, setEditingId]         = useState(null);
-  const [rowEdits, setRowEdits]           = useState({});
+  const [loading, setLoading] = useState(true);
+  const [expenses, setExpenses] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [rowEdits, setRowEdits] = useState({});
+  const [selectedDay, setSelectedDay] = useState(dayjs().date());
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCurrency, setSelectedCurrency] = useState(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
+  const [newCategoryInput, setNewCategoryInput] = useState('');
 
-  const { currentUser }                   = useAuth();
-  const { Option }                        = Select;
-
-  const spanishMonthMap = {
-    enero:0, febrero:1, marzo:2, abril:3, mayo:4, junio:5, julio:6, agosto:7, septiembre:8, octubre:9, noviembre:10, diciembre:11
-  };
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -34,62 +32,90 @@ const DetailedExpenses = () => {
 
     const unsub = onSnapshot(q, snap => {
       const all = [];
-      const set = new Set();
       snap.forEach(d => {
         const ex = { id: d.id, ...d.data() };
         all.push(ex);
-        const ts = new Date(ex.timestamp.seconds * 1000);
-        set.add(format(ts, 'MMMM yyyy', { locale: es }));
-      });
-      const sortedMonths = Array.from(set).sort((a,b)=>{
-        const [mA,yA]=a.split(' '), [mB,yB]=b.split(' ');
-        return new Date(+yB, spanishMonthMap[mB.toLowerCase()]) -
-               new Date(+yA, spanishMonthMap[mA.toLowerCase()]);
       });
       setExpenses(all);
-      setMonths(sortedMonths);
       setLoading(false);
-      const todayKey = format(new Date(), 'MMMM yyyy', { locale: es });
-      setSelectedMonth(sortedMonths.includes(todayKey) ? todayKey : sortedMonths[0]||null);
     });
 
     return () => unsub();
-
   }, [currentUser]);
 
-  const filteredExpenses = useMemo(() => {
-    if (!selectedMonth) return [];
+  // Obtener categorías únicas para el filtro
+  const categories = useMemo(() => {
+    const uniqueCategories = new Set(expenses.map(e => e.category));
+    return Array.from(uniqueCategories).sort();
+  }, [expenses]);
 
-    const [m,y] = selectedMonth.split(' ');
-    const start = Timestamp.fromDate(new Date(+y, spanishMonthMap[m.toLowerCase()], 1));
-    const end   = Timestamp.fromDate(new Date(+y, spanishMonthMap[m.toLowerCase()]+1, 1));
-
-    return expenses.filter(e =>
-      e.timestamp.seconds >= start.seconds &&
-      e.timestamp.seconds <  end.seconds
-    );
-
-  }, [selectedMonth, expenses]);
-
-  const grouped = useMemo(() => {
-    const obj = {};
-
-    filteredExpenses.forEach(e => {
-      const cat = e.category||'Uncategorized';
-
-      if (!obj[cat]) obj[cat]=[];
-      obj[cat].push(e);
+  // Obtener días únicos del mes actual para el filtro
+  const days = useMemo(() => {
+    const currentMonth = dayjs().month();
+    const currentYear = dayjs().year();
+    const daysInMonth = dayjs().daysInMonth();
+    
+    return Array.from({ length: daysInMonth }, (_, i) => {
+      const dayNumber = i + 1;
+      const date = dayjs().year(currentYear).month(currentMonth).date(dayNumber);
+      const dayName = date.format('dddd');
+      const capitalizedDayName = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+      return {
+        value: dayNumber,
+        label: `${capitalizedDayName} ${dayNumber}`
+      };
     });
+  }, []);
 
-    return obj;
+  // Obtener monedas únicas para el filtro
+  const currencies = useMemo(() => {
+    const uniqueCurrencies = new Set(expenses.map(e => e.currency));
+    return Array.from(uniqueCurrencies).sort();
+  }, [expenses]);
+
+  // Obtener métodos de pago únicos para el filtro
+  const paymentMethods = useMemo(() => {
+    const uniqueMethods = new Set(expenses
+      .map(e => e.paymentMethod)
+      .filter(method => method && method.trim() !== '')
+    );
+    return Array.from(uniqueMethods).sort();
+  }, [expenses]);
+
+  // Filtrar gastos según los filtros seleccionados
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter(expense => {
+      const expenseDate = new Date(expense.timestamp.seconds * 1000);
+      const matchesDay = !selectedDay || expenseDate.getDate() === selectedDay;
+      const matchesCategory = !selectedCategory || expense.category === selectedCategory;
+      const matchesCurrency = !selectedCurrency || expense.currency === selectedCurrency;
+      const matchesPaymentMethod = !selectedPaymentMethod || expense.paymentMethod === selectedPaymentMethod;
+      const isCurrentMonth = expenseDate.getMonth() === dayjs().month() && 
+                            expenseDate.getFullYear() === dayjs().year();
+      
+      return matchesDay && matchesCategory && matchesCurrency && matchesPaymentMethod && isCurrentMonth;
+    });
+  }, [expenses, selectedDay, selectedCategory, selectedCurrency, selectedPaymentMethod]);
+
+  // Calcular totales
+  const totalPesos = useMemo(() => {
+    return filteredExpenses
+      .filter(expense => expense.currency === 'ARS')
+      .reduce((sum, expense) => sum + Number(expense.amount), 0);
+  }, [filteredExpenses]);
+
+  const totalDollars = useMemo(() => {
+    return filteredExpenses
+      .filter(expense => expense.currency === 'USD')
+      .reduce((sum, expense) => sum + Number(expense.amount), 0);
   }, [filteredExpenses]);
 
   const handleDelete = async exp => {
     try {
       await deleteDoc(doc(db, `users/${currentUser.uid}/expenses`, exp.id));
-      notification.success({ message:'Gasto eliminado' });
+      notification.success({ message: 'Gasto eliminado' });
     } catch {
-      notification.error({ message:'Error al eliminar' });
+      notification.error({ message: 'Error al eliminar' });
     }
   };
 
@@ -101,7 +127,8 @@ const DetailedExpenses = () => {
       description: record.description,
       amount: record.amount,
       currency: record.currency,
-      timestamp: new Date(record.timestamp.seconds*1000)
+      category: record.category,
+      timestamp: new Date(record.timestamp.seconds * 1000)
     });
   };
 
@@ -112,7 +139,7 @@ const DetailedExpenses = () => {
 
   const saveEdit = async id => {
     try {
-      const { description, amount, currency, timestamp } = rowEdits;
+      const { description, amount, currency, category, timestamp } = rowEdits;
 
       await updateDoc(
         doc(db, `users/${currentUser.uid}/expenses`, id),
@@ -120,151 +147,266 @@ const DetailedExpenses = () => {
           description,
           amount: Number(amount),
           currency,
+          category,
           timestamp: Timestamp.fromDate(timestamp)
         }
       );
 
-      notification.success({ message:'Gasto actualizado' });
+      notification.success({ message: 'Gasto actualizado' });
       cancelEdit();
     } catch {
-      notification.error({ message:'Error al actualizar' });
+      notification.error({ message: 'Error al actualizar' });
     }
   };
 
   const onChangeCell = (field, value) => setRowEdits(prev => ({ ...prev, [field]: value }));
 
+  const handleNewCategory = (value) => {
+    if (value.trim()) {
+      onChangeCell('category', value.trim());
+      setNewCategoryInput('');
+    }
+  };
+
+  const columns = [
+    {
+      title: 'Descripción',
+      dataIndex: 'description',
+      key: 'description',
+      width: '30%',
+      onCell: () => ({
+        style: { minWidth: '343px' }
+      }),
+      sorter: (a, b) => a.description.localeCompare(b.description),
+      sortDirections: ['ascend', 'descend'],
+      render: (_, rec) => isEditing(rec)
+        ? <Input
+            value={rowEdits.description}
+            onChange={e => onChangeCell('description', e.target.value)}
+          />
+        : rec.description
+    },
+    {
+      title: 'Monto',
+      dataIndex: 'amount',
+      key: 'amount',
+      width: '15%',
+      onCell: () => ({
+        style: { minWidth: '147px' }
+      }),
+      sorter: (a, b) => a.amount - b.amount,
+      sortDirections: ['descend', 'ascend'],
+      render: (t, rec) => isEditing(rec)
+        ? <InputNumber
+            value={rowEdits.amount}
+            onChange={v => onChangeCell('amount', v)}
+            prefix="$"
+            style={{ width: '100%' }}
+          />
+        : `$ ${Number(t).toFixed(2)}`
+    },
+    {
+      title: 'Categoría',
+      dataIndex: 'category',
+      key: 'category',
+      width: '15%',
+      sorter: (a, b) => (a.category || '').localeCompare(b.category || ''),
+      sortDirections: ['ascend', 'descend'],
+      render: (_, rec) => isEditing(rec)
+        ? <Select
+            value={rowEdits.category}
+            onChange={v => onChangeCell('category', v)}
+            style={{ width: '100%' }}
+            showSearch
+            allowClear
+            optionFilterProp="children"
+            filterOption={(input, option) =>
+              (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+            }
+            dropdownRender={menu => (
+              <>
+                {menu}
+                <Divider style={{ margin: '8px 0' }} />
+                <div style={{ padding: '8px' }}>
+                  <Input
+                    placeholder="Nueva categoría"
+                    value={newCategoryInput}
+                    onChange={e => setNewCategoryInput(e.target.value)}
+                    onPressEnter={() => handleNewCategory(newCategoryInput)}
+                  />
+                </div>
+              </>
+            )}
+          >
+            {categories.map(cat => (
+              <Option key={cat} value={cat}>{cat}</Option>
+            ))}
+          </Select>
+        : rec.category
+    },
+    {
+      title: 'Moneda',
+      dataIndex: 'currency',
+      key: 'currency',
+      width: '10%',
+      sorter: (a, b) => (a.currency || '').localeCompare(b.currency || ''),
+      sortDirections: ['ascend', 'descend'],
+      render: (_, rec) => isEditing(rec)
+        ? <Select
+            value={rowEdits.currency}
+            onChange={v => onChangeCell('currency', v)}
+            style={{ width: '100%' }}
+          >
+            <Option value="ARS">ARS</Option>
+            <Option value="USD">USD</Option>
+          </Select>
+        : rec.currency
+    },
+    {
+      title: 'Hora',
+      dataIndex: 'timestamp',
+      key: 'timestamp',
+      width: '10%',
+      sorter: (a, b) => b.timestamp.seconds - a.timestamp.seconds,
+      sortDirections: ['descend', 'ascend'],
+      render: ts => {
+        const d = new Date(ts.seconds * 1000);
+        return isEditing({ timestamp: ts })
+          ? <DatePicker
+              value={dayjs(rowEdits.timestamp)}
+              onChange={(_, date) => onChangeCell('timestamp', date.toDate())}
+              style={{ width: '100%' }}
+            />
+          : format(d, 'HH:mm');
+      }
+    },
+    {
+      title: 'Acciones',
+      key: 'actions',
+      width: '10%',
+      onCell: () => ({
+        style: { minWidth: '106px' }
+      }),
+      render: (_, rec) => isEditing(rec)
+        ? (
+          <div style={{ minWidth: '106px' }}>
+            <Tag
+              icon={<CheckOutlined />}
+              onClick={() => saveEdit(rec.id)}
+              style={{ cursor: 'pointer', marginRight: 8 }}
+            />
+            <Tag
+              icon={<CloseOutlined />}
+              onClick={cancelEdit}
+              style={{ cursor: 'pointer' }}
+            />
+          </div>
+        )
+        : (
+          <>
+            <Tag
+              icon={<EditOutlined />}
+              onClick={() => startEdit(rec)}
+              style={{ cursor: 'pointer', marginRight: 8 }}
+            />
+            <Popconfirm title="¿Eliminar?" onConfirm={() => handleDelete(rec)}>
+              <Tag icon={<DeleteOutlined />} color="red" style={{ cursor: 'pointer' }} />
+            </Popconfirm>
+          </>
+        )
+    }
+  ];
+
   return (
     <div className="container-page">
       <Spin spinning={loading}>
+        <div style={{ 
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: 16,
+          maxWidth: '800px',
+          width: '100%'
+        }}>
+          <FilterOutlined style={{ 
+            fontSize: '20px', 
+            color: '#1890ff',
+            marginRight: '8px'
+          }} />
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+            gap: '12px',
+            flex: 1
+          }}>
+            <Select
+              placeholder="Día"
+              value={selectedDay}
+              onChange={setSelectedDay}
+              allowClear
+              suffixIcon={<CalendarOutlined style={{ color: '#1890ff' }} />}
+            >
+              {days.map(day => (
+                <Option key={day.value} value={day.value}>{day.label}</Option>
+              ))}
+            </Select>
 
-        {/* Filter */}
-        <Select
-          style={{ width:220, marginBottom:24 }}
-          placeholder="Selecciona mes"
-          value={selectedMonth}
-          onChange={setSelectedMonth}
-        >
-          {months.map(m=> <Option key={m} value={m}>{m}</Option>)}
-        </Select>
+            <Select
+              placeholder="Categoría"
+              value={selectedCategory}
+              onChange={setSelectedCategory}
+              allowClear
+              suffixIcon={<TagOutlined style={{ color: '#1890ff' }} />}
+            >
+              {categories.map(cat => (
+                <Option key={cat} value={cat}>{cat}</Option>
+              ))}
+            </Select>
 
-        {/* Tables */}
-        <Row gutter={[16,16]}>
-          {Object.entries(grouped).map(([cat, arr])=> {
-            const totalARS = arr.filter(e=>e.currency==='ARS')
-                                .reduce((s,e)=>s+Number(e.amount), 0);
-            const totalUSD = arr.filter(e=>e.currency==='USD')
-                                .reduce((s,e)=>s+Number(e.amount), 0);
+            <Select
+              placeholder="Moneda"
+              value={selectedCurrency}
+              onChange={setSelectedCurrency}
+              allowClear
+              suffixIcon={<DollarOutlined style={{ color: '#1890ff' }} />}
+            >
+              {currencies.map(curr => (
+                <Option key={curr} value={curr}>{curr}</Option>
+              ))}
+            </Select>
 
-            const columns = [
-              {
-                title:'Descripción', dataIndex:'description', key:'desc', width:'35%',
-                render: (_, rec) => isEditing(rec)
-                  ? <Input
-                      value={rowEdits.description}
-                      onChange={e => onChangeCell('description', e.target.value)}
-                    />
-                  : rec.description
-              },
-              {
-                title:'Monto', dataIndex:'amount', key:'amt', width:'15%',
-                render:(t,rec)=> isEditing(rec)
-                  ? <InputNumber
-                      value={rowEdits.amount}
-                      onChange={v => onChangeCell('amount', v)}
-                      prefix="$"
-                    />
-                  : (rec.currency==='ARS'
-                      ? `$${Number(t).toFixed(2)}`
-                      : `USD${Number(t).toFixed(2)}`)
-              },
-              {
-                title:'Moneda', dataIndex:'currency', key:'cur', width:'10%',
-                render:(_,rec) => isEditing(rec)
-                  ? (
-                    <Select
-                      value={rowEdits.currency}
-                      onChange={v => onChangeCell('currency', v)}
-                    >
-                      <Option value="ARS">ARS</Option>
-                      <Option value="USD">USD</Option>
-                    </Select>
-                  )
-                  : rec.currency
-              },
-              {
-                title:'Fecha', dataIndex:'timestamp', key:'ts', width:'20%',
-                render: ts => {
-                  const d = new Date(ts.seconds*1000);
-                  return isEditing({ timestamp: ts })
-                    ? <DatePicker
-                        value={dayjs(rowEdits.timestamp)}
-                        onChange={(_,date) => onChangeCell('timestamp', date.toDate())}
-                      />
-                    : <Tooltip title={d.toLocaleTimeString()}>
-                        {d.toLocaleDateString()}
-                      </Tooltip>;
-                }
-              },
-              {
-                title:'Acción', key:'act', width:'20%',
-                render: (_,rec) => isEditing(rec)
-                  ? (
-                    <>
-                      <Tag
-                        icon={<CheckOutlined />}
-                        onClick={()=>saveEdit(rec.id)}
-                        style={{ cursor:'pointer', marginRight:8 }}
-                      />
-                      <Tag
-                        icon={<CloseOutlined />}
-                        onClick={cancelEdit}
-                        style={{ cursor:'pointer' }}
-                      />
-                    </>
-                  )
-                  : (
-                    <>
-                      <Tag
-                        icon={<EditOutlined />}
-                        onClick={()=>startEdit(rec)}
-                        style={{ cursor:'pointer', marginRight:8 }}
-                      />
-                      <Popconfirm title="¿Eliminar?" onConfirm={()=>handleDelete(rec)}>
-                        <Tag icon={<DeleteOutlined />} color="red" style={{cursor:'pointer'}}/>
-                      </Popconfirm>
-                    </>
-                  )
-              }
-            ];
+            <Select
+              placeholder="Método"
+              value={selectedPaymentMethod}
+              onChange={setSelectedPaymentMethod}
+              allowClear
+              suffixIcon={<CreditCardOutlined style={{ color: '#1890ff' }} />}
+            >
+              {paymentMethods.map(method => (
+                <Option key={method} value={method}>{method}</Option>
+              ))}
+            </Select>
+          </div>
+        </div>
 
-            return (
-              <Col xs={24} md={12} key={cat}>
-                <h2>{cat}</h2>
-                <Table
-                  bordered
-                  dataSource={arr}
-                  columns={columns}
-                  rowKey="id"
-                  pagination={{ pageSize:5 }}
-                  scroll={{ x:true }}
-                />
-                <div style={{
-                  fontWeight:'bold',
-                  borderTop:'2px solid #1890ff',
-                  padding:10,
-                  background:'#e6f7ff',
-                  textAlign:'right'
-                }}>
-                  Total ARS: ${totalARS.toFixed(2)} &nbsp;|&nbsp; USD ${totalUSD.toFixed(2)}
-                </div>
-              </Col>
-            );
-          })}
-        </Row>
-        
+        <Table
+          bordered
+          dataSource={filteredExpenses.slice().sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)}
+          columns={columns}
+          rowKey="id"
+          pagination={{ pageSize: 8 }}
+          scroll={{ x: true }}
+        />
+        {filteredExpenses.length > 0 && (
+          <div className="totals-container">
+            <span style={{ color: '#0071de' }}>Total ARS: ${totalPesos.toFixed(2)}</span>
+            <span style={{ color: '#0071de', opacity: 0.5 }}>|</span>
+            <span style={{ color: '#0071de' }}>Total USD: ${totalDollars.toFixed(2)}</span>
+          </div>
+        )}
       </Spin>
     </div>
   );
-}
+};
 
 export default DetailedExpenses;

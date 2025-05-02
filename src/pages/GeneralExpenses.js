@@ -5,6 +5,7 @@ import { collection, query, onSnapshot }        from 'firebase/firestore';
 import { useAuth }                              from '../contexts/AuthContext';
 import { format }                               from 'date-fns';
 import { es }                                   from 'date-fns/locale';
+import { FilterOutlined, CalendarOutlined }       from '@ant-design/icons';
 // Styles
 import '../styles/ExpensesPage.css'
 
@@ -29,17 +30,14 @@ const GeneralExpenses = () => {
       });
       setExpenses(expensesData);
       setLoading(false);
+
+      // Establecer el mes actual como seleccionado
+      const currentMonthYear = getCurrentMonthYear();
+      setSelectedMonth(currentMonthYear);
     });
 
     return () => unsubscribe();
   }, [currentUser]);
-
-  useEffect(() => {
-    const currentMonthYear = getCurrentMonthYear();
-
-    if (expenses.some(expense => `${format(new Date(expense.timestamp.seconds * 1000), 'MMMM', { locale: es })} ${expense.year}` === currentMonthYear)) setSelectedMonth(currentMonthYear);
-
-  }, [expenses]);
 
   const handleMonthChange = (value) => setSelectedMonth(value);
 
@@ -48,7 +46,7 @@ const GeneralExpenses = () => {
     const month = format(date, 'MMMM', { locale: es });
     const year = date.getFullYear();
 
-    return `${month} ${year}`;
+    return `${month.charAt(0).toUpperCase() + month.slice(1)} ${year}`;
   };
 
   const calculateMonthlyTotals = (expenses) => {
@@ -77,9 +75,12 @@ const GeneralExpenses = () => {
     if (!selectedMonth) return [];
 
     const [month, year] = selectedMonth.split(' ');
+    const monthLower = month.toLowerCase();
 
-    return expenses.filter(expense => format(new Date(expense.timestamp.seconds * 1000), 'MMMM', { locale: es }) === month && expense.year === parseInt(year, 10));
-
+    return expenses.filter(expense => {
+      const expenseMonth = format(new Date(expense.timestamp.seconds * 1000), 'MMMM', { locale: es });
+      return expenseMonth === monthLower && expense.year === parseInt(year, 10);
+    });
   }, [selectedMonth, expenses]);
 
   const monthlyData = useMemo(() => calculateMonthlyTotals(filteredExpenses), [filteredExpenses]);
@@ -104,24 +105,29 @@ const GeneralExpenses = () => {
       dataIndex: 'totalDollars',
       key: 'totalDollars',
       width: '20%',
-      render: (text) => text ? `USD${parseFloat(text).toFixed(2)}` : 'USD0.00',
+      render: (text) => text ? `$${parseFloat(text).toFixed(2)}` : 'USD0.00',
     },
   ];
 
   const columns = generateColumns();
 
-  const dataSource = Object.entries(monthlyData).map(([category, totals]) => ({
-    category,
-    totalPesos: totals.amountPesos,
-    totalDollars: totals.amountDollars
-  }));
+  const dataSource = Object.entries(monthlyData)
+    .map(([category, totals]) => ({
+      category,
+      totalPesos: totals.amountPesos,
+      totalDollars: totals.amountDollars
+    }))
+    .sort((a, b) => a.category.localeCompare(b.category));
 
   const getSortedMonths = () => {
     const spanishMonthMap = {
       enero: 0, febrero: 1, marzo: 2, abril: 3, mayo: 4, junio: 5, julio: 6, agosto: 7, septiembre: 8, octubre: 9, noviembre: 10, diciembre: 11
     };
 
-    const sortedMonths = Array.from(new Set(expenses.map(expense => `${format(new Date(expense.timestamp.seconds * 1000), 'MMMM', { locale: es })} ${expense.year}`)))
+    const sortedMonths = Array.from(new Set(expenses.map(expense => {
+      const month = format(new Date(expense.timestamp.seconds * 1000), 'MMMM', { locale: es });
+      return `${month.charAt(0).toUpperCase() + month.slice(1)} ${expense.year}`;
+    })))
     .sort((a, b) => {
       const [monthA, yearA] = a.split(' ');
       const [monthB, yearB] = b.split(' ');
@@ -137,53 +143,54 @@ const GeneralExpenses = () => {
   return (
     <div className='container-page'>
       <Spin spinning={loading}>
-
-        {/* Filter */}
-        <Select
-          style={{ width: 200, marginBottom: 16 }}
-          placeholder="Select Month"
-          value={selectedMonth}
-          onChange={handleMonthChange}
-        >
-          {getSortedMonths().map(month => (
-            <Option key={month} value={month}>{month}</Option>
-          ))}
-        </Select>
+        <div style={{ 
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: 16,
+          maxWidth: '250px',
+          width: '100%',
+          paddingBottom: 1
+        }}>
+          <FilterOutlined style={{ 
+            fontSize: '20px', 
+            color: '#1890ff',
+            marginRight: '8px'
+          }} />
+          <Select
+            style={{ flex: 1 }}
+            placeholder="Seleccionar mes"
+            value={selectedMonth}
+            onChange={handleMonthChange}
+            suffixIcon={<CalendarOutlined style={{ color: '#1890ff' }} />}
+          >
+            {getSortedMonths().map(month => (
+              <Option key={month} value={month}>{month}</Option>
+            ))}
+          </Select>
+        </div>
 
         {/* Table */}
         {selectedMonth && (
           <Row gutter={[16, 16]}>
             <Col span={24}>
-              <h2>{selectedMonth}</h2>
               <Table
                 dataSource={dataSource}
                 columns={columns}
-                pagination={false}
+                pagination={{ pageSize: 8 }}
                 rowKey="category"
-                scroll={{ x: true }} // Enable horizontal scrolling in mobile view
-                summary={pageData => {
-                  const totalPesos = pageData.reduce((sum, record) => sum + (parseFloat(record.totalPesos) || 0), 0);
-                  const totalDollars = pageData.reduce((sum, record) => sum + (parseFloat(record.totalDollars) || 0), 0);
-
-                  return (
-                    <Table.Summary fixed>
-                      <Table.Summary.Row style={{ backgroundColor: '#e6f7ff', fontWeight: 'bold', borderTop: '2px solid #1890ff' }}>
-                        <Table.Summary.Cell index={0}>TOTAL</Table.Summary.Cell>
-                        <Table.Summary.Cell index={1}>
-                          ${totalPesos.toFixed(2)}
-                        </Table.Summary.Cell>
-                        <Table.Summary.Cell index={2}>
-                          USD {totalDollars.toFixed(2)}
-                        </Table.Summary.Cell>
-                      </Table.Summary.Row>
-                    </Table.Summary>
-                  );
-                }}
+                scroll={{ x: true }}
               />
+              {dataSource.length > 0 && (
+                <div className="totals-container">
+                  <span style={{ color: '#0071de' }}>Total ARS: ${dataSource.reduce((sum, record) => sum + (parseFloat(record.totalPesos) || 0), 0).toFixed(2)}</span>
+                  <span style={{ color: '#0071de', opacity: 0.5 }}>|</span>
+                  <span style={{ color: '#0071de' }}>Total USD: ${dataSource.reduce((sum, record) => sum + (parseFloat(record.totalDollars) || 0), 0).toFixed(2)}</span>
+                </div>
+              )}
             </Col>
           </Row>
         )}
-        
       </Spin>
     </div>
   );

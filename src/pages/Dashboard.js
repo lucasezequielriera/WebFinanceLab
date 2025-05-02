@@ -39,9 +39,7 @@ const Dashboard = () => {
       setLoading(false);
     });
   
-    return () => {
-      unsub();
-    }
+    return () => unsub();
   }, [currentUser]);
 
   return (

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo }                    from 'react';
 import { Table, Spin, Select, Modal, Form, Input, InputNumber,
   DatePicker, Tag, Popconfirm, Button, notification, Empty,
   Row, Col, Typography }                                          from 'antd';
-import { EditOutlined, DeleteOutlined }                           from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, FilterOutlined, CalendarOutlined } from '@ant-design/icons';
 import { db }                                                     from '../firebase';
 import { collection, query, onSnapshot, doc, deleteDoc, updateDoc,
   Timestamp }                                                     from 'firebase/firestore';
@@ -47,7 +47,8 @@ const Income = () => {
 
       data.forEach(item => {
         const dt = new Date(item.timestamp.seconds * 1000);
-        const m = format(dt, 'MMMM yyyy', { locale: es });
+        const month = format(dt, 'MMMM', { locale: es });
+        const m = `${month.charAt(0).toUpperCase() + month.slice(1)} ${dt.getFullYear()}`;
         ms.add(m);
       });
 
@@ -74,11 +75,12 @@ const Income = () => {
     if (!selectedMonth) return [];
 
     const [mon, yr] = selectedMonth.split(' ');
+    const monthLower = mon.toLowerCase();
 
     return incomes.filter(item => {
       const dt = new Date(item.timestamp.seconds * 1000);
-
-      return format(dt, 'MMMM', { locale: es }) === mon && dt.getFullYear() === parseInt(yr, 10)
+      const expenseMonth = format(dt, 'MMMM', { locale: es });
+      return expenseMonth === monthLower && dt.getFullYear() === parseInt(yr, 10);
     });
   }, [selectedMonth, incomes]);
 
@@ -184,20 +186,34 @@ const Income = () => {
   return (
     <div className="container-page">
       <Spin spinning={loading}>
-
-        {/* Filter */}
-        <Select
-          style={{ width: 250, marginBottom: 16 }}
-          placeholder={t("userProfile.incomes.filter.placeholder")}
-          value={selectedMonth}
-          onChange={handleMonthChange}
-        >
-          {months.map(m => (
-            <Option key={m} value={m}>
-              {m}
-            </Option>
-          ))}
-        </Select>
+        <div style={{ 
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: 16,
+          maxWidth: '250px',
+          width: '100%',
+          paddingBottom: 1
+        }}>
+          <FilterOutlined style={{ 
+            fontSize: '20px', 
+            color: '#1890ff',
+            marginRight: '8px'
+          }} />
+          <Select
+            style={{ flex: 1 }}
+            placeholder={t("userProfile.incomes.filter.placeholder")}
+            value={selectedMonth}
+            onChange={handleMonthChange}
+            suffixIcon={<CalendarOutlined style={{ color: '#1890ff' }} />}
+          >
+            {months.map(m => (
+              <Option key={m} value={m}>
+                {m}
+              </Option>
+            ))}
+          </Select>
+        </div>
 
         {/* Incomes Table */}
         {filtered.length > 0 ? (
@@ -206,23 +222,19 @@ const Income = () => {
               <Col span={24}>
                 <Table
                   bordered
-                  dataSource={filtered}
+                  dataSource={filtered.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)}
                   columns={columns}
                   rowKey="id"
-                  pagination={{ pageSize: 5 }}
+                  pagination={{ pageSize: 8 }}
                   scroll={{ x: 'max-content' }}
                 />
-                <div
-                  style={{
-                    fontWeight: 'bold',
-                    borderTop: '2px solid #1890ff',
-                    padding: 10,
-                    background: '#e6f7ff',
-                    textAlign: 'right',
-                  }}
-                >
-                  Total ARS: ${totalARS.toFixed(2)} &nbsp;|&nbsp; Total USD: ${totalUSD.toFixed(2)}
-                </div>
+                {filtered.length > 0 && (
+                  <div className="totals-container">
+                    <span style={{ color: '#0071de' }}>Total ARS: ${totalARS.toFixed(2)}</span>
+                    <span style={{ color: '#0071de', opacity: 0.5 }}>|</span>
+                    <span style={{ color: '#0071de' }}>Total USD: ${totalUSD.toFixed(2)}</span>
+                  </div>
+                )}
               </Col>
             </Row>
           </>

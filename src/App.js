@@ -272,7 +272,7 @@ const AppLayout = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout className="main-container" style={{ minHeight: '100vh' }}>
 
       <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
 
