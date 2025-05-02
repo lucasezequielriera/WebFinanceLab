@@ -47,13 +47,15 @@ export default function AccountTypeBadge({ type = 'free' }) {
         setMenuOpen(false);
       }}
     >
-      <Menu.Item key="/dashboard">{t("userProfile.navbar.dashboard")}</Menu.Item>
-      <Menu.Item key="/incomes">{t("userProfile.navbar.incomes")}</Menu.Item>
-      <Menu.Item key="/expenses">{t("userProfile.navbar.expenses")}</Menu.Item>
-      <Menu.Item key="/financial-goals">{t("userProfile.navbar.financialGoals")}</Menu.Item>
-      <Menu.Item key="/profile">{t("userProfile.navbar.profile")}</Menu.Item>
+      <Menu.Item key="/dashboard">{t("userProfile.typeOfAccount.dropdown.dashboard")}</Menu.Item>
+      <Menu.Item key="/incomes">{t("userProfile.typeOfAccount.dropdown.incomes")}</Menu.Item>
+      <Menu.Item key="/detailed-expenses">{t("userProfile.typeOfAccount.dropdown.dailyExpenses")}</Menu.Item>
+      <Menu.Item key="/general-expenses">{t("userProfile.typeOfAccount.dropdown.monthlyExpenses")}</Menu.Item>
+      <Menu.Item key="/expenses">{t("userProfile.typeOfAccount.dropdown.payments")}</Menu.Item>
+      <Menu.Item key="/financial-goals">{t("userProfile.typeOfAccount.dropdown.financialGoals")}</Menu.Item>
+      <Menu.Item key="/profile">{t("userProfile.typeOfAccount.dropdown.profile")}</Menu.Item>
       <Menu.Divider />
-      <Menu.Item key="logout">{t("userProfile.navbar.logout")}</Menu.Item>
+      <Menu.Item key="logout">{t("userProfile.typeOfAccount.dropdown.logout")}</Menu.Item>
     </Menu>
   );
 

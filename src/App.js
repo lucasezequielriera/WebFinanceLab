@@ -81,14 +81,12 @@ const AppLayout = () => {
 
     if (path.startsWith('/dashboard')) {
       setSelectedKey('1');
-    } else if (path.startsWith('/expenses')) {
-      setSelectedKey('5');
     } else if (path.startsWith('/incomes')) {
       setSelectedKey('8');
     } else if (path.startsWith('/detailed-expenses')) {
-      setSelectedKey('detailed-expenses');
+      setSelectedKey('9');
     } else if (path.startsWith('/general-expenses')) {
-      setSelectedKey('general-expenses');
+      setSelectedKey('10');
     } else if (path.startsWith('/profile')) {
       setSelectedKey('2');
     } else if (path.startsWith('/financial-goals')) {
@@ -158,7 +156,21 @@ const AppLayout = () => {
     {
       key: '5',
       icon: <CreditCardOutlined />,
-      label: <Link to="/expenses">{t('userProfile.navbar.expenses')}</Link>
+      label: t('userProfile.navbar.expenses.dropdown'),
+      children: [
+        {
+          key: '9',
+          label: <Link to="/detailed-expenses">{t('userProfile.navbar.expenses.dailyExpenses')}</Link>
+        },
+        {
+          key: '10',
+          label: <Link to="/general-expenses">{t('userProfile.navbar.expenses.monthlyExpenses')}</Link>
+        },
+        {
+          key: '11',
+          label: <Link to="/expenses">{t('userProfile.navbar.expenses.payments')}</Link>
+        },
+      ],
     },
     {
       key: '7',
@@ -211,14 +223,14 @@ const AppLayout = () => {
 
   // Title in Up Navbar
   const getPageTitle = () => {
-    if (location.pathname.startsWith('/dashboard'))        return t('userProfile.navbar.dashboard');
-    if (location.pathname.startsWith('/expenses'))         return t('userProfile.navbar.expenses');
-    if (location.pathname.startsWith('/incomes'))          return t('userProfile.navbar.incomes');
-    if (location.pathname.startsWith('/financial-goals'))  return t('userProfile.navbar.financialGoals');
-    if (location.pathname.startsWith('/about-us'))         return t('userProfile.navbar.aboutUs');
-    if (location.pathname.startsWith('/profile'))          return t('userProfile.navbar.profile');
-    if (location.pathname.startsWith('/detailed-expenses'))return t('userProfile.navbar.detailedExpenses');
-    if (location.pathname.startsWith('/general-expenses')) return t('userProfile.navbar.generalExpenses');
+    if (location.pathname.startsWith('/dashboard'))         return t('userProfile.navbar.dashboard');
+    if (location.pathname.startsWith('/incomes'))           return t('userProfile.navbar.incomes');
+    if (location.pathname.startsWith('/financial-goals'))   return t('userProfile.navbar.financialGoals');
+    if (location.pathname.startsWith('/about-us'))          return t('userProfile.navbar.aboutUs');
+    if (location.pathname.startsWith('/profile'))           return t('userProfile.navbar.profile');
+    if (location.pathname.startsWith('/detailed-expenses')) return t('userProfile.navbar.expenses.dailyExpenses');
+    if (location.pathname.startsWith('/general-expenses'))  return t('userProfile.navbar.expenses.monthlyExpenses');
+    if (location.pathname.startsWith('/expenses'))          return t('userProfile.navbar.expenses.payments');
     return '';
   };
 
@@ -315,7 +327,7 @@ const AppLayout = () => {
               {isMobile ?
                 (location.pathname.startsWith('/detailed-expenses') || location.pathname.startsWith('/general-expenses'))
                 ? <span style={{ display: 'flex', alignItems: 'center' }}>
-                    {React.cloneElement(getPageIcon(), { style: { fontSize: 24, marginRight: 10 } })}
+                    {/* {React.cloneElement(getPageIcon(), { style: { fontSize: 0, marginRight: 10 } })} */}
                     {getPageTitle()}
                   </span>
                 : <div className="user-greeting" style={{ display: 'flex', color: 'white', textAlign: 'center', marginLeft: "-10px" }}>
@@ -329,7 +341,7 @@ const AppLayout = () => {
                   </div>
               : (location.pathname.startsWith('/detailed-expenses') || location.pathname.startsWith('/general-expenses'))
                 ? <span style={{ display: 'flex', alignItems: 'center' }}>
-                    {React.cloneElement(getPageIcon(), { style: { fontSize: 24, marginRight: 10 } })}
+                    {/* {React.cloneElement(getPageIcon(), { style: { fontSize: 24, marginRight: 10 } })} */}
                     {getPageTitle()}
                   </span>
                 : getPageTitle()

@@ -1,6 +1,5 @@
 import React, { useState, useEffect }                                   from 'react';
-import { useNavigate }                                                  from 'react-router-dom';
-import { Button, Spin, Empty, DatePicker }                              from 'antd';
+import { Spin, Empty, DatePicker }                                      from 'antd';
 import { doc, onSnapshot, updateDoc, collection, getDoc, query, where } from 'firebase/firestore';
 import { db }                                                           from '../firebase';
 import { useAuth }                                                      from '../contexts/AuthContext';
@@ -22,8 +21,6 @@ const Expenses = () => {
   const { t } = useTranslation();
   const { hasExpenses } = useMonthlyMovements();
   
-  const navigate = useNavigate();
-
   const cardColors = {
     Visa: 'linear-gradient(135deg, #1A1F71, #2E77BB)',
     MasterCard: 'linear-gradient(135deg, #ff2500, #ff9300)',
@@ -183,18 +180,6 @@ const Expenses = () => {
       <Spin spinning={loading}>
 
         {hasExpenses ? <>
-
-          {/* General & Detailed Expenses Buttons */}
-          <div className='title-and-buttons' style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
-            <div className="buttons">
-              <Button onClick={() => navigate('/general-expenses')}>
-                {t('userProfile.expenses.generalExpensesButton')}
-              </Button>
-              <Button onClick={() => navigate('/detailed-expenses')}>
-              {t('userProfile.expenses.detailedExpensesButton')}
-              </Button>
-            </div>
-          </div>
 
           {/* Cards filter per month */}
           <div className="filter" style={{ marginBottom: 24 }}>

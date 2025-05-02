@@ -28,7 +28,7 @@ const FinancialGoals = () => {
 
     const { currentUser } = useAuth();
     const { t } = useTranslation();
-    const { hasIncomes } = useMonthlyMovements();
+    const { hasIncomes, hasExpenses } = useMonthlyMovements();
     
     const { Title, Text } = Typography;
     const { Option } = Select;
@@ -187,7 +187,7 @@ const FinancialGoals = () => {
         <div className="container-page">
             <Spin spinning={loading}>
 
-                {hasIncomes ?
+                {(hasIncomes && hasExpenses) ?
                 <div className="financial-goals">
 
                     {/* Add Limits */}

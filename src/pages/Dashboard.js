@@ -38,10 +38,9 @@ const Dashboard = () => {
     });
   
     return () => {
-      setLoading(false);
       unsub();
+      setLoading(false);
     }
-
   }, [currentUser]);
 
   return (
@@ -107,7 +106,7 @@ const Dashboard = () => {
             </div>) :
 
             // EMPTY DATA MESSAGE
-            <div style={{ textAlign: 'center', marginTop: 30 }}>
+            (hasIncomes && hasExpenses) && <div style={{ textAlign: 'center', marginTop: 30 }}>
               <SmileOutlined style={{ fontSize: 48, color: 'rgb(0, 126, 222)', marginBottom: 20 }} />
               <h2>{t("userProfile.dashboard.welcome")}</h2>
               <p>{t("userProfile.dashboard.welcomeText")}</p>
