@@ -32,6 +32,7 @@
     "react-dom": "^18.3.1",
     "react-easy-crop": "^5.4.1",
     "react-i18next": "^15.4.1",
+    "react-number-format": "^5.4.4",
     "react-router-dom": "^7.5.0",
     "recharts": "^2.15.2",
     "regjsparser": "^0.12.0",

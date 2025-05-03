@@ -112,4 +112,45 @@
       width: 250px;
     }
   }
-  
+
+  .add-payment-btn {
+    transition: all 0.3s ease !important;
+  }
+
+  .add-payment-btn.disabled {
+    background-color: #f0f0f0 !important;
+    border-color: #d9d9d9 !important;
+    color: rgba(0, 0, 0, 0.25) !important;
+    box-shadow: none !important;
+  }
+
+  .add-payment-btn-icon {
+    transition: all 0.3s ease !important;
+  }
+
+  .add-payment-btn-icon.enabled {
+    color: #fff !important;
+  }
+
+  .add-payment-btn-icon.disabled {
+    color: rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .ant-table-tbody > tr {
+    transition: all 0.5s ease;
+  }
+
+  .ant-table-tbody > tr.ant-table-row {
+    animation: fadeIn 0.5s ease;
+    height: 40px !important;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
