@@ -79,7 +79,10 @@
             "ask": "Delete Income?",
             "deleted": "Income Deleted",
             "error": "Error Deleting"
-        }
+        },
+        "totalARS": "Total ARS:",
+        "totalUSD": "Total USD:",
+        "noIncomes": "No incomes to show."
     },
 
     "userProfile.expenses.title": "My Expenses",
@@ -92,6 +95,38 @@
     "userProfile.expenses.debitCardTitle": "Debit Card",
     "userProfile.expenses.cashTitle": "Cash",
     "userProfile.expenses.withoutData": "No expenses recorded this month.",
+    "userProfile.expenses.detailed": {
+        "totalARS": "Total ARS: $",
+        "totalUSD": "Total USD: $",
+        "filterDay": "Day",
+        "filterCategory": "Category",
+        "filterCurrency": "Currency",
+        "filterMethod": "Payment Method",
+        "colDescription": "Description",
+        "colAmount": "Amount",
+        "colCurrency": "Currency",
+        "colCategory": "Category",
+        "colTime": "Time",
+        "colActions": "Actions",
+        "deleteConfirm": "Delete?",
+        "deleted": "Expense deleted",
+        "deleteError": "Error deleting",
+        "updated": "Expense updated",
+        "updateError": "Error updating",
+        "invalidDate": "Invalid date/time.",
+        "newCategory": "New category",
+        "noExpenses": "No expenses to show."
+    },
+    "userProfile.expenses.general": {
+        "table": {
+            "category": "Category",
+            "totalPesos": "Total (Pesos)",
+            "totalDollars": "Total (Dollars)",
+            "noExpenses": "No expenses to show."
+        },
+        "totalARS": "Total ARS:",
+        "totalUSD": "Total USD:"
+    },
 
     "userProfile.financialGoals.title": "Financial Goals",
     "userProfile.financialGoals.subtitle": "You can check your financial goals here and configure everything.",

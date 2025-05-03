@@ -79,7 +79,10 @@
             "ask": "¿Eliminar ingreso?",
             "deleted": "Ingreso eliminado",
             "error": "Error al eliminar"
-        }
+        },
+        "totalARS": "Total ARS:",
+        "totalUSD": "Total USD:",
+        "noIncomes": "No hay ingresos para mostrar"
     },
 
     "userProfile.expenses.title": "Mis Gastos",
@@ -92,6 +95,37 @@
     "userProfile.expenses.debitCardTitle": "Tarjeta de Débito",
     "userProfile.expenses.cashTitle": "Efectivo",
     "userProfile.expenses.withoutData": "No hay gastos registrados en este mes.",
+    "userProfile.expenses.detailed": {
+        "totalARS": "Total ARS: $",
+        "totalUSD": "Total USD: $",
+        "filterDay": "Día",
+        "filterCategory": "Categoría",
+        "filterCurrency": "Moneda",
+        "filterMethod": "Método de Pago",
+        "colDescription": "Descripción",
+        "colAmount": "Monto",
+        "colCurrency": "Moneda",
+        "colCategory": "Categoría",
+        "colTime": "Hora",
+        "colActions": "Acciones",
+        "deleteConfirm": "¿Eliminar?",
+        "deleted": "Gasto eliminado",
+        "deleteError": "Error al eliminar",
+        "updated": "Gasto actualizado",
+        "updateError": "Error al actualizar",
+        "invalidDate": "La fecha/hora es inválida.",
+        "newCategory": "Nueva categoría",
+        "noExpenses": "No hay gastos para mostrar"
+    },
+    "userProfile.expenses.general": {
+        "table": {
+            "category": "Categoría",
+            "totalPesos": "Total (Pesos)",
+            "totalDollars": "Total (Dólares)"
+        },
+        "totalARS": "Total ARS:",
+        "totalUSD": "Total USD:"
+    },
 
     "userProfile.financialGoals.title": "Mis Objetivos Financieros",
     "userProfile.financialGoals.subtitle": "Aquí puedes fijar tus objetivos financieros y configurarlo todo. Nosotros te ayudamos a que puedas mantener tus finanzas y tener la capacidad de ahorro que tanto buscas.",

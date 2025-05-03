@@ -9,7 +9,7 @@ import { collection, query, onSnapshot, doc, deleteDoc, updateDoc,
   Timestamp }                                                     from 'firebase/firestore';
 import { useAuth }                                                from '../contexts/AuthContext';
 import { format }                                                 from 'date-fns';
-import { es }                                                     from 'date-fns/locale';
+import { es, enUS }                                               from 'date-fns/locale';
 import dayjs                                                      from 'dayjs';
 import { useTranslation }                                         from 'react-i18next';
 import CurrencyTagPicker                                          from '../components/CurrencyTagPicker';
@@ -26,9 +26,11 @@ const Income = () => {
   const [form] = Form.useForm();
 
   const { currentUser } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { Option } = Select;
   const { Title } = Typography;
+
+  const currentLocale = i18n.language === 'en' ? enUS : es;
 
   const handleMonthChange = m => setSelectedMonth(m);
 
@@ -43,25 +45,20 @@ const Income = () => {
 
       setIncomes(data);
 
-      const ms = new Set();
-
+      const ms = new Map();
       data.forEach(item => {
         const dt = new Date(item.timestamp.seconds * 1000);
-        const month = format(dt, 'MMMM', { locale: es });
-        const m = `${month.charAt(0).toUpperCase() + month.slice(1)} ${dt.getFullYear()}`;
-        ms.add(m);
+        const monthNum = dt.getMonth() + 1;
+        const year = dt.getFullYear();
+        const value = `${year}-${monthNum.toString().padStart(2, '0')}`;
+        const label = `${format(dt, 'MMMM', { locale: currentLocale }).charAt(0).toUpperCase() + format(dt, 'MMMM', { locale: currentLocale }).slice(1)} ${year}`;
+        ms.set(value, label);
       });
+      const monthsArr = Array.from(ms, ([value, label]) => ({ value, label }));
+      setMonths(monthsArr);
 
-      const sorted = Array.from(ms).sort((a,b) => {
-        const da = new Date(a), db_ = new Date(b);
-
-        return db_ - da;
-      });
-
-      setMonths(sorted);
-
-      if (!selectedMonth && sorted.length) {
-        setSelectedMonth(sorted[0]);
+      if (!selectedMonth && monthsArr.length) {
+        setSelectedMonth(monthsArr[0].value);
       }
 
       setLoading(false);
@@ -73,14 +70,10 @@ const Income = () => {
 
   const filtered = useMemo(() => {
     if (!selectedMonth) return [];
-
-    const [mon, yr] = selectedMonth.split(' ');
-    const monthLower = mon.toLowerCase();
-
+    const [year, month] = selectedMonth.split('-');
     return incomes.filter(item => {
       const dt = new Date(item.timestamp.seconds * 1000);
-      const expenseMonth = format(dt, 'MMMM', { locale: es });
-      return expenseMonth === monthLower && dt.getFullYear() === parseInt(yr, 10);
+      return dt.getFullYear() === parseInt(year, 10) && (dt.getMonth() + 1) === parseInt(month, 10);
     });
   }, [selectedMonth, incomes]);
 
@@ -113,7 +106,7 @@ const Income = () => {
       title: t('userProfile.incomes.table.amount'),
       dataIndex: 'amount',
       key: 'amount',
-      render: (amt, rec) => `$${Number(amt).toFixed(2)}`,
+      render: (amt, rec) => `$ ${Number(amt).toFixed(2)}`,
       width: 120,
     },
     {
@@ -208,8 +201,8 @@ const Income = () => {
             suffixIcon={<CalendarOutlined style={{ color: '#1890ff' }} />}
           >
             {months.map(m => (
-              <Option key={m} value={m}>
-                {m}
+              <Option key={m.value} value={m.value}>
+                {m.label}
               </Option>
             ))}
           </Select>
@@ -227,12 +220,15 @@ const Income = () => {
                   rowKey="id"
                   pagination={{ pageSize: 8 }}
                   scroll={{ x: 'max-content' }}
+                  locale={{
+                    emptyText: <Empty description={t("userProfile.incomes.table.noIncomes")} />
+                  }}
                 />
                 {filtered.length > 0 && (
                   <div className="totals-container">
-                    <span style={{ color: '#0071de' }}>Total ARS: ${totalARS.toFixed(2)}</span>
+                    <span style={{ color: '#0071de' }}>{t('userProfile.incomes.table.totalARS')} ${totalARS.toFixed(2)}</span>
                     <span style={{ color: '#0071de', opacity: 0.5 }}>|</span>
-                    <span style={{ color: '#0071de' }}>Total USD: ${totalUSD.toFixed(2)}</span>
+                    <span style={{ color: '#0071de' }}>{t('userProfile.incomes.table.totalUSD')} ${totalUSD.toFixed(2)}</span>
                   </div>
                 )}
               </Col>

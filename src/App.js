@@ -228,8 +228,8 @@ const AppLayout = () => {
     if (location.pathname.startsWith('/financial-goals'))   return t('userProfile.navbar.financialGoals');
     if (location.pathname.startsWith('/about-us'))          return t('userProfile.navbar.aboutUs');
     if (location.pathname.startsWith('/profile'))           return t('userProfile.navbar.profile');
-    if (location.pathname.startsWith('/detailed-expenses')) return t('userProfile.navbar.expenses.dailyExpenses');
-    if (location.pathname.startsWith('/general-expenses'))  return t('userProfile.navbar.expenses.monthlyExpenses');
+    if (location.pathname.startsWith('/detailed-expenses')) return t('userProfile.typeOfAccount.dropdown.dailyExpenses');
+    if (location.pathname.startsWith('/general-expenses'))  return t('userProfile.typeOfAccount.dropdown.monthlyExpenses');
     if (location.pathname.startsWith('/expenses'))          return t('userProfile.navbar.expenses.payments');
     return '';
   };
@@ -324,33 +324,27 @@ const AppLayout = () => {
             <span style={{ fontSize: '20px', fontWeight: 500, color: 'white', display: 'flex', alignItems: 'center' }}>
 
               {/* TITLE NAVBAR UP MOBILE */}
-              {isMobile ?
-                (location.pathname.startsWith('/detailed-expenses') || location.pathname.startsWith('/general-expenses'))
-                ? <span style={{ display: 'flex', alignItems: 'center' }}>
-                    {/* {React.cloneElement(getPageIcon(), { style: { fontSize: 0, marginRight: 10 } })} */}
-                    {getPageTitle()}
-                  </span>
-                : <div className="user-greeting" style={{ display: 'flex', color: 'white', textAlign: 'center', marginLeft: "-10px" }}>
-                    <img src={logo} alt="#" style={{ width: 60 }}/>
-                    <Title level={3} style={{ display: 'grid', margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center', width: 110 }}>
-                      <Link to="/" style={{ color: 'white' }}>
-                        Web
-                        FinanceLab
-                      </Link>
-                    </Title>
-                  </div>
-              : (location.pathname.startsWith('/detailed-expenses') || location.pathname.startsWith('/general-expenses'))
-                ? <span style={{ display: 'flex', alignItems: 'center' }}>
-                    {/* {React.cloneElement(getPageIcon(), { style: { fontSize: 24, marginRight: 10 } })} */}
-                    {getPageTitle()}
-                  </span>
-                : getPageTitle()
+              { isMobile ?
+                <div className="user-greeting" style={{ display: 'flex', color: 'white', textAlign: 'center', marginLeft: "-10px" }}>
+                  <img src={logo} alt="#" style={{ width: 60 }}/>
+                  <Title level={3} style={{ display: 'grid', margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center', width: 110 }}>
+                    <Link to="/" style={{ color: 'white' }}>
+                      Web
+                      FinanceLab
+                    </Link>
+                  </Title>
+                </div> :
+                <span style={{ display: 'flex', alignItems: 'center' }}>{getPageTitle()}</span>
               }
+
             </span>
+
+            {/* User Badge & Dropdown in Mobile*/}
             <AccountTypeBadge type={userData?.user_access_level === 0 ? 'admin'
             : userData?.user_access_level === 2 ? 'premium'
             : userData?.user_access_level === 3 ? 'gold'
             : 'free'} />
+            
           </div> }
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" />} />
