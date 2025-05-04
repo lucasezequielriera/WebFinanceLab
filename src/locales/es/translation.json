@@ -51,7 +51,7 @@
     "userProfile.navbar.profile": "Perfil",
     "userProfile.navbar.logout": "Cerrar Sesión",
     "userProfile.navbar.addIncome": "Agregar Ingreso",
-    "userProfile.navbar.addExpense": "Agregar Gasto",
+    "userProfile.navbar.addExpense": "Agregar Gasto Diario",
     "userProfile.navbar.addTarget": "Agregar Objetivo",
     "userProfile.navbar.addStock": "Agregar Acción",
 
@@ -224,7 +224,7 @@
     "userProfile.addNewExpense.paymentMethod": "Método de Pago",
     "userProfile.addNewExpense.bank": "Banco",
     "userProfile.addNewExpense.cardType": "Tipo de Tarjeta",
-    "userProfile.addNewExpense.addExpenseButton": "Agregar Gasto",
+    "userProfile.addNewExpense.addExpenseButton": "Guardar",
     "userProfile.addNewExpense.errorMessages": {
         "dateRequired": "Por favor, ingresa una fecha",
         "descriptionRequired": "Por favor, ingresa una descripción.",

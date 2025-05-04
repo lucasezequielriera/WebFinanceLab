@@ -714,7 +714,7 @@ const Expenses = () => {
         loading={mpLoading}
         pagination={{ pageSize: 8 }}
         scroll={{ x: true }}
-        size="small"
+        size="medium"
         locale={{
           emptyText: <Empty description={"No hay pagos registrados en este mes"} />
         }}

@@ -51,7 +51,7 @@
     "userProfile.navbar.profile": "Profile",
     "userProfile.navbar.logout": "Logout",
     "userProfile.navbar.addIncome": "Add Income",
-    "userProfile.navbar.addExpense": "Add Expense",
+    "userProfile.navbar.addExpense": "Add Daily Expense",
     "userProfile.navbar.addTarget": "Add Target",
     "userProfile.navbar.addStock": "Add Stock",
 
@@ -225,7 +225,7 @@
     "userProfile.addNewExpense.paymentMethod": "Payment Method",
     "userProfile.addNewExpense.bank": "Bank",
     "userProfile.addNewExpense.cardType": "Card Type",
-    "userProfile.addNewExpense.addExpenseButton": "Add Expense",
+    "userProfile.addNewExpense.addExpenseButton": "Save",
     "userProfile.addNewExpense.errorMessages": {
         "dateRequired": "Please, input a date",
         "descriptionRequired": "Please, input a description.",

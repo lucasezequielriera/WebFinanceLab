@@ -399,21 +399,6 @@ const UserProfile = () => {
                                     />
                                 </Col>
                             </Row>
-                            <Row gutter={16}>
-                                <Col span={12}>
-                                    <label className="label-small">{t('userProfile.profile.balanceDisplay')}</label>
-                                    <Select
-                                        style={{ width: '100%', marginTop: 3 }}
-                                        value={userData.displayBalance}
-                                        onChange={(value) => setUserData(prev => ({ ...prev, displayBalance: value }))}
-                                        options={[
-                                            { value: 'ARS', label: 'ARS' },
-                                            { value: 'USD', label: 'USD' },
-                                            { value: 'Both', label: 'ARS / USD' },
-                                        ]}
-                                    />
-                                </Col>
-                            </Row>
                         </div>
                     </div>
                     <div className="display-flex margin-top-large center">
