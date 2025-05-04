@@ -43,7 +43,7 @@
         "dropdown": "Gastos",
         "dailyExpenses": "Diarios",
         "monthlyExpenses": "Mensuales",
-        "payments": "Pagos"
+        "payments": "Fijos"
     },
     "userProfile.navbar.incomes": "Ingresos",
     "userProfile.navbar.financialGoals": "Mis Objetivos",
@@ -51,7 +51,7 @@
     "userProfile.navbar.profile": "Perfil",
     "userProfile.navbar.logout": "Cerrar Sesión",
     "userProfile.navbar.addIncome": "Agregar Ingreso",
-    "userProfile.navbar.addExpense": "Agregar Gasto Diario",
+    "userProfile.navbar.addExpense": "Agregar Gasto",
     "userProfile.navbar.addTarget": "Agregar Objetivo",
     "userProfile.navbar.addStock": "Agregar Acción",
 

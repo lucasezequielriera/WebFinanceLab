@@ -313,3 +313,10 @@ code {
   }
 }
 
+@media (max-width: 900px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+

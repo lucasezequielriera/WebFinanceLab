@@ -43,7 +43,7 @@
         "dropdown": "Expenses",
         "dailyExpenses": "Daily",
         "monthlyExpenses": "Monthly",
-        "payments": "Payments"
+        "payments": "Fixed"
     },
     "userProfile.navbar.incomes": "Incomes",
     "userProfile.navbar.financialGoals": "Financial Goals",
@@ -51,7 +51,7 @@
     "userProfile.navbar.profile": "Profile",
     "userProfile.navbar.logout": "Logout",
     "userProfile.navbar.addIncome": "Add Income",
-    "userProfile.navbar.addExpense": "Add Daily Expense",
+    "userProfile.navbar.addExpense": "Add Expense",
     "userProfile.navbar.addTarget": "Add Target",
     "userProfile.navbar.addStock": "Add Stock",
 

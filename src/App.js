@@ -28,6 +28,8 @@ import CurrencyTagPicker from './components/CurrencyTagPicker'
 import dayjs from 'dayjs';
 import './index.css';
 import './App.css';
+import ToDoList from './pages/ToDoList';
+import AdminRoute from './components/AdminRoute';
 
 const { Title, Paragraph } = Typography;
 const { Header, Sider, Content } = Layout;
@@ -280,10 +282,24 @@ const AppLayout = () => {
         <div className="user-greeting" style={{ display: 'flex', color: 'white', padding: '10px', textAlign: 'center' }}>
           <img src={logo} alt="#" style={{ width: 60 }}/>
           <Title level={3} style={{ display: 'grid', margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center' }}>
-            <Link to="/" style={{ color: 'white' }}>
-              Web
-              FinanceLab
-            </Link>
+            {currentUser ? (
+              userData?.user_access_level === 0 ? (
+                <Link to="/web-finance-lab" style={{ color: 'white' }}>
+                  Web
+                  FinanceLab
+                </Link>
+              ) : (
+                <Link to="/dashboard" style={{ color: 'white' }}>
+                  Web
+                  FinanceLab
+                </Link>
+              )
+            ) : (
+              <span style={{ color: 'white' }}>
+                Web
+                FinanceLab
+              </span>
+            )}
           </Title>
         </div>
 
@@ -328,10 +344,24 @@ const AppLayout = () => {
                 <div className="user-greeting" style={{ display: 'flex', color: 'white', textAlign: 'center', marginLeft: "-10px" }}>
                   <img src={logo} alt="#" style={{ width: 60 }}/>
                   <Title level={3} style={{ display: 'grid', margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center', width: 110 }}>
-                    <Link to="/" style={{ color: 'white' }}>
-                      Web
-                      FinanceLab
-                    </Link>
+                    {currentUser ? (
+                      userData?.user_access_level === 0 ? (
+                        <Link to="/web-finance-lab" style={{ color: 'white' }}>
+                          Web
+                          FinanceLab
+                        </Link>
+                      ) : (
+                        <Link to="/dashboard" style={{ color: 'white' }}>
+                          Web
+                          FinanceLab
+                        </Link>
+                      )
+                    ) : (
+                      <span style={{ color: 'white' }}>
+                        Web
+                        FinanceLab
+                      </span>
+                    )}
                   </Title>
                 </div> :
                 <span style={{ display: 'flex', alignItems: 'center' }}>{getPageTitle()}</span>
@@ -359,6 +389,11 @@ const AppLayout = () => {
             <Route path="/about-us" element={<PrivateRoute><AboutUs /></PrivateRoute>} />
             <Route path="/detailed-expenses" element={<PrivateRoute><DetailedExpenses /></PrivateRoute>} />
             <Route path="/general-expenses" element={<PrivateRoute><GeneralExpenses /></PrivateRoute>} />
+            <Route path="/web-finance-lab" element={
+              <AdminRoute>
+                <ToDoList />
+              </AdminRoute>
+            } />
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>
 

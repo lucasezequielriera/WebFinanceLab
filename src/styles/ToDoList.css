@@ -1,0 +1,45 @@
+.todo-card {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.todo-card .ant-list-item {
+  padding: 12px 24px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  background-color: #fff;
+  transition: all 0.3s ease;
+}
+
+.todo-card .ant-list-item:hover {
+  background-color: #f5f5f5;
+}
+
+.todo-card .ant-list-item-meta-title {
+  margin-bottom: 4px;
+}
+
+.todo-card .ant-list-item-action {
+  margin-left: 24px;
+}
+
+.todo-card .ant-checkbox-wrapper {
+  margin-right: 8px;
+}
+
+.todo-card .ant-btn {
+  margin-left: 8px;
+}
+
+.todo-card .ant-input-group {
+  margin-bottom: 24px;
+}
+
+.todo-card .ant-list-empty-text {
+  padding: 24px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.45);
+} 

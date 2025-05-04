@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo }  from 'react';
-import { Table, Spin, Row, Col, Select, Empty }        from 'antd';
+import { Table, Spin, Row, Col, Select, Empty } from 'antd';
 import { db }                                   from '../firebase';
 import { collection, query, onSnapshot }        from 'firebase/firestore';
 import { useAuth }                              from '../contexts/AuthContext';
@@ -7,6 +7,7 @@ import { useTranslation }                       from 'react-i18next';
 import { format }                               from 'date-fns';
 import { es, enUS }                             from 'date-fns/locale';
 import { FilterOutlined, CalendarOutlined }     from '@ant-design/icons';
+import useMonthlyMovements                      from '../hooks/useMonthlyMovements';
 // Styles
 import '../styles/ExpensesPage.css'
 
@@ -18,6 +19,8 @@ const GeneralExpenses = () => {
   const { t, i18n } = useTranslation();
   const { currentUser } = useAuth();
   const { Option } = Select;
+  const { hasExpenses } = useMonthlyMovements();
+  
 
   const currentLocale = i18n.language === 'en' ? enUS : es;
 
@@ -130,59 +133,65 @@ const GeneralExpenses = () => {
   return (
     <div className='container-page'>
       <Spin spinning={loading}>
-        <div style={{ 
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          marginBottom: 16,
-          maxWidth: '250px',
-          width: '100%',
-          paddingBottom: 1
-        }}>
-          <FilterOutlined style={{ 
-            fontSize: '20px', 
-            color: '#1890ff',
-            marginRight: '8px'
-          }} />
-          <Select
-            style={{ flex: 1 }}
-            placeholder={t("userProfile.incomes.filter.placeholder")}
-            value={selectedMonth}
-            onChange={handleMonthChange}
-            suffixIcon={<CalendarOutlined style={{ color: '#1890ff' }} />}
-          >
-            {months.map(m => (
-              <Option key={m.value} value={m.value}>
-                {m.label}
-              </Option>
-            ))}
-          </Select>
-        </div>
+        { hasExpenses ? <> (
+          <div style={{ 
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            marginBottom: 16,
+            maxWidth: '250px',
+            width: '100%',
+            paddingBottom: 1
+          }}>
+            <FilterOutlined style={{ 
+              fontSize: '20px', 
+              color: '#1890ff',
+              marginRight: '8px'
+            }} />
+            <Select
+              style={{ flex: 1 }}
+              placeholder={t("userProfile.incomes.filter.placeholder")}
+              value={selectedMonth}
+              onChange={handleMonthChange}
+              suffixIcon={<CalendarOutlined style={{ color: '#1890ff' }} />}
+            >
+              {months.map(m => (
+                <Option key={m.value} value={m.value}>
+                  {m.label}
+                </Option>
+              ))}
+            </Select>
+          </div>
 
-        {/* Table */}
-        {selectedMonth && (
-          <Row gutter={[16, 16]}>
-            <Col span={24}>
-              <Table
-                dataSource={dataSource}
-                columns={columns}
-                pagination={{ pageSize: 8 }}
-                rowKey="category"
-                scroll={{ x: true }}
-                locale={{
-                  emptyText: <Empty description={t('userProfile.expenses.detailed.noExpenses')} />
-                }}
-              />
-              {dataSource.length > 0 && (
-                <div className="totals-container">
-                  <span style={{ color: '#0071de' }}>{t('userProfile.expenses.general.totalARS')} ${dataSource.reduce((sum, record) => sum + (parseFloat(record.totalPesos) || 0), 0).toFixed(2)}</span>
-                  <span style={{ color: '#0071de', opacity: 0.5 }}>|</span>
-                  <span style={{ color: '#0071de' }}>{t('userProfile.expenses.general.totalUSD')} ${dataSource.reduce((sum, record) => sum + (parseFloat(record.totalDollars) || 0), 0).toFixed(2)}</span>
-                </div>
-              )}
-            </Col>
-          </Row>
-        )}
+          {/* Table */}
+          {selectedMonth && (
+            <Row gutter={[16, 16]}>
+              <Col span={24}>
+                <Table
+                  dataSource={dataSource}
+                  columns={columns}
+                  pagination={{ pageSize: 8 }}
+                  rowKey="category"
+                  scroll={{ x: true }}
+                  locale={{
+                    emptyText: <Empty description={t('userProfile.expenses.detailed.noExpenses')} />
+                  }}
+                />
+                {dataSource.length > 0 && (
+                  <div className="totals-container">
+                    <span style={{ color: '#0071de' }}>{t('userProfile.expenses.general.totalARS')} ${dataSource.reduce((sum, record) => sum + (parseFloat(record.totalPesos) || 0), 0).toFixed(2)}</span>
+                    <span style={{ color: '#0071de', opacity: 0.5 }}>|</span>
+                    <span style={{ color: '#0071de' }}>{t('userProfile.expenses.general.totalUSD')} ${dataSource.reduce((sum, record) => sum + (parseFloat(record.totalDollars) || 0), 0).toFixed(2)}</span>
+                  </div>
+                )}
+              </Col>
+            </Row>
+          )})
+        </> :
+        // EMPTY DATA MESSAGE
+          <div style={{ marginTop: 40 }}>
+            <Empty description={t("No hay gastos registrados en este mes")}/>
+          </div> }
       </Spin>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo }                                   from 'react';
+import React, { useState, useEffect }                                   from 'react';
 import { Spin, Empty, DatePicker, Table, Button, Input, InputNumber, Checkbox, Popconfirm, Form, Space, message, Select, Divider, Tag, AutoComplete, Modal, Tooltip } from 'antd';
 import { doc, onSnapshot, updateDoc, collection, getDoc, query, where, setDoc, addDoc, deleteDoc } from 'firebase/firestore';
 import { db }                                                           from '../firebase';
@@ -26,8 +26,7 @@ const Expenses = () => {
   const [editingKey, setEditingKey] = useState('');
   const [form] = Form.useForm();
   const currentMonthKey = dayjs().format('YYYY-MM');
-  const [noteModal, setNoteModal] = useState({ visible: false, id: null });
-  const [localNote, setLocalNote] = useState('');
+  const [noteModal, setNoteModal] = useState({ visible: false, id: null, note: '' });
   const [uploading, setUploading] = useState(false);
   const [pdfFile, setPdfFile] = useState(null);
   const [confirmPdfModal, setConfirmPdfModal] = useState({ visible: false, id: null, row: null, oldPdfUrl: null });
@@ -598,9 +597,9 @@ const Expenses = () => {
           </Form.Item>
         ) : (
           record.paid ? (
-            <CheckOutlined style={{ color: '#52c41a', fontSize: 16, verticalAlign: 'middle' }} />
+            <CheckOutlined style={{ color: '#52c41a', fontSize: 16 }} />
           ) : (
-            <CloseOutlined style={{ color: 'red', fontSize: 16, verticalAlign: 'middle' }} />
+            <CloseOutlined style={{ color: 'red', fontSize: 16 }} />
           )
         );
       }
@@ -618,14 +617,14 @@ const Expenses = () => {
             <>
               <Form.Item name="notes" style={{ display: 'none' }} />
               <span onClick={() => openNoteModal(record)} style={{ cursor: 'pointer' }}>
-                <InfoCircleOutlined style={{ color: hasNote ? '#1890ff' : '#d9d9d9', fontSize: 16, verticalAlign: 'middle' }} />
+                <InfoCircleOutlined style={{ color: hasNote ? '#1890ff' : '#d9d9d9', fontSize: 16 }} />
               </span>
             </>
           );
         } else {
           return hasNote ? (
             <Tooltip title={record.notes} placement="top">
-              <InfoCircleOutlined style={{ color: '#1890ff', fontSize: 16, verticalAlign: 'middle' }} />
+              <InfoCircleOutlined style={{ color: '#1890ff', fontSize: 16 }} />
             </Tooltip>
           ) : null;
         }
@@ -642,13 +641,13 @@ const Expenses = () => {
         if (editing) {
           return (
             <label style={{ cursor: 'pointer' }}>
-              <FilePdfOutlined style={{ color: hasPdf ? '#d4380d' : '#d9d9d9', fontSize: 16, verticalAlign: 'middle' }} />
+              <FilePdfOutlined style={{ color: hasPdf ? '#d4380d' : '#d9d9d9', fontSize: 18, verticalAlign: 'middle' }} />
               <input type="file" accept="application/pdf" onChange={handlePdfChange} disabled={uploading} style={{ display: 'none' }} />
             </label>
           );
         } else {
           return record.pdfUrl
-            ? <a href={record.pdfUrl} target="_blank" rel="noopener noreferrer"><FilePdfOutlined style={{ color: '#d4380d', fontSize: 16, cursor: 'pointer', verticalAlign: 'middle' }} /></a>
+            ? <a href={record.pdfUrl} target="_blank" rel="noopener noreferrer"><FilePdfOutlined style={{ color: '#d4380d', fontSize: 18, cursor: 'pointer' }} /></a>
             : null;
         }
       }
@@ -666,6 +665,7 @@ const Expenses = () => {
               <>
                 <Tag icon={<CheckOutlined />} onClick={() => save(record.id)} style={{ cursor: 'pointer', margin: 0 }} />
                 <Tag icon={<CloseOutlined />} onClick={cancel} style={{ cursor: 'pointer', margin: 0 }} />
+                <Tag icon={<FileTextOutlined />} onClick={() => openNoteModal(record)} style={{ cursor: 'pointer', margin: 0 }} />
               </>
             ) : (
               <>
@@ -756,58 +756,40 @@ const Expenses = () => {
   );
 
   const openNoteModal = (record) => {
-    setNoteModal({ visible: true, id: record.id });
-    setLocalNote(record.notes || '');
+    setNoteModal({ visible: true, id: record.id, note: record.notes || '' });
   };
 
   const handleNoteChange = (e) => {
-    setLocalNote(e.target.value);
+    setNoteModal((prev) => ({ ...prev, note: e.target.value }));
   };
 
   const handleNoteSave = async () => {
+    // Buscar si el registro está en edición
     const editing = monthlyPayments.find(item => item.id === noteModal.id && isEditing(item));
     if (editing) {
-      // Actualiza el formulario
-      form.setFieldsValue({ notes: localNote });
-      // Actualiza el objeto en monthlyPayments (sin guardar en la DB)
+      // Actualizar el valor en monthlyPayments (sin guardar en la DB)
       const newData = monthlyPayments.map(item =>
-        item.id === noteModal.id ? { ...item, notes: localNote } : item
+        item.id === noteModal.id ? { ...item, notes: noteModal.note } : item
       );
       setMonthlyPayments(newData);
-      setNoteModal({ visible: false, id: null });
-      setLocalNote('');
+      form.setFieldsValue({ notes: noteModal.note });
+      setNoteModal({ visible: false, id: null, note: '' });
       message.success('Nota actualizada (se guardará al confirmar los cambios)');
     } else {
       // Guardar en la db inmediatamente
       const newData = monthlyPayments.map(item =>
-        item.id === noteModal.id ? { ...item, notes: localNote } : item
+        item.id === noteModal.id ? { ...item, notes: noteModal.note } : item
       );
       setMonthlyPayments(newData);
       await saveMonthlyPayments(newData);
-      setNoteModal({ visible: false, id: null });
-      setLocalNote('');
+      setNoteModal({ visible: false, id: null, note: '' });
       message.success('Nota guardada');
     }
   };
 
   const handleNoteCancel = () => {
-    setNoteModal({ visible: false, id: null });
-    setLocalNote('');
+    setNoteModal({ visible: false, id: null, note: '' });
   };
-
-  const memoizedEditableTable = useMemo(() => (
-  <EditableTable />
-), [
-  monthlyPayments,
-  editingKey,
-  mpLoading,
-  form,
-  pdfFile,
-  uploading,
-  confirmPdfModal,
-  i18n.language,
-  t
-]);
 
   return (
     <>
@@ -844,7 +826,7 @@ const Expenses = () => {
           {/* <MonthlyPaymentsSection cards={cards} creditCards={creditCards} debitCards={debitCards} cashCards={cashCards} /> */}
 
             {/* <h2 style={{ color: 'black', fontWeight: 700, letterSpacing: 1, marginBottom: 16 }}>Control de pagos del mes</h2> */}
-            {memoizedEditableTable}
+            <EditableTable />
           </>:
 
           // EMPTY DATA MESSAGE
@@ -861,10 +843,9 @@ const Expenses = () => {
         onCancel={handleNoteCancel}
         okText="Guardar"
         cancelText="Cancelar"
-        destroyOnClose
       >
         <Input.TextArea
-          value={localNote}
+          value={noteModal.note}
           onChange={handleNoteChange}
           rows={4}
           placeholder="Agrega una nota para este pago"

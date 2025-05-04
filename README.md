@@ -14,6 +14,8 @@ and ->
 npm i
 5) firebase deploy
 5) a) if I did changes only in functions (e.g. telegram) -> firebase deploy --only functions
+6) firebase deploy --only firestore:rules
+6) a) if I did changes only in firebase rules
 
 ** LEVELS **
 
