@@ -199,6 +199,16 @@ code {
   color: #c8c7c7 !important;
   cursor: not-allowed !important;
 }
+
+.ant-empty-image {
+  height: 60px !important;
+  min-height: 60px !important;
+  max-height: 60px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 @media (max-width: 768px) {
   .container-page {
     height: calc(100vh - 80px - 62px);

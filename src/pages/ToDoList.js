@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Table, Input, Select, Tag, Space, message, Popconfirm, Tooltip, Avatar, Divider, Button, Modal, Empty } from 'antd';
+import { Table, Input, Select, Tag, Space, message, Popconfirm, Tooltip, Avatar, Divider, Button, Modal, Empty, Spin } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, HistoryOutlined, CheckCircleTwoTone, SyncOutlined, ClockCircleOutlined, ArrowUpOutlined, ArrowDownOutlined, MinusOutlined, UserOutlined, FileAddOutlined, FieldTimeOutlined, FileTextOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { db } from '../firebase';
 import { collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc } from 'firebase/firestore';
@@ -30,6 +30,8 @@ const ToDoList = () => {
   const [newTaskName, setNewTaskName] = useState('');
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState('');
+  const addTaskInputRef = useRef(null);
+  const [creatingTask, setCreatingTask] = useState(false);
 
   // Cargar usuarios
   useEffect(() => {
@@ -93,6 +95,7 @@ const ToDoList = () => {
       message.error('Seleccione un usuario');
       return;
     }
+    setCreatingTask(true);
     try {
       const now = new Date();
       await addDoc(collection(db, 'tasksToDo'), {
@@ -118,6 +121,8 @@ const ToDoList = () => {
       message.success('Tarea creada');
     } catch (e) {
       message.error('Error al crear tarea');
+    } finally {
+      setCreatingTask(false);
     }
   };
 
@@ -431,30 +436,58 @@ const ToDoList = () => {
     };
   });
 
+  // Contadores para el título
+  const totalTareas = tasks.length;
+  const tareasFinalizadas = tasks.filter(t => t.estado === 'Done').length;
+
+  // Enfocar el input cuando se abre el modal de agregar tarea
+  useEffect(() => {
+    if (addModalOpen) {
+      setTimeout(() => {
+        if (addTaskInputRef.current) {
+          addTaskInputRef.current.focus();
+        }
+      }, 100);
+    }
+  }, [addModalOpen]);
+
   return (
     <div className="container-page">
+      {loading && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
+          <Spin size="large" tip="Cargando tareas..." />
+        </div>
+      )}
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
         <div className="table-responsive">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-            <div style={{ fontWeight: 600, fontSize: 18, color: '#555' }}>Tareas pendientes</div>
-            <Button
-              type="primary"
-              icon={<PlusOutlined style={{ fontSize: 18, marginRight: 6 }} />}
-              onClick={handleAdd}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                borderRadius: 8,
-                fontWeight: 600,
-                fontSize: 15,
-                padding: '8px 20px',
-                height: 40,
-                boxShadow: '0 2px 8px #1890ff22',
-              }}
-            >
-              Nueva tarea
-            </Button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 10 }}>
+            <div style={{ fontWeight: 600, fontSize: 18, color: '#555', display: 'flex', alignItems: 'center', gap: 8 }}>
+              Tareas pendientes
+              <span style={{ fontWeight: 500, color: '#888', fontSize: 15 }}>
+                ({tareasFinalizadas}/{totalTareas})
+              </span>
+            </div>
+            <Tooltip title="Nueva tarea">
+              <Button
+                type="primary"
+                shape="circle"
+                icon={<PlusOutlined style={{ fontSize: 18 }} />}
+                onClick={handleAdd}
+                style={{
+                  width: 36,
+                  height: 36,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 8px #1890ff22',
+                  background: 'linear-gradient(90deg, #1890ff 0%, #40a9ff 100%)',
+                  border: 'none',
+                  transition: 'all 0.2s',
+                }}
+                onMouseOver={e => e.currentTarget.style.background = 'linear-gradient(90deg, #40a9ff 0%, #1890ff 100%)'}
+                onMouseOut={e => e.currentTarget.style.background = 'linear-gradient(90deg, #1890ff 0%, #40a9ff 100%)'}
+              />
+            </Tooltip>
           </div>
           {tasks.filter(t => t.estado !== 'Done').length > 0 ? (
             <Table
@@ -464,7 +497,7 @@ const ToDoList = () => {
               loading={loading}
               bordered
               size="small"
-              pagination={false}
+              pagination={{ pageSize: 6 }}
             />
           ) : !loading && (
             <div style={{
@@ -497,7 +530,7 @@ const ToDoList = () => {
               rowKey={record => record.id}
               bordered
               size="small"
-              pagination={false}
+              pagination={{ pageSize: 6 }}
             />
           ) : !loading && (
             <div style={{
@@ -528,58 +561,97 @@ const ToDoList = () => {
         title="Historial de cambios"
         footer={null}
       >
-        <div style={{ maxHeight: 400, overflowY: 'auto' }}>
-          {historyModal.history && historyModal.history.length > 0 ? historyModal.history.map((h, i) => {
-            // Buscar usuario por email
-            const user = users.find(u => (u.email || '').toLowerCase() === (h.usuario || '').toLowerCase());
-            const nombreCompleto = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || h.usuario : h.usuario;
-            return (
-              <div key={i} style={{
-                background: i % 2 === 0 ? '#fafbfc' : '#f0f5ff',
-                borderRadius: 8,
-                marginBottom: 16,
-                padding: 12,
-                boxShadow: '0 1px 4px #0001'
+        {/* Bloque de creación sticky arriba */}
+        {historyModal.history && historyModal.history.length > 0 && (() => {
+          const h = historyModal.history[0];
+          const user = users.find(u => (u.email || '').toLowerCase() === (h.usuario || '').toLowerCase());
+          const nombreCompleto = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || h.usuario : h.usuario;
+          return (
+            <div style={{
+              background: '#f6ffed',
+              borderRadius: 8,
+              marginBottom: 20,
+              boxShadow: '0 1px 4px #0001',
+              border: '1px solid #b7eb8f',
+              position: 'sticky',
+              top: 0,
+              zIndex: 10,
+              padding: 0,
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                background: '#f6ffed',
+                borderTopLeftRadius: 8,
+                borderTopRightRadius: 8,
+                borderBottom: '1px solid #b7eb8f',
+                padding: '14px 14px 10px 14px',
+                boxShadow: '0 6px 16px -8px #b7eb8f99',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
-                  <Tooltip title={new Date(h.fecha).toLocaleString()}>
-                    <FieldTimeOutlined style={{ color: '#888', marginRight: 6 }} />
-                    <span style={{ fontWeight: 500 }}>{new Date(h.fecha).toLocaleDateString()} {new Date(h.fecha).toLocaleTimeString()}</span>
-                  </Tooltip>
-                  <span style={{ margin: '0 10px', color: '#aaa' }}>|</span>
-                  <UserOutlined style={{ color: '#1890ff', marginRight: 4 }} />
-                  <span style={{ fontWeight: 500 }}>{nombreCompleto}</span>
-                  {i === 0 && (
-                    <Tag color="green" style={{ marginLeft: 10 }} icon={<FileAddOutlined />}>Creación</Tag>
-                  )}
-                </div>
-                <Divider style={{ margin: '8px 0' }} />
-                <ul style={{ margin: 0, paddingLeft: 18 }}>
-                  {Array.isArray(h.cambios)
-                    ? h.cambios.map((c, j) => {
-                        // Si el campo es 'Asignado', busca nombre y apellido por email
-                        let antes = c.antes;
-                        let despues = c.despues;
-                        if (c.campo === 'Asignado') {
-                          const userAntes = users.find(u => (u.email || '').toLowerCase() === (c.antes || '').toLowerCase());
-                          const userDespues = users.find(u => (u.email || '').toLowerCase() === (c.despues || '').toLowerCase());
-                          antes = userAntes ? `${userAntes.firstName || ''} ${userAntes.lastName || ''}`.trim() || userAntes.email || c.antes : c.antes;
-                          despues = userDespues ? `${userDespues.firstName || ''} ${userDespues.lastName || ''}`.trim() || userDespues.email || c.despues : c.despues;
-                        }
-                        return (
-                          <li key={j} style={{ marginBottom: 4, display: 'flex', alignItems: 'center' }}>
-                            <Tag color="blue" style={{ marginRight: 8, minWidth: 90, textAlign: 'center' }}>{c.campo}</Tag>
-                            {c.campo === 'Finalizada' ? <CheckCircleTwoTone twoToneColor="#52c41a" style={{ marginRight: 6 }} /> : <EditOutlined style={{ color: '#faad14', marginRight: 6 }} />}
-                            <span style={{ color: '#888', textDecoration: 'line-through', marginRight: 6 }}>{antes || <i>vacío</i>}</span>
-                            <span style={{ color: '#1890ff', fontWeight: 500 }}><ArrowRightIcon /> {despues || <i>vacío</i>}</span>
-                          </li>
-                        );
-                      })
-                    : <li>{h.cambios}</li>}
-                </ul>
+                <Tooltip title={new Date(h.fecha).toLocaleString()}>
+                  <FieldTimeOutlined style={{ color: '#888', marginRight: 6 }} />
+                  <span style={{ fontWeight: 500 }}>{new Date(h.fecha).toLocaleDateString()} {new Date(h.fecha).toLocaleTimeString()}</span>
+                </Tooltip>
+                <span style={{ margin: '0 10px', color: '#aaa' }}>|</span>
+                <UserOutlined style={{ color: '#1890ff', marginRight: 4 }} />
+                <span style={{ fontWeight: 500 }}>{nombreCompleto}</span>
+                <Tag color="green" style={{ marginLeft: 10 }} icon={<FileAddOutlined />}>Creación</Tag>
               </div>
-            );
-          }) : <div style={{ textAlign: 'center', color: '#888' }}>No hay historial</div>}
+            </div>
+          );
+        })()}
+        {/* Resto del historial scrolleable */}
+        <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+          {historyModal.history && historyModal.history.length > 1 ? (
+            historyModal.history.slice(1).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).map((h, i) => {
+              const user = users.find(u => (u.email || '').toLowerCase() === (h.usuario || '').toLowerCase());
+              const nombreCompleto = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || h.usuario : h.usuario;
+              return (
+                <div key={i} style={{
+                  background: i % 2 === 0 ? '#fafbfc' : '#f0f5ff',
+                  borderRadius: 8,
+                  marginBottom: 16,
+                  padding: 12,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+                    <Tooltip title={new Date(h.fecha).toLocaleString()}>
+                      <FieldTimeOutlined style={{ color: '#888', marginRight: 6 }} />
+                      <span style={{ fontWeight: 500 }}>{new Date(h.fecha).toLocaleDateString()} {new Date(h.fecha).toLocaleTimeString()}</span>
+                    </Tooltip>
+                    <span style={{ margin: '0 10px', color: '#aaa' }}>|</span>
+                    <UserOutlined style={{ color: '#1890ff', marginRight: 4 }} />
+                    <span style={{ fontWeight: 500 }}>{nombreCompleto}</span>
+                  </div>
+                  <Divider style={{ margin: '8px 0' }} />
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {Array.isArray(h.cambios)
+                      ? h.cambios.map((c, j) => {
+                          let antes = c.antes;
+                          let despues = c.despues;
+                          if (c.campo === 'Asignado') {
+                            const userAntes = users.find(u => (u.email || '').toLowerCase() === (c.antes || '').toLowerCase());
+                            const userDespues = users.find(u => (u.email || '').toLowerCase() === (c.despues || '').toLowerCase());
+                            antes = userAntes ? `${userAntes.firstName || ''} ${userAntes.lastName || ''}`.trim() || userAntes.email || c.antes : c.antes;
+                            despues = userDespues ? `${userDespues.firstName || ''} ${userDespues.lastName || ''}`.trim() || userDespues.email || c.despues : c.despues;
+                          }
+                          return (
+                            <li key={j} style={{ marginBottom: 4, display: 'flex', alignItems: 'center' }}>
+                              <Tag color="blue" style={{ marginRight: 8, minWidth: 90, textAlign: 'center' }}>{c.campo}</Tag>
+                              {c.campo === 'Finalizada' ? <CheckCircleTwoTone twoToneColor="#52c41a" style={{ marginRight: 6 }} /> : <EditOutlined style={{ color: '#faad14', marginRight: 6 }} />}
+                              <span style={{ color: '#888', textDecoration: 'line-through', marginRight: 6 }}>{antes || <i>vacío</i>}</span>
+                              <span style={{ color: '#1890ff', fontWeight: 500, display: 'flex', alignItems: 'center' }}>
+                                <span style={{ marginRight: 6, display: 'flex', alignItems: 'center' }}><ArrowRightIcon /></span>
+                                {despues || <i>vacío</i>}
+                              </span>
+                            </li>
+                          );
+                        })
+                      : <li>{h.cambios}</li>}
+                  </ul>
+                </div>
+              );
+            })
+          ) : <div style={{ textAlign: 'center', color: '#888' }}>No hay historial</div>}
         </div>
       </Modal>
       {/* Modal de alta rápida */}
@@ -604,11 +676,11 @@ const ToDoList = () => {
           Nueva tarea
         </div>
         <Input
+          ref={addTaskInputRef}
           placeholder="Nombre de la tarea..."
           value={newTaskName}
           onChange={e => setNewTaskName(e.target.value)}
           onPressEnter={handleAddTaskConfirm}
-          autoFocus
           style={{ fontSize: 16, padding: 10, borderRadius: 8, marginBottom: 18, boxShadow: '0 1px 4px #0001' }}
         />
         <Select
@@ -639,8 +711,17 @@ const ToDoList = () => {
           }
         />
         <div>
-          <Button type="primary" onClick={handleAddTaskConfirm} style={{ minWidth: 150, fontWeight: 500 }}>
+          <Button
+            type="primary"
+            onClick={handleAddTaskConfirm}
+            style={{ minWidth: 150, fontWeight: 500 }}
+            loading={creatingTask}
+            disabled={creatingTask}
+          >
             Crear
+          </Button>
+          <Button onClick={() => setAddModalOpen(false)} style={{ minWidth: 90 }} disabled={creatingTask}>
+            Cancelar
           </Button>
         </div>
       </Modal>
