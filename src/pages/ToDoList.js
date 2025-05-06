@@ -564,7 +564,10 @@ const ToDoList = () => {
         {/* Bloque de creación sticky arriba */}
         {historyModal.history && historyModal.history.length > 0 && (() => {
           const h = historyModal.history[0];
-          const user = users.find(u => (u.email || '').toLowerCase() === (h.usuario || '').toLowerCase());
+          const user = users.find(u =>
+            (u.email || '').toLowerCase() === (h.usuario || '').toLowerCase() ||
+            ((u.firstName && u.lastName) && (`${u.firstName} ${u.lastName}`.toLowerCase() === (h.usuario || '').toLowerCase()))
+          );
           const nombreCompleto = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || h.usuario : h.usuario;
           return (
             <div style={{
@@ -593,7 +596,21 @@ const ToDoList = () => {
                   <span style={{ fontWeight: 500 }}>{new Date(h.fecha).toLocaleDateString()} {new Date(h.fecha).toLocaleTimeString()}</span>
                 </Tooltip>
                 <span style={{ margin: '0 10px', color: '#aaa' }}>|</span>
-                <UserOutlined style={{ color: '#1890ff', marginRight: 4 }} />
+                <Avatar
+                  src={user?.photoURL}
+                  style={{
+                    backgroundColor: '#004479',
+                    marginRight: 6,
+                    verticalAlign: 'middle',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 15
+                  }}
+                  size={24}
+                >
+                  {!user?.photoURL && (user?.firstName ? user.firstName[0].toUpperCase() : user?.email?.[0].toUpperCase())}
+                </Avatar>
                 <span style={{ fontWeight: 500 }}>{nombreCompleto}</span>
                 <Tag color="green" style={{ marginLeft: 10 }} icon={<FileAddOutlined />}>Creación</Tag>
               </div>
@@ -604,7 +621,11 @@ const ToDoList = () => {
         <div style={{ maxHeight: 400, overflowY: 'auto' }}>
           {historyModal.history && historyModal.history.length > 1 ? (
             historyModal.history.slice(1).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).map((h, i) => {
-              const user = users.find(u => (u.email || '').toLowerCase() === (h.usuario || '').toLowerCase());
+                console.log(h.usuario)
+              const user = users.find(u =>
+                (u.email || '').toLowerCase() === (h.usuario || '').toLowerCase() ||
+                ((u.firstName && u.lastName) && (`${u.firstName} ${u.lastName}`.toLowerCase() === (h.usuario || '').toLowerCase()))
+              );
               const nombreCompleto = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || h.usuario : h.usuario;
               return (
                 <div key={i} style={{
@@ -619,8 +640,23 @@ const ToDoList = () => {
                       <FieldTimeOutlined style={{ color: '#888', marginRight: 6 }} />
                       <span style={{ fontWeight: 500 }}>{new Date(h.fecha).toLocaleDateString()} {new Date(h.fecha).toLocaleTimeString()}</span>
                     </Tooltip>
+                    {console.log(user?.photoURL)}
                     <span style={{ margin: '0 10px', color: '#aaa' }}>|</span>
-                    <UserOutlined style={{ color: '#1890ff', marginRight: 4 }} />
+                    <Avatar
+                      src={user?.photoURL}
+                      style={{
+                        backgroundColor: '#004479',
+                        marginRight: 6,
+                        verticalAlign: 'middle',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 15
+                      }}
+                      size={24}
+                    >
+                      {!user?.photoURL && (user?.firstName ? user.firstName[0].toUpperCase() : user?.email?.[0].toUpperCase())}
+                    </Avatar>
                     <span style={{ fontWeight: 500 }}>{nombreCompleto}</span>
                   </div>
                   <Divider style={{ margin: '8px 0' }} />
