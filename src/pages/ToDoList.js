@@ -584,9 +584,9 @@ const ToDoList = () => {
                 background: '#f6ffed',
                 borderTopLeftRadius: 8,
                 borderTopRightRadius: 8,
-                borderBottom: '1px solid #b7eb8f',
+                borderBottomLeftRadius: 8,
+                borderBottomRightRadius: 8,
                 padding: '14px 14px 10px 14px',
-                boxShadow: '0 6px 16px -8px #b7eb8f99',
               }}>
                 <Tooltip title={new Date(h.fecha).toLocaleString()}>
                   <FieldTimeOutlined style={{ color: '#888', marginRight: 6 }} />
@@ -612,6 +612,7 @@ const ToDoList = () => {
                   borderRadius: 8,
                   marginBottom: 16,
                   padding: 12,
+                  boxShadow: '0 1px 4px #0001'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
                     <Tooltip title={new Date(h.fecha).toLocaleString()}>
