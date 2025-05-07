@@ -33,6 +33,7 @@ import AdminRoute from './components/AdminRoute';
 import Tasks from './pages/Tasks';
 import Users from './pages/Users';
 import Configuration from './pages/Configuration';
+import Summary from './pages/Summary';
 
 const { Title, Paragraph } = Typography;
 const { Header, Sider, Content } = Layout;
@@ -163,6 +164,10 @@ const AppLayout = () => {
       icon: <CreditCardOutlined />,
       label: t('userProfile.navbar.expenses.dropdown'),
       children: [
+        {
+          key: 'summary',
+          label: <Link to="/summary">Summary</Link>
+        },
         {
           key: '9',
           label: <Link to="/detailed-expenses">{t('userProfile.navbar.expenses.dailyExpenses')}</Link>
@@ -383,6 +388,7 @@ const AppLayout = () => {
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard expenses={expenses} handleExpenseAdded={handleExpenseAdded} /></PrivateRoute>} />
+            <Route path="/summary" element={<PrivateRoute><Summary /></PrivateRoute>} />
             <Route path="/expenses" element={<PrivateRoute><Expenses /></PrivateRoute>} />
             <Route path="/incomes" element={<PrivateRoute><Incomes /></PrivateRoute>}/>
             <Route path="/signup" element={<RedirectIfAuthenticated><Signup /></RedirectIfAuthenticated>} />
