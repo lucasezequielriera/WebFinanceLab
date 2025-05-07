@@ -23,7 +23,13 @@ const Configuration = () => {
       setLoading(true);
       try {
         const snap = await getDocs(collection(db, 'users'));
-        setUsers(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const usersArr = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        usersArr.sort((a, b) => {
+          const nameA = `${a.firstName || ''} ${a.lastName || ''}`.toLowerCase();
+          const nameB = `${b.firstName || ''} ${b.lastName || ''}`.toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+        setUsers(usersArr);
       } catch (e) {
         notification.error({ message: 'Error al cargar usuarios' });
       } finally {

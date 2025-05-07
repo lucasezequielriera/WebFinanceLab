@@ -15,6 +15,11 @@ const PRIORIDADES = [
   { value: 'Media', label: 'Media', color: 'orange', icon: <MinusOutlined style={{ color: '#faad14', fontSize: 14, verticalAlign: 'middle' }} /> },
   { value: 'Alta', label: 'Alta', color: 'red', icon: <ArrowUpOutlined style={{ color: '#d4380d', fontSize: 14, verticalAlign: 'middle' }} /> },
 ];
+const TIPOS = [
+  { value: 'Bug', label: 'Bug', color: 'red' },
+  { value: 'Actualización', label: 'Actualización', color: 'blue' },
+  { value: 'Implementación', label: 'Implementación', color: 'green' },
+];
 const ArrowRightIcon = () => <span style={{ display: 'inline-block', margin: '0 4px', color: '#aaa' }}>→</span>;
 
 const Tasks = () => {
@@ -61,13 +66,17 @@ const Tasks = () => {
     const ref = collection(db, 'tasksToDo');
     const unsub = onSnapshot(ref, snap => {
       const data = snap.docs.map(docu => ({ id: docu.id, ...docu.data() }));
-      // Ordenar por prioridad personalizada
-      const prioridadOrden = { 'Alta': 0, 'Media': 1, 'Baja': 2 };
+      // Ordenar: primero 'In Process', luego por tipo, luego por fecha
+      const tipoOrden = { 'Bug': 0, 'Actualización': 1, 'Implementación': 2 };
       data.sort((a, b) => {
-        const pa = prioridadOrden[a.prioridad] ?? 3;
-        const pb = prioridadOrden[b.prioridad] ?? 3;
-        if (pa !== pb) return pa - pb;
-        // Si tienen la misma prioridad, ordenar por fecha de creación descendente
+        // Estado 'In Process' primero
+        if (a.estado === 'In Process' && b.estado !== 'In Process') return -1;
+        if (b.estado === 'In Process' && a.estado !== 'In Process') return 1;
+        // Luego por tipo
+        const ta = tipoOrden[a.tipo] ?? 3;
+        const tb = tipoOrden[b.tipo] ?? 3;
+        if (ta !== tb) return ta - tb;
+        // Luego por fecha de creación descendente
         return new Date(b.fechaCreacion) - new Date(a.fechaCreacion);
       });
       setTasks(data);
@@ -102,7 +111,7 @@ const Tasks = () => {
         descripcion: newTaskName.trim(),
         estado: 'To Do',
         asignado: selectedUser,
-        prioridad: 'Baja',
+        tipo: 'Bug',
         fechaCreacion: now.toISOString(),
         fechaFinalizacion: null,
         historial: [{
@@ -112,7 +121,7 @@ const Tasks = () => {
             { campo: 'Descripción', antes: '', despues: newTaskName.trim() },
             { campo: 'Estado', antes: '', despues: 'To Do' },
             { campo: 'Asignado', antes: '', despues: selectedUser },
-            { campo: 'Prioridad', antes: '', despues: 'Baja' }
+            { campo: 'Tipo', antes: '', despues: 'Bug' }
           ]
         }]
       });
@@ -306,31 +315,31 @@ const Tasks = () => {
       ) : ''
     },
     {
-      title: <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><ExclamationCircleOutlined style={{ color: '#bfbfbf' }} /> <span style={{ color: '#bfbfbf' }}>Prioridad</span></div>,
-      dataIndex: 'prioridad',
-      key: 'prioridad',
+      title: <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><ExclamationCircleOutlined style={{ color: '#bfbfbf' }} /> <span style={{ color: '#bfbfbf' }}>Tipo</span></div>,
+      dataIndex: 'tipo',
+      key: 'tipo',
       width: '5%',
       onCell: (record) => ({
         record,
         editable: 'true',
-        editing: editingKey === record.id && editingField === 'prioridad' ? 'true' : undefined,
-        field: 'prioridad'
+        editing: editingKey === record.id && editingField === 'tipo' ? 'true' : undefined,
+        field: 'tipo'
       }),
-      render: (prioridad, record) =>
-        editingKey === record.id && editingField === 'prioridad' ? (
+      render: (tipo, record) =>
+        editingKey === record.id && editingField === 'tipo' ? (
           <Select
             size="small"
-            defaultValue={prioridad}
-            style={{ minWidth: 90 }}
-            options={PRIORIDADES}
-            onBlur={e => saveEdit(record, 'prioridad', editingValue || prioridad)}
-            onChange={val => { setEditingValue(val); saveEdit(record, 'prioridad', val); }}
+            defaultValue={tipo}
+            style={{ minWidth: 120 }}
+            options={TIPOS}
+            onBlur={e => saveEdit(record, 'tipo', editingValue || tipo)}
+            onChange={val => { setEditingValue(val); saveEdit(record, 'tipo', val); }}
             autoFocus
           />
         ) : (
-          <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }} onClick={() => { setEditingKey(record.id); setEditingField('prioridad'); setEditingValue(prioridad); }}>
-            <Tag color={PRIORIDADES.find(p => p.value === prioridad)?.color} style={{ fontSize: 13, padding: '2px 8px', display: 'flex', alignItems: 'center', fontWeight: 600 }}>
-            <span style={{ marginRight: 3 }}>{PRIORIDADES.find(p => p.value === prioridad)?.icon}</span> {PRIORIDADES.find(p => p.value === prioridad)?.label || prioridad}
+          <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }} onClick={() => { setEditingKey(record.id); setEditingField('tipo'); setEditingValue(tipo); }}>
+            <Tag color={TIPOS.find(t => t.value === tipo)?.color || 'default'} style={{ fontSize: 13, padding: '2px 8px', display: 'flex', alignItems: 'center', fontWeight: 600 }}>
+              {TIPOS.find(t => t.value === tipo)?.label || tipo}
             </Tag>
           </div>
         )
@@ -423,11 +432,11 @@ const Tasks = () => {
             </Tooltip>
           ) : '';
         }
-        if (col.dataIndex === 'prioridad') {
-          const prioridadObj = PRIORIDADES.find(p => p.value === value);
+        if (col.dataIndex === 'tipo') {
+          const tipoObj = TIPOS.find(t => t.value === value);
           return (
-            <Tag color={prioridadObj?.color} style={{ fontSize: 13, padding: '2px 8px', display: 'flex', alignItems: 'center', fontWeight: 600 }}>
-              <span style={{ marginRight: 3 }}>{prioridadObj?.icon}</span> {prioridadObj?.label || value}
+            <Tag color={tipoObj?.color} style={{ fontSize: 13, padding: '2px 8px', display: 'flex', alignItems: 'center', fontWeight: 600 }}>
+              {TIPOS.find(t => t.value === value)?.label || value}
             </Tag>
           );
         }
