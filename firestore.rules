@@ -1,15 +1,21 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Función para verificar si el usuario es administrador
+    function isAdmin() {
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.user_access_level == 0;
+    }
+
     // Regla para tasksToDo a nivel raíz - solo accesible por admins
     match /tasksToDo/{taskId} {
-      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.user_access_level == 0;
+      allow read, write: if isAdmin();
     }
 
     // Regla para leer usuarios - solo accesible por admins
     match /users/{userId} {
-      allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.user_access_level == 0;
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == userId);
       allow write: if request.auth != null && request.auth.uid == userId;
+      allow update: if isAdmin();
       
       match /expenses/{expenseId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
@@ -37,6 +43,12 @@ service cloud.firestore {
       
       match /creditCards/{cardId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // Subcolecciones de usuarios - accesibles por el propio usuario o por admins
+      match /{collection}/{docId} {
+        allow read: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+        allow write: if request.auth != null && request.auth.uid == userId;
       }
     }
   }

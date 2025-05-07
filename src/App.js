@@ -17,7 +17,7 @@ import AboutUs from './pages/AboutUs';
 import FinancialGoals from './pages/FinancialGoals';
 import AccountTypeBadge from './components/AccountTypeBadge';
 import { db } from './firebase';
-import { doc, getDoc, collection, Timestamp, addDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, Timestamp, addDoc, updateDoc } from 'firebase/firestore';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Typography } from 'antd';
 import logo from './assets/transparent-logo.png';
@@ -28,8 +28,11 @@ import CurrencyTagPicker from './components/CurrencyTagPicker'
 import dayjs from 'dayjs';
 import './index.css';
 import './App.css';
-import ToDoList from './pages/ToDoList';
+import Admin from './pages/Admin';
 import AdminRoute from './components/AdminRoute';
+import Tasks from './pages/Tasks';
+import Users from './pages/Users';
+import Configuration from './pages/Configuration';
 
 const { Title, Paragraph } = Typography;
 const { Header, Sider, Content } = Layout;
@@ -265,6 +268,7 @@ const AppLayout = () => {
           date:     values.date.toDate()
         }
       );
+      await updateDoc(doc(db, 'users', currentUser.uid), { lastActivity: Timestamp.now() });
       notification.success({ message: 'Ingreso agregado' });
       setIncomeModalVisible(false);
       incomeForm.resetFields();
@@ -284,7 +288,7 @@ const AppLayout = () => {
           <Title level={3} style={{ display: 'grid', margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center' }}>
             {currentUser ? (
               userData?.user_access_level === 0 ? (
-                <Link to="/web-finance-lab" style={{ color: 'white' }}>
+                <Link to="/admin" style={{ color: 'white' }}>
                   Web
                   FinanceLab
                 </Link>
@@ -346,7 +350,7 @@ const AppLayout = () => {
                   <Title level={3} style={{ display: 'grid', margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center', width: 110 }}>
                     {currentUser ? (
                       userData?.user_access_level === 0 ? (
-                        <Link to="/web-finance-lab" style={{ color: 'white' }}>
+                        <Link to="/admin" style={{ color: 'white' }}>
                           Web
                           FinanceLab
                         </Link>
@@ -389,11 +393,11 @@ const AppLayout = () => {
             <Route path="/about-us" element={<PrivateRoute><AboutUs /></PrivateRoute>} />
             <Route path="/detailed-expenses" element={<PrivateRoute><DetailedExpenses /></PrivateRoute>} />
             <Route path="/general-expenses" element={<PrivateRoute><GeneralExpenses /></PrivateRoute>} />
-            <Route path="/web-finance-lab" element={
-              <AdminRoute>
-                <ToDoList />
-              </AdminRoute>
-            } />
+            <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>}>
+              <Route path="tasks" element={<Tasks />} />
+              <Route path="users" element={<Users />} />
+              <Route path="configuration" element={<Configuration />} />
+            </Route>
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>
 

@@ -15,7 +15,7 @@ code {
 .container-page {
   padding: 10px 20px;
   height: calc(100vh - 80px);
-  max-height: calc(100vh - 80px);
+  max-height: calc(100vh - 120px);
   overflow-y: scroll;
 }
 

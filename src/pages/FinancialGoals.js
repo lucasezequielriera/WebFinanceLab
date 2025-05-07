@@ -55,7 +55,7 @@ const FinancialGoals = () => {
 
                     setUserData(data);
         
-                const monthKey = dayjs().format('MM-DD-YYYY');
+                const monthKey = dayjs().format('YYYY-MM');
                 const monthlyDocRef = doc(
                     db,
                     'users',
@@ -145,7 +145,7 @@ const FinancialGoals = () => {
         setLoading(true);
 
         try {
-            const monthKey = dayjs().format('MM-DD-YYYY');
+            const monthKey = dayjs().format('YYYY-MM');
             const monthlyDocRef = doc(
                 db,
                 'users',
@@ -154,7 +154,12 @@ const FinancialGoals = () => {
                 monthKey
             );
 
-            await setDoc(monthlyDocRef, { limits }, { merge: true });
+            const existingDoc = await getDoc(monthlyDocRef);
+            if (!existingDoc.exists()) {
+                await setDoc(monthlyDocRef, { limits, createdAt: new Date().toISOString() }, { merge: true });
+            } else {
+                await setDoc(monthlyDocRef, { limits }, { merge: true });
+            }
 
             notification.success({
                 message: 'Limits Saved',

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, Form, Popconfirm, notification, Tag, Row, Col } from 'antd';
 import { db } from '../firebase';
-import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { doc, deleteDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import EditableCell from '../actions/EditableCell';
 import '../styles/ExpenseList.css';
@@ -13,6 +13,7 @@ const ExpenseList = ({ expenses }) => {
   const handleDelete = async (key) => {
     try {
       await deleteDoc(doc(db, `users/${currentUser.uid}/expenses`, key.id));
+      await updateDoc(doc(db, 'users', currentUser.uid), { lastActivity: Timestamp.now() });
       notification.success({
         message: 'Expense Deleted',
         description: 'The expense has been successfully deleted.',
@@ -33,6 +34,7 @@ const ExpenseList = ({ expenses }) => {
       const item = newData[index];
       newData.splice(index, 1, { ...item, ...row });
       await updateDoc(doc(db, `users/${currentUser.uid}/expenses`, item.id), row);
+      await updateDoc(doc(db, 'users', currentUser.uid), { lastActivity: Timestamp.now() });
       notification.success({
         message: 'Expense Updated',
         description: 'The expense has been successfully updated.',

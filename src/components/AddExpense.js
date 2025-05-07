@@ -7,7 +7,7 @@ import { DollarOutlined, FileTextOutlined, BankOutlined, PlusOutlined } from '@a
 import { db } from '../firebase';
 import {
   collection, addDoc, Timestamp,
-  query, onSnapshot, orderBy
+  query, onSnapshot, orderBy, updateDoc, doc
 } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
@@ -167,21 +167,15 @@ const AddExpense = ({ onExpenseAdded }) => {
       );
       newExpense.id = docRef.id;
 
+      // Actualizar lastActivity
+      await updateDoc(doc(db, 'users', currentUser.uid), { lastActivity: Timestamp.now() });
+
       form.resetFields();
       setPaymentMethod(null);
-
-      notification.success({
-        message: 'Gasto añadido',
-        description: 'Tu gasto fue registrado exitosamente.',
-      });
-      onExpenseAdded(newExpense);
-    } catch (err) {
-      console.error(err);
-      notification.error({
-        message: 'Error',
-        description: 'No se pudo registrar el gasto. Intenta de nuevo.',
-      });
-    } finally {
+      if (onExpenseAdded) onExpenseAdded(newExpense);
+      setLoading(false);
+    } catch (e) {
+      notification.error({ message: 'Error al agregar gasto' });
       setLoading(false);
     }
   };

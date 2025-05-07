@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef }                           from "re
 import { useTranslation }                                               from "react-i18next";
 import { updateProfile, updatePassword, reauthenticateWithCredential,
     EmailAuthProvider }                                                 from "firebase/auth";
-import { doc, getDoc, updateDoc }                                       from "firebase/firestore";
+import { doc, getDoc, updateDoc, Timestamp }                                       from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL }                             from "firebase/storage";
 import { db, storage }                                                  from "../firebase";
 import { useAuth }                                                      from "../contexts/AuthContext";
@@ -138,7 +138,8 @@ const UserProfile = () => {
                 gender: userData.gender,
                 phone: phoneSafe,
                 photoURL: photoURL,
-                language: userData.language
+                language: userData.language,
+                lastActivity: Timestamp.now()
             });
 
             setInitialUserData({

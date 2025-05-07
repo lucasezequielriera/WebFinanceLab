@@ -133,7 +133,7 @@ const GeneralExpenses = () => {
   return (
     <div className='container-page'>
       <Spin spinning={loading}>
-        { hasExpenses ? <> (
+        { hasExpenses ? <> 
           <div style={{ 
             display: 'flex',
             alignItems: 'center',
@@ -186,7 +186,7 @@ const GeneralExpenses = () => {
                 )}
               </Col>
             </Row>
-          )})
+          )}
         </> :
         // EMPTY DATA MESSAGE
           <div style={{ marginTop: 40 }}>

@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 
 export async function getDailyLimit(userId) {
   // usa la misma clave de mes que tu subcolección
-  const monthKey = dayjs().format('MM-DD-YYYY');
+  const monthKey = dayjs().format('YYYY-MM');
   const limitsDocRef = doc(db, 'users', userId, 'expenseLimitsByMonth', monthKey);
   const snap = await getDoc(limitsDocRef);
   if (!snap.exists()) return null;

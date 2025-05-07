@@ -94,7 +94,7 @@ const DailyExpensesChart = ({ userId }) => {
   
     const fetchMonthlyLimits = async () => {
       try {
-        const monthKey = dayjs().format('MM-DD-YYYY');
+        const monthKey = dayjs().format('YYYY-MM');
         const limitsDocRef = doc(
           db,
           'users',

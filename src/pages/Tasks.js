@@ -17,7 +17,7 @@ const PRIORIDADES = [
 ];
 const ArrowRightIcon = () => <span style={{ display: 'inline-block', margin: '0 4px', color: '#aaa' }}>→</span>;
 
-const ToDoList = () => {
+const Tasks = () => {
   const { currentUser } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -301,7 +301,7 @@ const ToDoList = () => {
       width: '10%',
       render: (fecha) => fecha ? (
         <Tooltip title={new Date(fecha).toLocaleTimeString()}>
-          <Tag color="#f0f0f0" style={{ color: '#555', fontWeight: 500, border: '1px solid #e0e0e0', fontWeight: 600 }}>{new Date(fecha).toLocaleDateString()}</Tag>
+          <Tag color="#f0f0f0" style={{ color: '#555', border: '1px solid #e0e0e0', fontWeight: 600 }}>{new Date(fecha).toLocaleDateString()}</Tag>
         </Tooltip>
       ) : ''
     },
@@ -452,7 +452,7 @@ const ToDoList = () => {
   }, [addModalOpen]);
 
   return (
-    <div className="container-page">
+    <div className="container-page" style={{ maxHeight: 'calc(100vh - 120px) !important' }}>
       {loading && (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
           <Spin size="large" tip="Cargando tareas..." />
@@ -766,4 +766,4 @@ const ToDoList = () => {
   );
 };
 
-export default ToDoList; 
+export default Tasks; 

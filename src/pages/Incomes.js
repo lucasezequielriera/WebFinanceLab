@@ -140,6 +140,7 @@ const Income = () => {
                 await deleteDoc(
                   doc(db, `users/${currentUser.uid}/incomes`, rec.id)
                 );
+                await updateDoc(doc(db, 'users', currentUser.uid), { lastActivity: Timestamp.now() });
                 notification.success({ message: t("userProfile.incomes.table.deleteIncome.deleted") });
               } catch {
                 notification.error({ message: t("userProfile.incomes.table.deleteIncome.error") });
@@ -165,6 +166,7 @@ const Income = () => {
           timestamp: Timestamp.fromDate(values.timestamp.toDate()),
         }
       );
+      await updateDoc(doc(db, 'users', currentUser.uid), { lastActivity: Timestamp.now() });
       notification.success({ message: t("userProfile.incomes.table.editIncome.edited") });
       setEditModalVisible(false);
       setEditingIncome(null);
