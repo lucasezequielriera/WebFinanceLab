@@ -194,23 +194,23 @@ const Users = () => {
                   <Row gutter={[16, 8]} style={{ marginTop: 8 }}>
                     <Col span={8}>
                       <div>
-                        <Text type="secondary" style={{ fontWeight: 'bold' }}>Gastos:</Text>
-                        <div>
-                          <DollarOutlined style={{ color: '#52c41a' }} /> {formatCurrency(user.totalExpensesUSD || 0, 'USD')}
-                        </div>
-                        <div>
-                          <DollarOutlined style={{ color: '#52c41a' }} /> {formatCurrency(user.totalExpensesARS || 0, 'ARS')}
-                        </div>
-                      </div>
-                    </Col>
-                    <Col span={8}>
-                      <div>
                         <Text type="secondary" style={{ fontWeight: 'bold' }}>Ingresos:</Text>
                         <div>
                           <DollarOutlined style={{ color: '#1890ff' }} /> {formatCurrency(user.totalIncomesUSD || 0, 'USD')}
                         </div>
                         <div>
                           <DollarOutlined style={{ color: '#1890ff' }} /> {formatCurrency(user.totalIncomesARS || 0, 'ARS')}
+                        </div>
+                      </div>
+                    </Col>
+                    <Col span={8}>
+                      <div>
+                        <Text type="secondary" style={{ fontWeight: 'bold' }}>Gastos:</Text>
+                        <div>
+                          <DollarOutlined style={{ color: '#52c41a' }} /> {formatCurrency(user.totalExpensesUSD || 0, 'USD')}
+                        </div>
+                        <div>
+                          <DollarOutlined style={{ color: '#52c41a' }} /> {formatCurrency(user.totalExpensesARS || 0, 'ARS')}
                         </div>
                       </div>
                     </Col>
