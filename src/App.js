@@ -89,6 +89,10 @@ const AppLayout = () => {
       setSelectedKey('1');
     } else if (path.startsWith('/incomes')) {
       setSelectedKey('8');
+    } else if (path.startsWith('/expenses')) {
+      setSelectedKey('5');
+    } else if (path.startsWith('/summary')) {
+      setSelectedKey('12');
     } else if (path.startsWith('/detailed-expenses')) {
       setSelectedKey('9');
     } else if (path.startsWith('/general-expenses')) {
@@ -160,13 +164,13 @@ const AppLayout = () => {
       label: <Link to="/incomes">{t('userProfile.navbar.incomes')}</Link>
     },
     {
-      key: '5',
+      key: 'dropdown',
       icon: <CreditCardOutlined />,
       label: t('userProfile.navbar.expenses.dropdown'),
       children: [
         {
-          key: 'summary',
-          label: <Link to="/summary">Summary</Link>
+          key: '12',
+          label: <Link to="/summary">{t('userProfile.navbar.expenses.summary')}</Link>
         },
         {
           key: '9',
@@ -177,7 +181,7 @@ const AppLayout = () => {
           label: <Link to="/general-expenses">{t('userProfile.navbar.expenses.monthlyExpenses')}</Link>
         },
         {
-          key: '11',
+          key: '5',
           label: <Link to="/expenses">{t('userProfile.navbar.expenses.payments')}</Link>
         },
       ],

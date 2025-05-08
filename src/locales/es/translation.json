@@ -41,6 +41,7 @@
     "userProfile.navbar.dashboard": "Dashboard",
     "userProfile.navbar.expenses":{
         "dropdown": "Gastos",
+        "summary": "Resumen",
         "dailyExpenses": "Diarios",
         "monthlyExpenses": "Mensuales",
         "payments": "Fijos"
@@ -107,6 +108,7 @@
         "colCurrency": "Moneda",
         "colCategory": "Categoría",
         "colTime": "Hora",
+        "colDate": "Fecha",
         "colActions": "Acciones",
         "deleteConfirm": "¿Eliminar?",
         "deleted": "Gasto eliminado",
@@ -218,6 +220,11 @@
     "userProfile.addNewExpense.amount": "Cantidad",
     "userProfile.addNewExpense.currency": "Moneda",
     "userProfile.addNewExpense.category": "Categoría",
+    "userProfile.addNewExpense.expenseTypes": {
+        "label": "Tipo de Gasto",
+        "daily": "Diario",
+        "fixed": "Fijo"
+    },
     "userProfile.addNewExpense.date": "Fecha",
     "userProfile.addNewExpense.defaultDataInputDate": "Hoy",
     "userProfile.addNewExpense.description": "Descripción",

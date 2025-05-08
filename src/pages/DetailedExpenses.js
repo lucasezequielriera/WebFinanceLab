@@ -1,6 +1,6 @@
 // src/pages/DetailedExpenses.js
 import React, { useState, useEffect, useMemo } from 'react';
-import { Spin, Table, Select, Tag, Popconfirm, notification, Input, InputNumber, Divider, Empty } from 'antd';
+import { Spin, Table, Select, Tag, Popconfirm, notification, Input, InputNumber, Divider, Empty, DatePicker, Tooltip } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, Timestamp, deleteDoc, doc, updateDoc } from 'firebase/firestore';
@@ -22,7 +22,7 @@ const DetailedExpenses = () => {
   const [expenses, setExpenses] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [rowEdits, setRowEdits] = useState({});
-  const [selectedDay, setSelectedDay] = useState(dayjs().date());
+  const [dateRange, setDateRange] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedCurrency, setSelectedCurrency] = useState(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
@@ -50,30 +50,26 @@ const DetailedExpenses = () => {
     return () => unsub();
   }, [currentUser]);
 
-  // Obtener categorías únicas para el filtro
+    // Obtener categorías únicas para el filtro
   const categories = useMemo(() => {
-    const uniqueCategories = new Set(expenses.map(e => e.category));
+    const uniqueCategories = new Set(
+      expenses
+        .filter(e => {
+          // Si hay un rango de fechas seleccionado, filtrar por ese rango
+          if (dateRange) {
+            const expenseDate = new Date(e.timestamp.seconds * 1000);
+            return (
+              (!dateRange[0] || dayjs(expenseDate).isAfter(dateRange[0], 'day') || dayjs(expenseDate).isSame(dateRange[0], 'day')) &&
+              (!dateRange[1] || dayjs(expenseDate).isBefore(dateRange[1], 'day') || dayjs(expenseDate).isSame(dateRange[1], 'day'))
+            );
+          }
+          // Si no hay rango de fechas, incluir todas las categorías
+          return true;
+        })
+        .map(e => e.category)
+    );
     return Array.from(uniqueCategories).sort();
-  }, [expenses]);
-
-  // Obtener días únicos del mes actual para el filtro
-  const days = useMemo(() => {
-    const currentMonth = dayjs().month();
-    const currentYear = dayjs().year();
-    const daysInMonth = dayjs().daysInMonth();
-    
-    return Array.from({ length: daysInMonth }, (_, i) => {
-      const dayNumber = i + 1;
-      const date = dayjs().year(currentYear).month(currentMonth).date(dayNumber);
-      const jsDate = date.toDate();
-      const dayName = format(jsDate, 'EEEE', { locale: currentLocale });
-      const capitalizedDayName = dayName.charAt(0).toUpperCase() + dayName.slice(1);
-      return {
-        value: dayNumber,
-        label: `${capitalizedDayName} ${dayNumber}`
-      };
-    });
-  }, [i18n.language, currentLocale]);
+  }, [expenses, dateRange]);
 
   // Obtener monedas únicas para el filtro
   const currencies = useMemo(() => {
@@ -90,20 +86,21 @@ const DetailedExpenses = () => {
     return Array.from(uniqueMethods).sort();
   }, [expenses]);
 
-  // Filtrar gastos según los filtros seleccionados
+    // Filtrar gastos según los filtros seleccionados
   const filteredExpenses = useMemo(() => {
     return expenses.filter(expense => {
       const expenseDate = new Date(expense.timestamp.seconds * 1000);
-      const matchesDay = !selectedDay || expenseDate.getDate() === selectedDay;
+      const matchesDate = !dateRange || (
+        (!dateRange[0] || dayjs(expenseDate).isAfter(dateRange[0], 'day') || dayjs(expenseDate).isSame(dateRange[0], 'day')) &&
+        (!dateRange[1] || dayjs(expenseDate).isBefore(dateRange[1], 'day') || dayjs(expenseDate).isSame(dateRange[1], 'day'))
+      );
       const matchesCategory = !selectedCategory || expense.category === selectedCategory;
       const matchesCurrency = !selectedCurrency || expense.currency === selectedCurrency;
       const matchesPaymentMethod = !selectedPaymentMethod || expense.paymentMethod === selectedPaymentMethod;
-      const isCurrentMonth = expenseDate.getMonth() === dayjs().month() && 
-                            expenseDate.getFullYear() === dayjs().year();
       
-      return matchesDay && matchesCategory && matchesCurrency && matchesPaymentMethod && isCurrentMonth;
+      return matchesDate && matchesCategory && matchesCurrency && matchesPaymentMethod;
     });
-  }, [expenses, selectedDay, selectedCategory, selectedCurrency, selectedPaymentMethod]);
+  }, [expenses, dateRange, selectedCategory, selectedCurrency, selectedPaymentMethod]);
 
   // Calcular totales
   const totalPesos = useMemo(() => {
@@ -282,7 +279,7 @@ const DetailedExpenses = () => {
         : rec.category
     },
     {
-      title: t('userProfile.expenses.detailed.colTime'),
+      title: t('userProfile.expenses.detailed.colDate'),
       dataIndex: 'timestamp',
       key: 'timestamp',
       width: '10%',
@@ -297,9 +294,11 @@ const DetailedExpenses = () => {
               onChange={value => onChangeCell('timestamp', value)}
               style={{ width: '100%' }}
               showTime={{ format: 'HH:mm' }}
-              format="DD/MM/YYYY HH:mm"
+              format="dd/MM/yyyy HH:mm"
             />
-          : format(d, 'HH:mm');
+          : <Tooltip title={format(d, 'HH:mm:ss')}>
+              {format(d, i18n.language === 'en' ? 'MM/dd/yyyy' : 'dd/MM/yyyy')}
+            </Tooltip>;
       }
     },
     {
@@ -342,73 +341,42 @@ const DetailedExpenses = () => {
   return (
     <div className="container-page">
       <Spin spinning={loading}>
-        <div style={{ 
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          marginBottom: 16,
-          maxWidth: '800px',
-          width: '100%'
-        }}>
-          <FilterOutlined style={{ 
-            fontSize: '20px', 
-            color: '#1890ff',
-            marginRight: '8px'
-          }} />
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-            gap: '12px',
-            flex: 1
-          }}>
-            <Select
-              placeholder={t('userProfile.expenses.detailed.filterDay')}
-              value={selectedDay}
-              onChange={setSelectedDay}
-              allowClear
-              suffixIcon={<CalendarOutlined style={{ color: '#1890ff' }} />}
-            >
-              {days.map(day => (
-                <Option key={day.value} value={day.value}>{day.label}</Option>
-              ))}
-            </Select>
-
-            <Select
-              placeholder={t('userProfile.expenses.detailed.filterCategory')}
-              value={selectedCategory}
-              onChange={setSelectedCategory}
-              allowClear
-              suffixIcon={<TagOutlined style={{ color: '#1890ff' }} />}
-            >
-              {categories.map(cat => (
-                <Option key={cat} value={cat}>{cat}</Option>
-              ))}
-            </Select>
-
-            <Select
-              placeholder={t('userProfile.expenses.detailed.filterCurrency')}
-              value={selectedCurrency}
-              onChange={setSelectedCurrency}
-              allowClear
-              suffixIcon={<DollarOutlined style={{ color: '#1890ff' }} />}
-            >
-              {currencies.map(curr => (
-                <Option key={curr} value={curr}>{curr}</Option>
-              ))}
-            </Select>
-
-            <Select
-              placeholder={t('userProfile.expenses.detailed.filterMethod')}
-              value={selectedPaymentMethod}
-              onChange={setSelectedPaymentMethod}
-              allowClear
-              suffixIcon={<CreditCardOutlined style={{ color: '#1890ff' }} />}
-            >
-              {paymentMethods.map(method => (
-                <Option key={method} value={method}>{method}</Option>
-              ))}
-            </Select>
-          </div>
+        <div style={{ marginBottom: 16, display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+          <DatePicker.RangePicker
+            value={dateRange}
+            onChange={setDateRange}
+            allowClear
+            placeholder={['Fecha inicial', 'Fecha final']}
+            style={{ minWidth: 280 }}
+            clearIcon={<span style={{ fontSize: '16px', padding: '4px' }}>✕</span>}
+          />
+          <Select
+            style={{ minWidth: 180 }}
+            placeholder="Filtrar por categoría"
+            value={selectedCategory}
+            onChange={setSelectedCategory}
+            allowClear
+            options={categories.map(c => ({ value: c, label: c }))}
+            clearIcon={<span style={{ fontSize: '16px', padding: '4px' }}>✕</span>}
+          />
+          <Select
+            style={{ minWidth: 140 }}
+            placeholder="Filtrar por moneda"
+            value={selectedCurrency}
+            onChange={setSelectedCurrency}
+            allowClear
+            options={currencies.map(c => ({ value: c, label: c }))}
+            clearIcon={<span style={{ fontSize: '16px', padding: '4px' }}>✕</span>}
+          />
+          <Select
+            style={{ minWidth: 180 }}
+            placeholder="Filtrar por método de pago"
+            value={selectedPaymentMethod}
+            onChange={setSelectedPaymentMethod}
+            allowClear
+            options={paymentMethods.map(m => ({ value: m, label: m }))}
+            clearIcon={<span style={{ fontSize: '16px', padding: '4px' }}>✕</span>}
+          />
         </div>
 
         <Table
@@ -416,7 +384,10 @@ const DetailedExpenses = () => {
           dataSource={filteredExpenses.slice().sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)}
           columns={columns}
           rowKey="id"
-          pagination={{ pageSize: 8 }}
+          pagination={{ 
+            pageSize: 8,
+            showSizeChanger: false
+          }}
           scroll={{ x: true }}
           locale={{
             emptyText: <Empty description={t('userProfile.expenses.detailed.noExpenses')} />
@@ -424,9 +395,9 @@ const DetailedExpenses = () => {
         />
         {filteredExpenses.length > 0 && (
           <div className="totals-container">
-            <span style={{ color: '#0071de' }}>Total ARS: ${totalPesos.toFixed(2)}</span>
+            <span style={{ color: '#0071de' }}>Total ARS: <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>${totalPesos.toLocaleString(i18n.language === 'en' ? 'en-US' : 'es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></span>
             <span style={{ color: '#0071de', opacity: 0.5 }}>|</span>
-            <span style={{ color: '#0071de' }}>Total USD: ${totalDollars.toFixed(2)}</span>
+            <span style={{ color: '#0071de' }}>Total USD: <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>${totalDollars.toLocaleString(i18n.language === 'en' ? 'en-US' : 'es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></span>
           </div>
         )}
       </Spin>

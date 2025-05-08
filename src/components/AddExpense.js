@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   Form, Input, Button, Select, notification, Spin,
-  Typography, Row, Col, Card, DatePicker
+  Typography, Row, Col, Card, DatePicker, Checkbox
 } from 'antd';
 import { DollarOutlined, FileTextOutlined, BankOutlined, PlusOutlined } from '@ant-design/icons';
-import { db } from '../firebase';
+import { db, storage } from '../firebase';
 import {
   collection, addDoc, Timestamp,
-  query, onSnapshot, orderBy, updateDoc, doc
+  query, onSnapshot, orderBy, updateDoc, doc, getDoc, setDoc
 } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +15,9 @@ import dayjs from 'dayjs';
 import CategoryTagPicker from './CategoryTagPicker';
 import CurrencyTagPicker from './CurrencyTagPicker';
 import '../styles/AddExpense.css';
+import { NumericFormat } from 'react-number-format';
+import i18n from '../i18n';
+import { getDownloadURL, uploadBytes, ref as storageRef } from 'firebase/storage';
 
 const { Option } = Select;
 const { Title, Paragraph } = Typography;
@@ -33,6 +36,8 @@ const AddExpense = ({ onExpenseAdded }) => {
   const [newBank,   setNewBank]   = useState('');          // ← input local;
   const [lastBank,  setLastBank]  = useState({ credit: null, debit: null });
   const [lastCurrency, setLastCurrency] = useState('ARS');
+  const [expenseType, setExpenseType] = useState('daily');
+  const [pdfFile, setPdfFile] = useState(null);
 
   // cardInfo: { credit|debit: { [bank]: { list:[...], last:'Visa' } } }
   const [cardInfo, setCardInfo]   = useState({ credit: {}, debit: {} });
@@ -136,47 +141,106 @@ const AddExpense = ({ onExpenseAdded }) => {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      const selectedDate = values.date ? values.date.toDate() : new Date();
-      const timestamp    = Timestamp.fromDate(selectedDate);
-      const date         = timestamp.toDate();
+      if (values.expenseType === 'daily') {
+        const selectedDate = values.date ? values.date.toDate() : new Date();
+        const timestamp    = Timestamp.fromDate(selectedDate);
+        const date         = timestamp.toDate();
 
-      const finalCategory = values.category?.trim() || '';
-      if (!finalCategory) {
-        notification.error({ message: 'Categoría requerida' });
-        setLoading(false);
-        return;
+        const finalCategory = values.category?.trim() || '';
+        if (!finalCategory) {
+          notification.error({ message: 'Categoría requerida' });
+          setLoading(false);
+          return;
+        }
+
+        const newExpense = {
+          amount:        parseFloat(values.amount).toFixed(2),
+          currency:      values.currency,
+          category:      finalCategory,
+          description:   values.description,
+          paymentMethod: values.paymentMethod,
+          bank:          values.bank     || 'N/A',
+          cardType:      values.cardType || 'N/A',
+          timestamp,
+          day:   date.getDate(),
+          month: date.getMonth() + 1,
+          year:  date.getFullYear(),
+        };
+
+        const docRef = await addDoc(
+          collection(db, `users/${currentUser.uid}/expenses`),
+          newExpense
+        );
+        newExpense.id = docRef.id;
+
+        // Actualizar lastActivity
+        await updateDoc(doc(db, 'users', currentUser.uid), { lastActivity: Timestamp.now() });
+
+        form.resetFields();
+        setPaymentMethod(null);
+        if (onExpenseAdded) onExpenseAdded(newExpense);
+      } else {
+        // Gasto fijo: quick add al array payments del mes actual
+        const currentMonthKey = dayjs().format('YYYY-MM');
+        const docRef = doc(db, `users/${currentUser.uid}/monthlyPayments`, currentMonthKey);
+        const docSnap = await getDoc(docRef);
+        let payments = [];
+        if (docSnap.exists()) {
+          payments = docSnap.data().payments || [];
+        }
+        // Subir PDF si corresponde
+        let pdfUrl = '';
+        if (pdfFile) {
+          const fileRef = storageRef(storage, `monthlyPayments/${currentUser.uid}/${Date.now()}.pdf`);
+          await uploadBytes(fileRef, pdfFile);
+          pdfUrl = await getDownloadURL(fileRef);
+          setPdfFile(null);
+        }
+        // Normalizar montos como en Expenses.js
+        const normalizeAmount = (val) => {
+          if (val === '' || val === undefined || val === null) return 0;
+          if (typeof val === 'string') {
+            let clean = val.replace(/\$/g, '');
+            if (i18n.language === 'es') {
+              clean = clean.replace(/\./g, '').replace(',', '.');
+            } else {
+              clean = clean.replace(/,/g, '');
+            }
+            return Number(clean) || 0;
+          }
+          return isNaN(val) ? 0 : val;
+        };
+        const newPayment = {
+          id: Date.now().toString(),
+          title: values.title,
+          category: values.category || '',
+          amountARS: normalizeAmount(values.amountARS),
+          amountUSD: normalizeAmount(values.amountUSD),
+          paid: values.paid || false,
+          notes: values.notes || '',
+          createdAt: new Date(),
+          pdfUrl,
+        };
+        const updatedPayments = [...payments, newPayment];
+        await setDoc(docRef, { payments: updatedPayments }, { merge: true });
+        await updateDoc(doc(db, 'users', currentUser.uid), { lastActivity: Timestamp.now() });
+        form.resetFields();
+        if (onExpenseAdded) onExpenseAdded(newPayment);
       }
-
-      const newExpense = {
-        amount:        parseFloat(values.amount).toFixed(2),
-        currency:      values.currency,
-        category:      finalCategory,
-        description:   values.description,
-        paymentMethod: values.paymentMethod,
-        bank:          values.bank     || 'N/A',
-        cardType:      values.cardType || 'N/A',
-        timestamp,
-        day:   date.getDate(),
-        month: date.getMonth() + 1,
-        year:  date.getFullYear(),
-      };
-
-      const docRef = await addDoc(
-        collection(db, `users/${currentUser.uid}/expenses`),
-        newExpense
-      );
-      newExpense.id = docRef.id;
-
-      // Actualizar lastActivity
-      await updateDoc(doc(db, 'users', currentUser.uid), { lastActivity: Timestamp.now() });
-
-      form.resetFields();
-      setPaymentMethod(null);
-      if (onExpenseAdded) onExpenseAdded(newExpense);
       setLoading(false);
     } catch (e) {
       notification.error({ message: 'Error al agregar gasto' });
       setLoading(false);
+    }
+  };
+
+  const handlePdfChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'application/pdf') {
+      setPdfFile(file);
+    } else {
+      notification.error({ message: 'Solo se permiten archivos PDF' });
+      setPdfFile(null);
     }
   };
 
@@ -234,182 +298,284 @@ const AddExpense = ({ onExpenseAdded }) => {
         </Paragraph>
 
         <Form layout="vertical" form={form} onFinish={handleSubmit}>
-          {/* DATE */}
+          {/* EXPENSE TYPE */}
           <Form.Item
-            name="date"
-            label={t('userProfile.addNewExpense.date')}
-            initialValue={dayjs()}
-            rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.dateRequired') }]}
+            name="expenseType"
+            label={t('userProfile.addNewExpense.expenseTypes.label')}
+            initialValue="daily"
+            rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.expenseTypeRequired') }]}
           >
-            <DatePicker
-              style={{ width: '100%' }}
-              format={(val) =>
-                dayjs().isSame(val, 'day')
-                  ? t('userProfile.addNewExpense.defaultDataInputDate')
-                  : val.format('DD/MM/YYYY')
-              }
-            />
-          </Form.Item>
-
-          {/* DESCRIPTION */}
-          <Form.Item
-            name="description"
-            label={t('userProfile.addNewExpense.description')}
-            rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.descriptionRequired') }]}
-          >
-            <Input prefix={<FileTextOutlined />} placeholder="Uber to work" />
-          </Form.Item>
-
-          {/* AMOUNT + CURRENCY */}
-          <Row gutter={[16, 16]}>
-            <Col xs={12}>
-              <Form.Item
-                name="amount"
-                label={t('userProfile.addNewExpense.amount')}
-                rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.amountRequired') }]}
-              >
-                <Input type="number" prefix={<DollarOutlined />} placeholder="125.50" />
-              </Form.Item>
-            </Col>
-            <Col xs={12} style={{ display: 'flex', alignItems: 'center' }}>
-              <Form.Item
-                name="currency"
-                initialValue={lastCurrency}
-                rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.currencyRequired') }]}
-                style={{ marginBottom: 0 }}
-              >
-                <CurrencyTagPicker />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          {/* PAYMENT METHOD */}
-          <Form.Item
-            name="paymentMethod"
-            label={t('userProfile.addNewExpense.paymentMethod')}
-            rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.paymentMethodRequired') }]}
-          >
-            <Select
-              placeholder="Seleccioná método"
-              onChange={(val) => {
-                setPaymentMethod(val);
-
-                if (val === 'Credit Card') {
-                  form.setFieldsValue({
-                    bank:     lastBank.credit || undefined,
-                    cardType: lastBank.credit
-                      ? cardInfo.credit[lastBank.credit]?.last
-                      : undefined,
-                  });
-                } else if (val === 'Debit Card') {
-                  form.setFieldsValue({
-                    bank:     lastBank.debit || undefined,
-                    cardType: lastBank.debit
-                      ? cardInfo.debit[lastBank.debit]?.last
-                      : undefined,
-                  });
-                } else {
-                  form.setFieldsValue({ bank: undefined, cardType: undefined });
-                }
-              }}
-            >
-              <Option value="Cash">Cash</Option>
-              <Option value="Credit Card">Credit Card</Option>
-              <Option value="Debit Card">Debit Card</Option>
+            <Select onChange={(value) => setExpenseType(value)}>
+              <Option value="daily">{t('userProfile.addNewExpense.expenseTypes.daily')}</Option>
+              <Option value="fixed">{t('userProfile.addNewExpense.expenseTypes.fixed')}</Option>
             </Select>
           </Form.Item>
 
-          {/* BANK & CARD TYPE (only when card selected) */}
-          {(paymentMethod === 'Credit Card' || paymentMethod === 'Debit Card') && (
-            <Row gutter={[16, 16]}>
-              <Col xs={12}>
-                <Form.Item
-                  name="bank"
-                  label={t('userProfile.addNewExpense.bank')}
-                  rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.bankRequired') }]}
-                >
-                  <Select
-                    placeholder="Seleccioná banco"
-                    value={form.getFieldValue('bank')}
-                    onChange={handleBankChange}
-                    dropdownRender={(menu) => (
-                      <>
-                        {menu}
-                        {/* separador + input para nuevo banco */}
-                        <div style={{ display: 'flex', gap: 8, padding: 8 }}>
-                          <Input
-                            size="small"
-                            placeholder="Agregar banco"
-                            value={newBank}
-                            onChange={(e) => setNewBank(e.target.value)}
-                            onPressEnter={(e) => {
-                              e.preventDefault();    // evita que el Select procese el Enter
-                              e.stopPropagation();
-                              addNewBank();
-                            }}
-                          />
-                          <Button
-                            type="text"
-                            icon={<PlusOutlined />}
-                            onClick={addNewBank}
-                          />
-                        </div>
-                      </>
-                    )}
-                  >
-                    {(paymentMethod === 'Credit Card' ? banks.credit : banks.debit).map((b) => (
-                      <Option key={b} value={b}>
-                        {b}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-
-              <Col xs={12}>
+          {expenseType === 'daily' ? (
+            <>
+              {/* DATE */}
               <Form.Item
-                name="cardType"
-                label={t('userProfile.addNewExpense.cardType')}
-                rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.cardTypeRequired') }]}
+                name="date"
+                label={t('userProfile.addNewExpense.date')}
+                initialValue={dayjs()}
+                rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.dateRequired') }]}
               >
-                <Select placeholder="Seleccioná tipo">
-                  {(() => {
-                    const bk   = form.getFieldValue('bank');
-                    const info =
-                      paymentMethod === 'Credit Card'
-                        ? cardInfo.credit[bk]
-                        : cardInfo.debit[bk];
+                <DatePicker
+                  style={{ width: '100%' }}
+                  format={(val) =>
+                    dayjs().isSame(val, 'day')
+                      ? t('userProfile.addNewExpense.defaultDataInputDate')
+                      : val.format('DD/MM/YYYY')
+                  }
+                />
+              </Form.Item>
 
-                    /* unión: las 3 opciones fijas + las extras que existan en historial */
-                    const list = Array.from(
-                      new Set([ ...ALL_CARD_TYPES, ...(info?.list || []) ])
-                    );
+              {/* DESCRIPTION */}
+              <Form.Item
+                name="description"
+                label={t('userProfile.addNewExpense.description')}
+                rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.descriptionRequired') }]}
+              >
+                <Input prefix={<FileTextOutlined />} placeholder="Uber to work" />
+              </Form.Item>
 
-                    return list.map((ct) => (
-                      <Option key={ct} value={ct}>
-                        {ct}
-                      </Option>
-                    ));
-                  })()}
+              {/* AMOUNT + CURRENCY */}
+              <Row gutter={[16, 16]}>
+                <Col xs={12}>
+                  <Form.Item
+                    name="amount"
+                    label={t('userProfile.addNewExpense.amount')}
+                    rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.amountRequired') }]}
+                  >
+                    <Input type="number" prefix={<DollarOutlined />} placeholder="125.50" />
+                  </Form.Item>
+                </Col>
+                <Col xs={12} style={{ display: 'flex', alignItems: 'center' }}>
+                  <Form.Item
+                    name="currency"
+                    initialValue={lastCurrency}
+                    rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.currencyRequired') }]}
+                    style={{ marginBottom: 0 }}
+                  >
+                    <CurrencyTagPicker />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              {/* PAYMENT METHOD */}
+              <Form.Item
+                name="paymentMethod"
+                label={t('userProfile.addNewExpense.paymentMethod')}
+                rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.paymentMethodRequired') }]}
+              >
+                <Select
+                  placeholder="Seleccioná método"
+                  onChange={(val) => {
+                    setPaymentMethod(val);
+
+                    if (val === 'Credit Card') {
+                      form.setFieldsValue({
+                        bank:     lastBank.credit || undefined,
+                        cardType: lastBank.credit
+                          ? cardInfo.credit[lastBank.credit]?.last
+                          : undefined,
+                      });
+                    } else if (val === 'Debit Card') {
+                      form.setFieldsValue({
+                        bank:     lastBank.debit || undefined,
+                        cardType: lastBank.debit
+                          ? cardInfo.debit[lastBank.debit]?.last
+                          : undefined,
+                      });
+                    } else {
+                      form.setFieldsValue({ bank: undefined, cardType: undefined });
+                    }
+                  }}
+                >
+                  <Option value="Cash">Cash</Option>
+                  <Option value="Credit Card">Credit Card</Option>
+                  <Option value="Debit Card">Debit Card</Option>
                 </Select>
               </Form.Item>
-              </Col>
-            </Row>
-          )}
 
-          {/* CATEGORY */}
-          <Form.Item
-            name="category"
-            label={t('userProfile.addNewExpense.category')}
-            rules={[
-              { required: true, message: t('userProfile.addNewExpense.errorMessages.categoryRequired') },
-            ]}
-          >
-            <CategoryTagPicker
-              categories={categories}
-              onNewCategory={(cat) => setCategories((prev) => [...prev, cat])}
-            />
-          </Form.Item>
+              {/* BANK & CARD TYPE (only when card selected) */}
+              {(paymentMethod === 'Credit Card' || paymentMethod === 'Debit Card') && (
+                <Row gutter={[16, 16]}>
+                  <Col xs={12}>
+                    <Form.Item
+                      name="bank"
+                      label={t('userProfile.addNewExpense.bank')}
+                      rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.bankRequired') }]}
+                    >
+                      <Select
+                        placeholder="Seleccioná banco"
+                        value={form.getFieldValue('bank')}
+                        onChange={handleBankChange}
+                        dropdownRender={(menu) => (
+                          <>
+                            {menu}
+                            {/* separador + input para nuevo banco */}
+                            <div style={{ display: 'flex', gap: 8, padding: 8 }}>
+                              <Input
+                                size="small"
+                                placeholder="Agregar banco"
+                                value={newBank}
+                                onChange={(e) => setNewBank(e.target.value)}
+                                onPressEnter={(e) => {
+                                  e.preventDefault();    // evita que el Select procese el Enter
+                                  e.stopPropagation();
+                                  addNewBank();
+                                }}
+                              />
+                              <Button
+                                type="text"
+                                icon={<PlusOutlined />}
+                                onClick={addNewBank}
+                              />
+                            </div>
+                          </>
+                        )}
+                      >
+                        {(paymentMethod === 'Credit Card' ? banks.credit : banks.debit).map((b) => (
+                          <Option key={b} value={b}>
+                            {b}
+                          </Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  </Col>
+
+                  <Col xs={12}>
+                  <Form.Item
+                    name="cardType"
+                    label={t('userProfile.addNewExpense.cardType')}
+                    rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.cardTypeRequired') }]}
+                  >
+                    <Select placeholder="Seleccioná tipo">
+                      {(() => {
+                        const bk   = form.getFieldValue('bank');
+                        const info =
+                          paymentMethod === 'Credit Card'
+                            ? cardInfo.credit[bk]
+                            : cardInfo.debit[bk];
+
+                        /* unión: las 3 opciones fijas + las extras que existan en historial */
+                        const list = Array.from(
+                          new Set([ ...ALL_CARD_TYPES, ...(info?.list || []) ])
+                        );
+
+                        return list.map((ct) => (
+                          <Option key={ct} value={ct}>
+                            {ct}
+                          </Option>
+                        ));
+                      })()}
+                    </Select>
+                  </Form.Item>
+                  </Col>
+                </Row>
+              )}
+
+              {/* CATEGORY */}
+              <Form.Item
+                name="category"
+                label={t('userProfile.addNewExpense.category')}
+                rules={[
+                  { required: true, message: t('userProfile.addNewExpense.errorMessages.categoryRequired') },
+                ]}
+              >
+                <CategoryTagPicker
+                  categories={categories}
+                  onNewCategory={(cat) => setCategories((prev) => [...prev, cat])}
+                />
+              </Form.Item>
+            </>
+          ) : (
+            <>
+              {/* TITLE */}
+              <Form.Item
+                name="title"
+                label="Título"
+                rules={[{ required: true, message: 'Ingrese un título' }]}
+              >
+                <Input prefix={<FileTextOutlined />} placeholder="Alquiler" />
+              </Form.Item>
+
+              {/* AMOUNT ARS + USD */}
+              <Row gutter={[16, 16]}>
+                <Col xs={12}>
+                  <Form.Item
+                    name="amountARS"
+                    label="Monto ARS"
+                    rules={[{ required: true, message: 'Ingrese un monto' }]}
+                  >
+                    <NumericFormat
+                      customInput={Input}
+                      allowNegative={false}
+                      decimalScale={2}
+                      fixedDecimalScale
+                      thousandSeparator={i18n.language === 'es' ? '.' : ','}
+                      decimalSeparator={i18n.language === 'es' ? ',' : '.'}
+                      prefix={"$"}
+                      style={{ width: '100%' }}
+                      placeholder={i18n.language === 'es' ? '0,00' : '0.00'}
+                      onValueChange={vals => form.setFieldsValue({ amountARS: vals.floatValue ?? '' })}
+                      value={form.getFieldValue('amountARS')}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col xs={12}>
+                  <Form.Item
+                    name="amountUSD"
+                    label="Monto USD"
+                    rules={[{ required: true, message: 'Ingrese un monto' }]}
+                  >
+                    <NumericFormat
+                      customInput={Input}
+                      allowNegative={false}
+                      decimalScale={2}
+                      fixedDecimalScale
+                      thousandSeparator={i18n.language === 'es' ? '.' : ','}
+                      decimalSeparator={i18n.language === 'es' ? ',' : '.'}
+                      prefix={"$"}
+                      style={{ width: '100%' }}
+                      placeholder={i18n.language === 'es' ? '0,00' : '0.00'}
+                      onValueChange={vals => form.setFieldsValue({ amountUSD: vals.floatValue ?? '' })}
+                      value={form.getFieldValue('amountUSD')}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              {/* PAID CHECKBOX */}
+              <Form.Item
+                name="paid"
+                valuePropName="checked"
+                initialValue={false}
+              >
+                <Checkbox>Pago realizado</Checkbox>
+              </Form.Item>
+
+              {/* NOTES */}
+              <Form.Item
+                name="notes"
+                label="Información adicional"
+              >
+                <Input.TextArea rows={4} placeholder="Agregar información adicional..." />
+              </Form.Item>
+
+              {/* PDF UPLOAD */}
+              <Form.Item
+                label="Archivo PDF"
+              >
+                <Input
+                  type="file"
+                  accept=".pdf"
+                  onChange={handlePdfChange}
+                />
+              </Form.Item>
+            </>
+          )}
 
           <Button
             type="primary"
