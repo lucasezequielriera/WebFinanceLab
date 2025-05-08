@@ -99,8 +99,9 @@ const Expenses = () => {
               [expense.currency]: parseFloat(expense.amount),
             },
             color: cardColors[expense.cardType] || cardColors.Cash,
-            closingDate: moment().endOf('month').toDate(),
+            closingDate: expense.closingDate,
           });
+          console.log(expense)
         }
       }
     });

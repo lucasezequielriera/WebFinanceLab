@@ -75,8 +75,58 @@ const Expenses = () => {
     return () => unsub();
   }, [currentUser, currentMonthKey]);
 
-  const updateCreditCards = (expenses) => {
+  // Al cargar las tarjetas, asegura que cada tarjeta de crédito tenga closingDate
+  useEffect(() => {
+    const ensureCreditCardClosingDates = async () => {
+      if (!currentUser) return;
+      const userDocRef = doc(db, "users", currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (!userDoc.exists()) return;
+      const cards = userDoc.data().creditCards || [];
+      let changed = false;
+      const updated = cards.map(card => {
+        if (card.cardType === 'Credit Card') {
+          if (!card.closingDate || isNaN(new Date(card.closingDate))) {
+            changed = true;
+            return { ...card, closingDate: moment().endOf('month').toDate().toISOString() };
+          }
+        }
+        // Elimina closingDate de débito/cash si existe
+        if (card.cardType !== 'Credit Card' && card.closingDate !== undefined) {
+          const { closingDate, ...rest } = card;
+          return rest;
+        }
+        return card;
+      });
+      if (changed) {
+        await updateDoc(userDocRef, { creditCards: cleanUndefined(updated) });
+      }
+    };
+    ensureCreditCardClosingDates();
+  }, [currentUser]);
+
+  // Obtiene el array global de tarjetas del usuario
+  async function getUserCreditCards() {
+    if (!currentUser) return [];
+    const userDocRef = doc(db, "users", currentUser.uid);
+    const userDoc = await getDoc(userDocRef);
+    if (userDoc.exists()) {
+      // Solo deja closingDate en tarjetas de crédito
+      return (userDoc.data().creditCards || []).map(card => {
+        if (card.cardType === 'Credit Card') return card;
+        // Elimina closingDate si existe en débito/cash
+        const { closingDate, ...rest } = card;
+        return rest;
+      });
+    }
+    return [];
+  }
+
+  // Reconstruye las tarjetas del mes, usando el closingDate global solo para crédito
+  const updateCreditCards = async (expenses) => {
     const cardMap = new Map();
+    const globalCards = await getUserCreditCards();
+    let updatedGlobalCards = [...globalCards];
 
     expenses.forEach((expense) => {
       if (expense.bank && expense.cardType && expense.paymentMethod && expense.currency && !isNaN(expense.amount)) {
@@ -91,6 +141,21 @@ const Expenses = () => {
 
           existingCard.amounts[expense.currency] += parseFloat(expense.amount);
         } else {
+          let closingDate = undefined;
+          if (expense.paymentMethod === 'Credit Card') {
+            // Busca el closingDate solo para tarjetas de crédito
+            const prev = globalCards.find(c => c.bank === expense.bank && c.cardBank === expense.cardType && c.cardType === expense.paymentMethod);
+            closingDate = prev && prev.closingDate ? prev.closingDate : moment().endOf('month').toDate().toISOString();
+            // Si la tarjeta no existe en el array global, agregarla
+            if (!prev) {
+              updatedGlobalCards.push({
+                bank: expense.bank,
+                cardBank: expense.cardType,
+                cardType: 'Credit Card',
+                closingDate: closingDate
+              });
+            }
+          }
           cardMap.set(key, {
             bank: expense.bank,
             cardBank: expense.cardType,
@@ -99,7 +164,7 @@ const Expenses = () => {
               [expense.currency]: parseFloat(expense.amount),
             },
             color: cardColors[expense.cardType] || cardColors.Cash,
-            closingDate: moment().endOf('month').toDate(),
+            ...(expense.paymentMethod === 'Credit Card' ? { closingDate } : {}),
           });
         }
       }
@@ -110,51 +175,66 @@ const Expenses = () => {
         currency,
         amount: amount.toFixed(2),
       }));
-
       return card;
     });
 
     // Ordenar las tarjetas alfabéticamente por el nombre del banco
     cardsData.sort((a, b) => a.bank.localeCompare(b.bank));
-
     setCards(cardsData);
 
-    // Ensure no undefined values before updating document
-    const validCardsData = cardsData.map(card => {
-      const validAmounts = card.amounts.filter(amount => amount.currency && amount.amount !== undefined);
-
-      return {
-        ...card,
-        amounts: validAmounts,
-      };
-    });
-
+    // Actualiza el array global creditCards SOLO para tarjetas de crédito
     const userDocRef = doc(db, "users", currentUser.uid);
-
-    updateDoc(userDocRef, { creditCards: validCardsData }).catch(error => {
-      console.error("Error updating document:", error);
+    // Solo actualiza closingDate de las tarjetas de crédito que aparecen este mes
+    updatedGlobalCards = updatedGlobalCards.map(gc => {
+      if (gc.cardType === 'Credit Card') {
+        const match = cardsData.find(cd => cd.bank === gc.bank && cd.cardBank === gc.cardBank && cd.cardType === 'Credit Card');
+        if (match) {
+          return { ...gc, closingDate: match.closingDate };
+        }
+        return gc;
+      } else {
+        // Elimina closingDate si existe en débito/cash
+        const { closingDate, ...rest } = gc;
+        return rest;
+      }
     });
+    await updateDoc(userDocRef, { creditCards: cleanUndefined(updatedGlobalCards) });
   };
 
+  // Edita solo el closingDate de la tarjeta de crédito correspondiente
   const updateCardClosingDate = async (bank, cardBank, cardType, newClosingDate) => {
+    if (cardType !== 'Credit Card') return;
     const userDocRef = doc(db, `users/${currentUser.uid}`);
     const userDoc = await getDoc(userDocRef);
     const userData = userDoc.data();
-
-    const updatedCards = userData.creditCards.map((c) => {
-      if (c.bank === bank && c.cardBank === cardBank && c.cardType === cardType) {
-
-        return { ...c, closingDate: newClosingDate };
+    const updatedCards = (userData.creditCards || []).map((c) => {
+      if (c.bank === bank && c.cardBank === cardBank && c.cardType === 'Credit Card') {
+        let dateVal = newClosingDate;
+        if (!dateVal || (typeof dateVal === 'string' && isNaN(new Date(dateVal)))) {
+          dateVal = moment().endOf('month').toDate();
+        } else if (typeof dateVal === 'string') {
+          const parsed = new Date(dateVal);
+          dateVal = isNaN(parsed) ? moment().endOf('month').toDate() : parsed;
+        } else if (typeof dateVal === 'object' && dateVal !== null && typeof dateVal.toDate === 'function') {
+          dateVal = dateVal.toDate();
+        } else if (!(dateVal instanceof Date)) {
+          dateVal = new Date(dateVal);
+        }
+        // Convertir a string ISO antes de guardar
+        return { ...c, closingDate: dateVal.toISOString() };
       }
-
+      // Elimina closingDate si no es crédito
+      if (c.cardType !== 'Credit Card' && c.closingDate !== undefined) {
+        const { closingDate, ...rest } = c;
+        return rest;
+      }
       return c;
     });
-
-    await updateDoc(userDocRef, { creditCards: updatedCards });
-
+    await updateDoc(userDocRef, { creditCards: cleanUndefined(updatedCards) });
+    // Actualiza el estado local para reflejar el cambio inmediato
     setCards((prevCards) =>
       prevCards.map((card) =>
-        card.bank === bank && card.cardBank === cardBank && card.cardType === cardType
+        card.bank === bank && card.cardBank === cardBank && card.cardType === 'Credit Card'
           ? { ...card, closingDate: newClosingDate }
           : card
       )
@@ -171,10 +251,9 @@ const Expenses = () => {
 
   const { creditCards, debitCards, cashCards } = groupCardsByType(cards);
 
+  // Renderiza las tarjetas mostrando DatePicker solo para crédito
   const renderSection = (title, cards) => {
     if (cards.length === 0) return null;
-
-    // Cards with title
     return (
       <div className="card-section">
         <h2>{title}</h2>
@@ -791,6 +870,20 @@ const Expenses = () => {
     setNoteModal({ visible: false, id: null, note: '' });
   };
 
+  // Limpia undefined de objetos/arrays
+  function cleanUndefined(obj) {
+    if (Array.isArray(obj)) {
+      return obj.map(cleanUndefined);
+    } else if (obj && typeof obj === 'object') {
+      return Object.fromEntries(
+        Object.entries(obj)
+          .filter(([_, v]) => v !== undefined)
+          .map(([k, v]) => [k, cleanUndefined(v)])
+      );
+    }
+    return obj;
+  }
+
   return (
     <>
       <div className='container-page'>
@@ -804,8 +897,14 @@ const Expenses = () => {
               <DatePicker
                 picker="month"
                 allowClear={false}
-                value={selectedMonth}
-                onChange={(value) => setSelectedMonth(value)}
+                value={dayjs(selectedMonth).isValid() ? dayjs(selectedMonth) : dayjs()}
+                onChange={(value) => {
+                  if (!value || !dayjs(value).isValid()) {
+                    setSelectedMonth(dayjs());
+                  } else {
+                    setSelectedMonth(dayjs(value));
+                  }
+                }}
                 style={{ margin: 0 }}
               />
             </div>
