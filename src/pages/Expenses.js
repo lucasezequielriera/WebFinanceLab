@@ -690,7 +690,7 @@ const Expenses = () => {
 
   const EditableTable = () => (
     <Form form={form} component={false}>
-      <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 16 }}>
+      {/* <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 16 }}>
         <Button
           icon={<PlusOutlined />}
           onClick={e => {
@@ -705,7 +705,7 @@ const Expenses = () => {
         >
           Agregar pago
         </Button>
-      </div>
+      </div> */}
       <Table
         bordered
         dataSource={monthlyPayments}

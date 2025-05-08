@@ -176,10 +176,10 @@ const AppLayout = () => {
           key: '9',
           label: <Link to="/detailed-expenses">{t('userProfile.navbar.expenses.dailyExpenses')}</Link>
         },
-        {
-          key: '10',
-          label: <Link to="/general-expenses">{t('userProfile.navbar.expenses.monthlyExpenses')}</Link>
-        },
+        // {
+        //   key: '10',
+        //   label: <Link to="/general-expenses">{t('userProfile.navbar.expenses.monthlyExpenses')}</Link>
+        // },
         {
           key: '5',
           label: <Link to="/expenses">{t('userProfile.navbar.expenses.payments')}</Link>
@@ -243,7 +243,7 @@ const AppLayout = () => {
     if (location.pathname.startsWith('/about-us'))          return t('userProfile.navbar.aboutUs');
     if (location.pathname.startsWith('/profile'))           return t('userProfile.navbar.profile');
     if (location.pathname.startsWith('/detailed-expenses')) return t('userProfile.typeOfAccount.dropdown.dailyExpenses');
-    if (location.pathname.startsWith('/general-expenses'))  return t('userProfile.typeOfAccount.dropdown.monthlyExpenses');
+    // if (location.pathname.startsWith('/general-expenses'))  return t('userProfile.typeOfAccount.dropdown.monthlyExpenses');
     if (location.pathname.startsWith('/expenses'))          return t('userProfile.navbar.expenses.payments');
     return '';
   };
