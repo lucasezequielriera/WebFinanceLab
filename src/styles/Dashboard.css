@@ -25,6 +25,10 @@
   border: 1px solid rgb(126, 126, 126);
 }
 
+.equal-height-card .ant-list-header {
+  padding-top: 0 !important;
+}
+
 .ant-card {
   border: 1px solid transparent !important;
 }

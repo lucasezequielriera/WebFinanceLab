@@ -14,6 +14,8 @@ import PesoExpenseCounter             from '../components/PesoExpenseCounter';
 import BalancePesosCounter            from '../components/BalancePesosCounter';
 import BalanceDollarsCounter          from '../components/BalanceDollarsCounter';
 import DailyExpensesChart             from '../components/DailyExpensesChart';
+import MonthlySummaryTable            from '../components/MonthlySummaryTable';
+import RecentMovements                from '../components/RecentMovements';
 // Styles //
 import '../styles/Dashboard.css';
 
@@ -93,11 +95,23 @@ const Dashboard = () => {
                 </Row>
               )}
 
-              {/* GRAPH */}
-              <Row className="dashboard-chart" gutter={[12, 12]} style={{ marginTop: 0, marginBottom: 30, marginRight: 0, marginLeft: 0 }}>
-                <Col span={24} style={{ padding: 0 }}>
+              {/* GRAPH + MONTHLY SUMMARY + RECENT MOVEMENTS */}
+              <Row className="dashboard-chart" gutter={[16, 16]} style={{ marginTop: 0, marginBottom: 30 }}>
+                <Col xs={24} sm={24} md={24} lg={16}>
                   <Card>
                     <DailyExpensesChart userId={currentUser?.uid} />
+                  </Card>
+                  <Card style={{ marginTop: 16 }}>
+                    <MonthlySummaryTable />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={24} md={24} lg={8}>
+                  <Card
+                    className="equal-height-card"
+                    style={{ marginLeft: 0, justifyContent: 'flex-start' }}
+                    id="recent-movements-card"
+                  >
+                    <RecentMovements />
                   </Card>
                 </Col>
               </Row>

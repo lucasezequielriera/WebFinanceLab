@@ -75,6 +75,21 @@ const Expenses = () => {
     return () => unsub();
   }, [currentUser, currentMonthKey]);
 
+  // Helper para limpiar undefined
+  function cleanUndefined(obj) {
+    if (Array.isArray(obj)) {
+      return obj.map(cleanUndefined);
+    }
+    if (obj && typeof obj === 'object') {
+      return Object.fromEntries(
+        Object.entries(obj)
+          .filter(([_, v]) => v !== undefined)
+          .map(([k, v]) => [k, cleanUndefined(v)])
+      );
+    }
+    return obj;
+  }
+
   const updateCreditCards = (expenses) => {
     const cardMap = new Map();
 
@@ -132,7 +147,7 @@ const Expenses = () => {
 
     const userDocRef = doc(db, "users", currentUser.uid);
 
-    updateDoc(userDocRef, { creditCards: validCardsData }).catch(error => {
+    updateDoc(userDocRef, { creditCards: cleanUndefined(validCardsData) }).catch(error => {
       console.error("Error updating document:", error);
     });
   };
@@ -151,7 +166,7 @@ const Expenses = () => {
       return c;
     });
 
-    await updateDoc(userDocRef, { creditCards: updatedCards });
+    await updateDoc(userDocRef, { creditCards: cleanUndefined(updatedCards) });
 
     setCards((prevCards) =>
       prevCards.map((card) =>
