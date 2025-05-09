@@ -22,7 +22,10 @@ const DetailedExpenses = () => {
   const [expenses, setExpenses] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [rowEdits, setRowEdits] = useState({});
-  const [dateRange, setDateRange] = useState(null);
+  const [dateRange, setDateRange] = useState([
+    dayjs().startOf('month'),
+    dayjs()
+  ]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedCurrency, setSelectedCurrency] = useState(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
@@ -349,6 +352,7 @@ const DetailedExpenses = () => {
             placeholder={['Fecha inicial', 'Fecha final']}
             style={{ minWidth: 280 }}
             clearIcon={<span style={{ fontSize: '16px', padding: '4px' }}>✕</span>}
+            format={i18n.language === 'en' ? 'MM/DD/YYYY' : 'DD/MM/YYYY'}
           />
           <Select
             style={{ minWidth: 180 }}

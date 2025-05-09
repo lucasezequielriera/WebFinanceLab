@@ -38,9 +38,9 @@ const Expenses = () => {
   const decimalSeparator = i18n.language === 'es' ? ',' : '.';
 
   const cardColors = {
-    Visa: 'linear-gradient(135deg, #1A1F71, #2E77BB)',
-    MasterCard: 'linear-gradient(135deg, #ff2500, #ff9300)',
-    'American Express': 'linear-gradient(135deg, #0080ff, #00d6ff)',
+    Visa: 'linear-gradient(135deg,rgb(106, 114, 255),rgb(112, 186, 255))',
+    MasterCard: 'linear-gradient(135deg,rgb(250, 127, 39),rgb(255, 187, 92))',
+    'American Express': 'linear-gradient(135deg,rgb(61, 158, 255),rgb(158, 239, 255))',
     Cash: 'linear-gradient(135deg, #00771A, #00BF5A)',
   };
 
