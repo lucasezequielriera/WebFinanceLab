@@ -187,8 +187,8 @@ const DetailedExpenses = () => {
     }
   };
 
-  const columns = [
-    {
+            const columns = [
+              {
       title: t('userProfile.expenses.detailed.colDescription'),
       dataIndex: 'description',
       key: 'description',
@@ -198,14 +198,14 @@ const DetailedExpenses = () => {
       }),
       sorter: (a, b) => a.description.localeCompare(b.description),
       sortDirections: ['ascend', 'descend'],
-      render: (_, rec) => isEditing(rec)
-        ? <Input
-            value={rowEdits.description}
-            onChange={e => onChangeCell('description', e.target.value)}
-          />
-        : rec.description
-    },
-    {
+                render: (_, rec) => isEditing(rec)
+                  ? <Input
+                      value={rowEdits.description}
+                      onChange={e => onChangeCell('description', e.target.value)}
+                    />
+                  : rec.description
+              },
+              {
       title: t('userProfile.expenses.detailed.colAmount'),
       dataIndex: 'amount',
       key: 'amount',
@@ -216,15 +216,15 @@ const DetailedExpenses = () => {
       sorter: (a, b) => a.amount - b.amount,
       sortDirections: ['descend', 'ascend'],
       render: (t, rec) => isEditing(rec)
-        ? <InputNumber
-            value={rowEdits.amount}
-            onChange={v => onChangeCell('amount', v)}
-            prefix="$"
+                  ? <InputNumber
+                      value={rowEdits.amount}
+                      onChange={v => onChangeCell('amount', v)}
+                      prefix="$"
             style={{ width: '100%' }}
           />
         : `$ ${Number(t).toFixed(2)}`
-    },
-    {
+              },
+              {
       title: t('userProfile.expenses.detailed.colCurrency'),
       dataIndex: 'currency',
       key: 'currency',
@@ -233,16 +233,16 @@ const DetailedExpenses = () => {
       sortDirections: ['ascend', 'descend'],
       render: (_, rec) => isEditing(rec)
         ? <Select
-            value={rowEdits.currency}
-            onChange={v => onChangeCell('currency', v)}
+                      value={rowEdits.currency}
+                      onChange={v => onChangeCell('currency', v)}
             style={{ width: '100%' }}
-          >
-            <Option value="ARS">ARS</Option>
-            <Option value="USD">USD</Option>
-          </Select>
-        : rec.currency
-    },
-    {
+                    >
+                      <Option value="ARS">ARS</Option>
+                      <Option value="USD">USD</Option>
+                    </Select>
+                  : rec.currency
+              },
+              {
       title: t('userProfile.expenses.detailed.colCategory'),
       dataIndex: 'category',
       key: 'category',
@@ -298,13 +298,13 @@ const DetailedExpenses = () => {
               style={{ width: '100%' }}
               showTime={{ format: 'HH:mm' }}
               format="dd/MM/yyyy HH:mm"
-            />
+                      />
           : <Tooltip title={format(d, 'HH:mm:ss')}>
               {format(d, i18n.language === 'en' ? 'MM/dd/yyyy' : 'dd/MM/yyyy')}
-            </Tooltip>;
-      }
-    },
-    {
+                      </Tooltip>;
+                }
+              },
+              {
       title: t('userProfile.expenses.detailed.colActions'),
       key: 'actions',
       width: '10%',
@@ -312,36 +312,36 @@ const DetailedExpenses = () => {
         style: { minWidth: '106px' }
       }),
       render: (_, rec) => isEditing(rec)
-        ? (
+                  ? (
           <div style={{ minWidth: '106px' }}>
-            <Tag
-              icon={<CheckOutlined />}
+                      <Tag
+                        icon={<CheckOutlined />}
               onClick={() => saveEdit(rec.id)}
               style={{ cursor: 'pointer', marginRight: 8 }}
-            />
-            <Tag
-              icon={<CloseOutlined />}
-              onClick={cancelEdit}
+                      />
+                      <Tag
+                        icon={<CloseOutlined />}
+                        onClick={cancelEdit}
               style={{ cursor: 'pointer' }}
-            />
+                      />
           </div>
-        )
-        : (
-          <>
-            <Tag
-              icon={<EditOutlined />}
+                  )
+                  : (
+                    <>
+                      <Tag
+                        icon={<EditOutlined />}
               onClick={() => startEdit(rec)}
               style={{ cursor: 'pointer', marginRight: 8 }}
-            />
+                      />
             <Popconfirm title={t('userProfile.expenses.detailed.deleteConfirm')} onConfirm={() => handleDelete(rec)}>
               <Tag icon={<DeleteOutlined />} color="red" style={{ cursor: 'pointer' }} />
-            </Popconfirm>
-          </>
-        )
-    }
-  ];
+                      </Popconfirm>
+                    </>
+                  )
+              }
+            ];
 
-  return (
+            return (
     <div className="container-page">
       <Spin spinning={loading}>
         <div style={{ marginBottom: 16, display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -383,11 +383,11 @@ const DetailedExpenses = () => {
           />
         </div>
 
-        <Table
-          bordered
+                <Table
+                  bordered
           dataSource={filteredExpenses.slice().sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)}
-          columns={columns}
-          rowKey="id"
+                  columns={columns}
+                  rowKey="id"
           pagination={{ 
             pageSize: 8,
             showSizeChanger: false
@@ -402,7 +402,7 @@ const DetailedExpenses = () => {
             <span style={{ color: '#0071de' }}>Total ARS: <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>${totalPesos.toLocaleString(i18n.language === 'en' ? 'en-US' : 'es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></span>
             <span style={{ color: '#0071de', opacity: 0.5 }}>|</span>
             <span style={{ color: '#0071de' }}>Total USD: <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>${totalDollars.toLocaleString(i18n.language === 'en' ? 'en-US' : 'es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></span>
-          </div>
+                </div>
         )}
       </Spin>
     </div>

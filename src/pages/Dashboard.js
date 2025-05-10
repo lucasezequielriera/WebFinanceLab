@@ -101,9 +101,9 @@ const Dashboard = () => {
                   <Card>
                     <DailyExpensesChart userId={currentUser?.uid} />
                   </Card>
-                  <Card style={{ marginTop: 16 }}>
+                  {/* <Card style={{ marginTop: 16 }}>
                     <MonthlySummaryTable />
-                  </Card>
+                  </Card> */}
                 </Col>
                 <Col xs={24} sm={24} md={24} lg={8}>
                   <Card
