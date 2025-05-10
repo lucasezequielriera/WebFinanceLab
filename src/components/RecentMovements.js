@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { List, Tag, Spin } from 'antd';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import dayjs from 'dayjs';
 import { DollarOutlined, ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
 
@@ -13,39 +13,60 @@ const RecentMovements = () => {
 
   useEffect(() => {
     if (!currentUser) return;
-    const fetchData = async () => {
-      setLoading(true);
-      const all = [];
-      // Incomes
-      const incomesSnap = await getDocs(collection(db, `users/${currentUser.uid}/incomes`));
-      incomesSnap.forEach(doc => {
+
+    let incomes = [];
+    let expenses = [];
+    let incomesLoaded = false;
+    let expensesLoaded = false;
+
+    // Incomes listener
+    const unsubIncomes = onSnapshot(collection(db, `users/${currentUser.uid}/incomes`), (snapshot) => {
+      incomes = snapshot.docs.map(doc => {
         const d = doc.data();
-        all.push({
+        return {
           type: 'Ingreso',
           description: d.title || d.description || '',
           amount: Number(d.amount),
           currency: d.currency || 'ARS',
           date: dayjs(d.timestamp?.seconds ? d.timestamp.seconds * 1000 : d.timestamp),
-        });
+        };
       });
-      // Expenses
-      const expensesSnap = await getDocs(collection(db, `users/${currentUser.uid}/expenses`));
-      expensesSnap.forEach(doc => {
+      incomesLoaded = true;
+      if (expensesLoaded) {
+        // Combinar y ordenar por fecha descendente
+        const all = [...incomes, ...expenses];
+        all.sort((a, b) => b.date.valueOf() - a.date.valueOf());
+        setMovements(all.slice(0, 10));
+        setLoading(false);
+      }
+    });
+
+    // Expenses listener
+    const unsubExpenses = onSnapshot(collection(db, `users/${currentUser.uid}/expenses`), (snapshot) => {
+      expenses = snapshot.docs.map(doc => {
         const d = doc.data();
-        all.push({
+        return {
           type: d.fixed ? 'Gasto Fijo' : 'Gasto Diario',
           description: d.description || '',
           amount: Number(d.amount),
           currency: d.currency || 'ARS',
           date: dayjs(d.timestamp?.seconds ? d.timestamp.seconds * 1000 : d.timestamp),
-        });
+        };
       });
-      // Ordenar por fecha descendente y tomar los 10 más recientes
-      all.sort((a, b) => b.date.valueOf() - a.date.valueOf());
-      setMovements(all.slice(0, 10));
-      setLoading(false);
+      expensesLoaded = true;
+      if (incomesLoaded) {
+        // Combinar y ordenar por fecha descendente
+        const all = [...incomes, ...expenses];
+        all.sort((a, b) => b.date.valueOf() - a.date.valueOf());
+        setMovements(all.slice(0, 10));
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      unsubIncomes();
+      unsubExpenses();
     };
-    fetchData();
   }, [currentUser]);
 
   return (

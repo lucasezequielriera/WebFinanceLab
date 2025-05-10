@@ -41,7 +41,7 @@ const Expenses = () => {
     Visa: 'linear-gradient(135deg,rgb(106, 114, 255),rgb(112, 186, 255))',
     MasterCard: 'linear-gradient(135deg,rgb(250, 127, 39),rgb(255, 187, 92))',
     'American Express': 'linear-gradient(135deg,rgb(61, 158, 255),rgb(158, 239, 255))',
-    Cash: 'linear-gradient(135deg, #00771A, #00BF5A)',
+    Cash: 'linear-gradient(135deg,rgb(0, 201, 104),rgb(105, 255, 175))',
   };
 
   useEffect(() => {
