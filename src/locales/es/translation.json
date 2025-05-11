@@ -7,8 +7,9 @@
         "dropdown": {
             "dashboard": "Dashboard",
             "incomes": "Ingresos",
+            "summary": "Resumen de Gastos",
             "dailyExpenses": "Gastos Diarios",
-            "monthlyExpenses": "Gastos Mensuales",
+            "fixedExpenses": "Gastos Fijos",
             "payments": "Pagos",
             "financialGoals": "Mis Objetivos",
             "profile": "Perfil",
@@ -49,6 +50,10 @@
             "fixedExpense": "Gasto Fijo",
             "fixedPayment": "Pago Fijo"
         }
+    },
+    "userProfile.dashboard.monthlyTimeline": {
+        "title": "Comparación Mensual",
+        "noData": "No hay datos para mostrar"
     },
 
     "userProfile.incomes.filter.placeholder": "Selecciona mes",

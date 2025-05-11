@@ -142,42 +142,42 @@ const AddExpense = ({ onExpenseAdded }) => {
     setLoading(true);
     try {
       if (values.expenseType === 'daily') {
-        const selectedDate = values.date ? values.date.toDate() : new Date();
-        const timestamp    = Timestamp.fromDate(selectedDate);
-        const date         = timestamp.toDate();
+      const selectedDate = values.date ? values.date.toDate() : new Date();
+      const timestamp    = Timestamp.fromDate(selectedDate);
+      const date         = timestamp.toDate();
 
-        const finalCategory = values.category?.trim() || '';
-        if (!finalCategory) {
-          notification.error({ message: 'Categoría requerida' });
-          setLoading(false);
-          return;
-        }
+      const finalCategory = values.category?.trim() || '';
+      if (!finalCategory) {
+        notification.error({ message: 'Categoría requerida' });
+        setLoading(false);
+        return;
+      }
 
-        const newExpense = {
-          amount:        parseFloat(values.amount).toFixed(2),
-          currency:      values.currency,
-          category:      finalCategory,
-          description:   values.description,
-          paymentMethod: values.paymentMethod,
-          bank:          values.bank     || 'N/A',
-          cardType:      values.cardType || 'N/A',
-          timestamp,
-          day:   date.getDate(),
-          month: date.getMonth() + 1,
-          year:  date.getFullYear(),
-        };
+      const newExpense = {
+        amount:        parseFloat(values.amount).toFixed(2),
+        currency:      values.currency,
+        category:      finalCategory,
+        description:   values.description,
+        paymentMethod: values.paymentMethod,
+        bank:          values.bank     || 'N/A',
+        cardType:      values.cardType || 'N/A',
+        timestamp,
+        day:   date.getDate(),
+        month: date.getMonth() + 1,
+        year:  date.getFullYear(),
+      };
 
-        const docRef = await addDoc(
-          collection(db, `users/${currentUser.uid}/expenses`),
-          newExpense
-        );
-        newExpense.id = docRef.id;
+      const docRef = await addDoc(
+        collection(db, `users/${currentUser.uid}/expenses`),
+        newExpense
+      );
+      newExpense.id = docRef.id;
 
         // Actualizar lastActivity
         await updateDoc(doc(db, 'users', currentUser.uid), { lastActivity: Timestamp.now() });
 
-        form.resetFields();
-        setPaymentMethod(null);
+      form.resetFields();
+      setPaymentMethod(null);
         if (onExpenseAdded) onExpenseAdded(newExpense);
         notification.success({ message: 'Gasto diario agregado', description: 'El gasto fue agregado correctamente.' });
       } else {
@@ -197,7 +197,7 @@ const AddExpense = ({ onExpenseAdded }) => {
             await uploadBytes(fileRef, pdfFile);
             pdfUrl = await getDownloadURL(fileRef);
             setPdfFile(null);
-          } catch (err) {
+    } catch (err) {
             notification.error({ message: 'Error al subir PDF', description: 'No se pudo subir el archivo PDF.' });
             setLoading(false);
             return;
@@ -326,182 +326,182 @@ const AddExpense = ({ onExpenseAdded }) => {
 
           {expenseType === 'daily' ? (
             <>
-              {/* DATE */}
+          {/* DATE */}
+          <Form.Item
+            name="date"
+            label={t('userProfile.addNewExpense.date')}
+            initialValue={dayjs()}
+            rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.dateRequired') }]}
+          >
+            <DatePicker
+              style={{ width: '100%' }}
+              format={(val) =>
+                dayjs().isSame(val, 'day')
+                  ? t('userProfile.addNewExpense.defaultDataInputDate')
+                  : val.format('DD/MM/YYYY')
+              }
+            />
+          </Form.Item>
+
+          {/* DESCRIPTION */}
+          <Form.Item
+            name="description"
+            label={t('userProfile.addNewExpense.description')}
+            rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.descriptionRequired') }]}
+          >
+            <Input prefix={<FileTextOutlined />} placeholder="Uber to work" />
+          </Form.Item>
+
+          {/* AMOUNT + CURRENCY */}
+          <Row gutter={[16, 16]}>
+            <Col xs={12}>
               <Form.Item
-                name="date"
-                label={t('userProfile.addNewExpense.date')}
-                initialValue={dayjs()}
-                rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.dateRequired') }]}
+                name="amount"
+                label={t('userProfile.addNewExpense.amount')}
+                rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.amountRequired') }]}
               >
-                <DatePicker
-                  style={{ width: '100%' }}
-                  format={(val) =>
-                    dayjs().isSame(val, 'day')
-                      ? t('userProfile.addNewExpense.defaultDataInputDate')
-                      : val.format('DD/MM/YYYY')
-                  }
-                />
+                <Input type="number" prefix={<DollarOutlined />} placeholder="125.50" />
               </Form.Item>
-
-              {/* DESCRIPTION */}
+            </Col>
+            <Col xs={12} style={{ display: 'flex', alignItems: 'center' }}>
               <Form.Item
-                name="description"
-                label={t('userProfile.addNewExpense.description')}
-                rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.descriptionRequired') }]}
+                name="currency"
+                initialValue={lastCurrency}
+                rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.currencyRequired') }]}
+                style={{ marginBottom: 0 }}
               >
-                <Input prefix={<FileTextOutlined />} placeholder="Uber to work" />
+                <CurrencyTagPicker />
               </Form.Item>
+            </Col>
+          </Row>
 
-              {/* AMOUNT + CURRENCY */}
-              <Row gutter={[16, 16]}>
-                <Col xs={12}>
-                  <Form.Item
-                    name="amount"
-                    label={t('userProfile.addNewExpense.amount')}
-                    rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.amountRequired') }]}
-                  >
-                    <Input type="number" prefix={<DollarOutlined />} placeholder="125.50" />
-                  </Form.Item>
-                </Col>
-                <Col xs={12} style={{ display: 'flex', alignItems: 'center' }}>
-                  <Form.Item
-                    name="currency"
-                    initialValue={lastCurrency}
-                    rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.currencyRequired') }]}
-                    style={{ marginBottom: 0 }}
-                  >
-                    <CurrencyTagPicker />
-                  </Form.Item>
-                </Col>
-              </Row>
+          {/* PAYMENT METHOD */}
+          <Form.Item
+            name="paymentMethod"
+            label={t('userProfile.addNewExpense.paymentMethod')}
+            rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.paymentMethodRequired') }]}
+          >
+            <Select
+              placeholder="Seleccioná método"
+              onChange={(val) => {
+                setPaymentMethod(val);
 
-              {/* PAYMENT METHOD */}
-              <Form.Item
-                name="paymentMethod"
-                label={t('userProfile.addNewExpense.paymentMethod')}
-                rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.paymentMethodRequired') }]}
-              >
-                <Select
-                  placeholder="Seleccioná método"
-                  onChange={(val) => {
-                    setPaymentMethod(val);
+                if (val === 'Credit Card') {
+                  form.setFieldsValue({
+                    bank:     lastBank.credit || undefined,
+                    cardType: lastBank.credit
+                      ? cardInfo.credit[lastBank.credit]?.last
+                      : undefined,
+                  });
+                } else if (val === 'Debit Card') {
+                  form.setFieldsValue({
+                    bank:     lastBank.debit || undefined,
+                    cardType: lastBank.debit
+                      ? cardInfo.debit[lastBank.debit]?.last
+                      : undefined,
+                  });
+                } else {
+                  form.setFieldsValue({ bank: undefined, cardType: undefined });
+                }
+              }}
+            >
+              <Option value="Cash">Cash</Option>
+              <Option value="Credit Card">Credit Card</Option>
+              <Option value="Debit Card">Debit Card</Option>
+            </Select>
+          </Form.Item>
 
-                    if (val === 'Credit Card') {
-                      form.setFieldsValue({
-                        bank:     lastBank.credit || undefined,
-                        cardType: lastBank.credit
-                          ? cardInfo.credit[lastBank.credit]?.last
-                          : undefined,
-                      });
-                    } else if (val === 'Debit Card') {
-                      form.setFieldsValue({
-                        bank:     lastBank.debit || undefined,
-                        cardType: lastBank.debit
-                          ? cardInfo.debit[lastBank.debit]?.last
-                          : undefined,
-                      });
-                    } else {
-                      form.setFieldsValue({ bank: undefined, cardType: undefined });
-                    }
-                  }}
+          {/* BANK & CARD TYPE (only when card selected) */}
+          {(paymentMethod === 'Credit Card' || paymentMethod === 'Debit Card') && (
+            <Row gutter={[16, 16]}>
+              <Col xs={12}>
+                <Form.Item
+                  name="bank"
+                  label={t('userProfile.addNewExpense.bank')}
+                  rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.bankRequired') }]}
                 >
-                  <Option value="Cash">Cash</Option>
-                  <Option value="Credit Card">Credit Card</Option>
-                  <Option value="Debit Card">Debit Card</Option>
+                  <Select
+                    placeholder="Seleccioná banco"
+                    value={form.getFieldValue('bank')}
+                    onChange={handleBankChange}
+                    dropdownRender={(menu) => (
+                      <>
+                        {menu}
+                        {/* separador + input para nuevo banco */}
+                        <div style={{ display: 'flex', gap: 8, padding: 8 }}>
+                          <Input
+                            size="small"
+                            placeholder="Agregar banco"
+                            value={newBank}
+                            onChange={(e) => setNewBank(e.target.value)}
+                            onPressEnter={(e) => {
+                              e.preventDefault();    // evita que el Select procese el Enter
+                              e.stopPropagation();
+                              addNewBank();
+                            }}
+                          />
+                          <Button
+                            type="text"
+                            icon={<PlusOutlined />}
+                            onClick={addNewBank}
+                          />
+                        </div>
+                      </>
+                    )}
+                  >
+                    {(paymentMethod === 'Credit Card' ? banks.credit : banks.debit).map((b) => (
+                      <Option key={b} value={b}>
+                        {b}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+
+              <Col xs={12}>
+              <Form.Item
+                name="cardType"
+                label={t('userProfile.addNewExpense.cardType')}
+                rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.cardTypeRequired') }]}
+              >
+                <Select placeholder="Seleccioná tipo">
+                  {(() => {
+                    const bk   = form.getFieldValue('bank');
+                    const info =
+                      paymentMethod === 'Credit Card'
+                        ? cardInfo.credit[bk]
+                        : cardInfo.debit[bk];
+
+                    /* unión: las 3 opciones fijas + las extras que existan en historial */
+                    const list = Array.from(
+                      new Set([ ...ALL_CARD_TYPES, ...(info?.list || []) ])
+                    );
+
+                    return list.map((ct) => (
+                      <Option key={ct} value={ct}>
+                        {ct}
+                      </Option>
+                    ));
+                  })()}
                 </Select>
               </Form.Item>
+              </Col>
+            </Row>
+          )}
 
-              {/* BANK & CARD TYPE (only when card selected) */}
-              {(paymentMethod === 'Credit Card' || paymentMethod === 'Debit Card') && (
-                <Row gutter={[16, 16]}>
-                  <Col xs={12}>
-                    <Form.Item
-                      name="bank"
-                      label={t('userProfile.addNewExpense.bank')}
-                      rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.bankRequired') }]}
-                    >
-                      <Select
-                        placeholder="Seleccioná banco"
-                        value={form.getFieldValue('bank')}
-                        onChange={handleBankChange}
-                        dropdownRender={(menu) => (
-                          <>
-                            {menu}
-                            {/* separador + input para nuevo banco */}
-                            <div style={{ display: 'flex', gap: 8, padding: 8 }}>
-                              <Input
-                                size="small"
-                                placeholder="Agregar banco"
-                                value={newBank}
-                                onChange={(e) => setNewBank(e.target.value)}
-                                onPressEnter={(e) => {
-                                  e.preventDefault();    // evita que el Select procese el Enter
-                                  e.stopPropagation();
-                                  addNewBank();
-                                }}
-                              />
-                              <Button
-                                type="text"
-                                icon={<PlusOutlined />}
-                                onClick={addNewBank}
-                              />
-                            </div>
-                          </>
-                        )}
-                      >
-                        {(paymentMethod === 'Credit Card' ? banks.credit : banks.debit).map((b) => (
-                          <Option key={b} value={b}>
-                            {b}
-                          </Option>
-                        ))}
-                      </Select>
-                    </Form.Item>
-                  </Col>
-
-                  <Col xs={12}>
-                  <Form.Item
-                    name="cardType"
-                    label={t('userProfile.addNewExpense.cardType')}
-                    rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.cardTypeRequired') }]}
-                  >
-                    <Select placeholder="Seleccioná tipo">
-                      {(() => {
-                        const bk   = form.getFieldValue('bank');
-                        const info =
-                          paymentMethod === 'Credit Card'
-                            ? cardInfo.credit[bk]
-                            : cardInfo.debit[bk];
-
-                        /* unión: las 3 opciones fijas + las extras que existan en historial */
-                        const list = Array.from(
-                          new Set([ ...ALL_CARD_TYPES, ...(info?.list || []) ])
-                        );
-
-                        return list.map((ct) => (
-                          <Option key={ct} value={ct}>
-                            {ct}
-                          </Option>
-                        ));
-                      })()}
-                    </Select>
-                  </Form.Item>
-                  </Col>
-                </Row>
-              )}
-
-              {/* CATEGORY */}
-              <Form.Item
-                name="category"
-                label={t('userProfile.addNewExpense.category')}
-                rules={[
-                  { required: true, message: t('userProfile.addNewExpense.errorMessages.categoryRequired') },
-                ]}
-              >
-                <CategoryTagPicker
-                  categories={categories}
-                  onNewCategory={(cat) => setCategories((prev) => [...prev, cat])}
-                />
-              </Form.Item>
+          {/* CATEGORY */}
+          <Form.Item
+            name="category"
+            label={t('userProfile.addNewExpense.category')}
+            rules={[
+              { required: true, message: t('userProfile.addNewExpense.errorMessages.categoryRequired') },
+            ]}
+          >
+            <CategoryTagPicker
+              categories={categories}
+              onNewCategory={(cat) => setCategories((prev) => [...prev, cat])}
+            />
+          </Form.Item>
             </>
           ) : (
             <>

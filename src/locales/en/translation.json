@@ -7,6 +7,7 @@
         "dropdown": {
             "dashboard": "Dashboard",
             "incomes": "Incomes",
+            "summary": "Expenses Summary",
             "dailyExpenses": "Daily Expenses",
             "monthlyExpenses": "Monthly Expenses",
             "payments": "Payments",
@@ -49,6 +50,10 @@
             "fixedExpense": "Fixed Expense",
             "fixedPayment": "Fixed Payment"
         }
+    },
+    "userProfile.dashboard.monthlyTimeline": {
+        "title": "Monthly Comparison",
+        "noData": "No data to show"
     },
 
     "userProfile.incomes.filter.placeholder": "Select month",

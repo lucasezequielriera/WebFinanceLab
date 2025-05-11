@@ -8,11 +8,9 @@ import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import PrivateRoute from './components/PrivateRoute';
 import UserProfile from './pages/UserProfile';
-import DetailedExpenses from './pages/DetailedExpenses';
 import GeneralExpenses from './pages/GeneralExpenses';
 import Incomes from './pages/Incomes';
 import AddExpense from './components/AddExpense';
-import Expenses from './pages/Expenses'; // Importa el nuevo componente
 import AboutUs from './pages/AboutUs';
 import FinancialGoals from './pages/FinancialGoals';
 import AccountTypeBadge from './components/AccountTypeBadge';
@@ -35,6 +33,8 @@ import Users from './pages/Users';
 import Configuration from './pages/Configuration';
 import Summary from './pages/Summary';
 import Debts from './pages/Debts';
+import DailyExpenses from './pages/DailyExpenses';
+import FixedExpenses from './pages/FixedExpenses';
 
 const { Title, Paragraph } = Typography;
 const { Header, Sider, Content } = Layout;
@@ -90,11 +90,11 @@ const AppLayout = () => {
       setSelectedKey('1');
     } else if (path.startsWith('/incomes')) {
       setSelectedKey('8');
-    } else if (path.startsWith('/expenses')) {
+    } else if (path.startsWith('/fixed-expenses')) {
       setSelectedKey('5');
     } else if (path.startsWith('/summary')) {
       setSelectedKey('12');
-    } else if (path.startsWith('/detailed-expenses')) {
+    } else if (path.startsWith('/daily-expenses')) {
       setSelectedKey('9');
     } else if (path.startsWith('/general-expenses')) {
       setSelectedKey('10');
@@ -177,11 +177,11 @@ const AppLayout = () => {
         },
         {
           key: '9',
-          label: <Link to="/detailed-expenses">{t('userProfile.navbar.expenses.dailyExpenses')}</Link>
+          label: <Link to="/daily-expenses">{t('userProfile.navbar.expenses.dailyExpenses')}</Link>
         },
         {
           key: '5',
-          label: <Link to="/expenses">{t('userProfile.navbar.expenses.payments')}</Link>
+          label: <Link to="/fixed-expenses">{t('userProfile.navbar.expenses.payments')}</Link>
         },
       ],
     },
@@ -230,12 +230,12 @@ const AppLayout = () => {
   const getPageTitle = () => {
     if (location.pathname.startsWith('/dashboard'))         return t('userProfile.navbar.dashboard');
     if (location.pathname.startsWith('/incomes'))           return t('userProfile.navbar.incomes');
-    if (location.pathname.startsWith('/expenses'))          return t('userProfile.navbar.expenses.payments');
+    if (location.pathname.startsWith('/fixed-expenses'))    return t('userProfile.navbar.expenses.payments');
     if (location.pathname.startsWith('/summary'))           return t('userProfile.expenses.summary.title');
     if (location.pathname.startsWith('/financial-goals'))   return t('userProfile.navbar.financialGoals');
     if (location.pathname.startsWith('/about-us'))          return t('userProfile.navbar.aboutUs');
     if (location.pathname.startsWith('/profile'))           return t('userProfile.navbar.profile');
-    if (location.pathname.startsWith('/detailed-expenses')) return t('userProfile.typeOfAccount.dropdown.dailyExpenses');
+    if (location.pathname.startsWith('/daily-expenses'))    return t('userProfile.typeOfAccount.dropdown.dailyExpenses');
     if (location.pathname.startsWith('/debts'))             return t('userProfile.navbar.debts');
     return '';
   };
@@ -385,7 +385,7 @@ const AppLayout = () => {
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard expenses={expenses} handleExpenseAdded={handleExpenseAdded} /></PrivateRoute>} />
             <Route path="/summary" element={<PrivateRoute><Summary /></PrivateRoute>} />
-            <Route path="/expenses" element={<PrivateRoute><Expenses /></PrivateRoute>} />
+            <Route path="/fixed-expenses" element={<PrivateRoute><FixedExpenses /></PrivateRoute>} />
             <Route path="/incomes" element={<PrivateRoute><Incomes /></PrivateRoute>}/>
             <Route path="/debts" element={<PrivateRoute><Debts /></PrivateRoute>}/>
             <Route path="/signup" element={<RedirectIfAuthenticated><Signup /></RedirectIfAuthenticated>} />
@@ -394,7 +394,7 @@ const AppLayout = () => {
             <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
             <Route path="/financial-goals" element={<PrivateRoute><FinancialGoals /></PrivateRoute>} />
             <Route path="/about-us" element={<PrivateRoute><AboutUs /></PrivateRoute>} />
-            <Route path="/detailed-expenses" element={<PrivateRoute><DetailedExpenses /></PrivateRoute>} />
+            <Route path="/daily-expenses" element={<PrivateRoute><DailyExpenses /></PrivateRoute>} />
             <Route path="/general-expenses" element={<PrivateRoute><GeneralExpenses /></PrivateRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>}>
               <Route path="tasks" element={<Tasks />} />

@@ -18,8 +18,10 @@ import FixedExpensesDollarsCounter    from '../components/FixedExpensesDollarsCo
 import DailyExpensesChart             from '../components/DailyExpensesChart';
 import MonthlySummaryTable            from '../components/MonthlySummaryTable';
 import RecentMovements                from '../components/RecentMovements';
+import MiniMonthlyTimeline           from '../components/MiniMonthlyTimeline';
 // Styles //
 import '../styles/Dashboard.css';
+import '../components/MiniMonthlyTimeline.css';
 
 const Dashboard = () => {
   const [loading, setLoading]               = useState(true);
@@ -27,6 +29,7 @@ const Dashboard = () => {
   const [hasUsdIncome, setHasUsdIncome]     = useState(false);
   const [hasPesosExpenses, setHasPesosExpenses] = useState(false);
   const [hasDollarsExpenses, setHasDollarsExpenses] = useState(false);
+  const [expensesByMonth, setExpensesByMonth] = useState({});
 
   const { currentUser } = useAuth();
   const { t } = useTranslation();
@@ -75,6 +78,36 @@ const Dashboard = () => {
       unsubIncomes();
       unsubExpenses();
     };
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const year = new Date().getFullYear();
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+
+    const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
+    const q = query(
+      expensesRef,
+      where('timestamp', '>=', startOfYear),
+      where('timestamp', '<', endOfYear)
+    );
+
+    const unsub = onSnapshot(q, snap => {
+      const byMonth = {};
+      snap.docs.forEach(doc => {
+        const d = doc.data();
+        if (!d.timestamp) return;
+        const date = d.timestamp.seconds ? new Date(d.timestamp.seconds * 1000) : new Date(d.timestamp);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        if (!byMonth[monthKey]) byMonth[monthKey] = { ARS: 0, USD: 0 };
+        if (d.currency === 'ARS') byMonth[monthKey].ARS += Number(d.amount) || 0;
+        if (d.currency === 'USD') byMonth[monthKey].USD += Number(d.amount) || 0;
+      });
+      setExpensesByMonth(byMonth);
+    });
+
+    return () => unsub();
   }, [currentUser]);
 
   return (
@@ -145,9 +178,20 @@ const Dashboard = () => {
                   <Card>
                     <DailyExpensesChart userId={currentUser?.uid} />
                   </Card>
-                  {/* <Card style={{ marginTop: 16 }}>
-                    <MonthlySummaryTable />
-                  </Card> */}
+                  <Card 
+                    style={{ marginTop: 16 }}
+                    title={
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span>{t('userProfile.dashboard.monthlyTimeline.title')}</span>
+                      </div>
+                    }
+                  >
+                    <MiniMonthlyTimeline
+                      expensesByMonth={expensesByMonth}
+                      onMonthClick={monthKey => console.log('Seleccionaste', monthKey)}
+                      selectedMonth={null}
+                    />
+                  </Card>
                 </Col>
                 <Col xs={24} sm={24} md={24} lg={8}>
                   <Card

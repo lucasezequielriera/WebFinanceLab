@@ -24,7 +24,7 @@ const Summary = () => {
   const { currentUser } = useAuth();
   const { t, i18n } = useTranslation();
   const { hasExpenses } = useMonthlyMovements();
-  
+
   const cardColors = {
     Visa: 'linear-gradient(135deg,rgb(106, 114, 255),rgb(112, 186, 255))',
     MasterCard: 'linear-gradient(135deg,rgb(250, 127, 39),rgb(255, 187, 92))',
@@ -49,7 +49,7 @@ const Summary = () => {
     });
 
     setTimeout(() => {
-      setLoading(false);
+    setLoading(false);
     }, 2000);
 
     return () => unsubscribe();
@@ -58,7 +58,7 @@ const Summary = () => {
   // Al cargar las tarjetas, asegura que cada tarjeta de crédito tenga closingDate
   useEffect(() => {
     const ensureCreditCardClosingDates = async () => {
-      if (!currentUser) return;
+    if (!currentUser) return;
       const userDocRef = doc(db, "users", currentUser.uid);
       const userDoc = await getDoc(userDocRef);
       if (!userDoc.exists()) return;
@@ -362,8 +362,8 @@ const Summary = () => {
             />
           ) : (
             <div style={{ height: 36 }} />
-          )}
-        </div>
+            )}
+          </div>
         {/* Fecha de cierre: si la tarjeta seleccionada es de crédito, mostrar aquí */}
         {selectedCard && selectedCard.cardType === 'Credit Card' && selectedCard.closingDate ? (
           <div style={{ color: '#bfc2ce', fontSize: 18, margin: '8px 0 0 0', display: 'flex', alignItems: 'center', gap: 10, minHeight: 32 }}>
@@ -481,7 +481,7 @@ const Summary = () => {
               {cards.length === 0 ? (
                 <div style={{ width: '100%', textAlign: 'center', marginTop: 40 }}>
                   <Empty description="No hay resumen para mostrar" />
-                </div>
+              </div>
               ) : (
                 <TransitionGroup
                   className="cards-transition-group"

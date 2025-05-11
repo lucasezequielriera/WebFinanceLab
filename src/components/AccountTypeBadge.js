@@ -49,9 +49,9 @@ export default function AccountTypeBadge({ type = 'free' }) {
     >
       <Menu.Item key="/dashboard">{t("userProfile.typeOfAccount.dropdown.dashboard")}</Menu.Item>
       <Menu.Item key="/incomes">{t("userProfile.typeOfAccount.dropdown.incomes")}</Menu.Item>
-      <Menu.Item key="/detailed-expenses">{t("userProfile.typeOfAccount.dropdown.dailyExpenses")}</Menu.Item>
-      <Menu.Item key="/general-expenses">{t("userProfile.typeOfAccount.dropdown.monthlyExpenses")}</Menu.Item>
-      <Menu.Item key="/expenses">{t("userProfile.typeOfAccount.dropdown.payments")}</Menu.Item>
+      <Menu.Item key="/summary">{t("userProfile.typeOfAccount.dropdown.summary")}</Menu.Item>
+      <Menu.Item key="/daily-expenses">{t("userProfile.typeOfAccount.dropdown.dailyExpenses")}</Menu.Item>
+      <Menu.Item key="/fixed-expenses">{t("userProfile.typeOfAccount.dropdown.fixedExpenses")}</Menu.Item>
       <Menu.Item key="/financial-goals">{t("userProfile.typeOfAccount.dropdown.financialGoals")}</Menu.Item>
       <Menu.Item key="/profile">{t("userProfile.typeOfAccount.dropdown.profile")}</Menu.Item>
       <Menu.Divider />

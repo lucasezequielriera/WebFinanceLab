@@ -17,7 +17,7 @@ import '../styles/ExpensesPage.css';
 
 const { Option } = Select;
 
-const DetailedExpenses = () => {
+const DailyExpenses = () => {
   const [loading, setLoading] = useState(true);
   const [expenses, setExpenses] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -409,4 +409,4 @@ const DetailedExpenses = () => {
   );
 };
 
-export default DetailedExpenses;
+export default DailyExpenses;
