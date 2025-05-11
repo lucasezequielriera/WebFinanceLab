@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Statistic } from 'antd';
 import { RiseOutlined, FallOutlined } from '@ant-design/icons';
 import { db } from '../firebase';
-import { collection, query, where, onSnapshot, getDocs, Timestamp, doc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, getDocs, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
@@ -11,9 +11,6 @@ const PesoIncomeCounter = () => {
   const [total, setTotal] = useState(0);
   const [prevTotal, setPrevTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [totalPayments, setTotalPayments] = useState(0);
-  const [prevTotalPayments, setPrevTotalPayments] = useState(0);
-
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -27,18 +24,15 @@ const PesoIncomeCounter = () => {
     const end   = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     const startTimestamp = Timestamp.fromDate(start);
     const endTimestamp   = Timestamp.fromDate(end);
-    const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
     // Mes anterior
     const startPrev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endPrev   = new Date(now.getFullYear(), now.getMonth(), 1);
     const startPrevTs = Timestamp.fromDate(startPrev);
     const endPrevTs   = Timestamp.fromDate(endPrev);
-    const prevMonthKey = `${startPrev.getFullYear()}-${String(startPrev.getMonth() + 1).padStart(2, '0')}`;
 
     // 1) Consultar mes anterior (una sola vez)
     (async () => {
-      // Ingresos mes anterior
       const qPrev = query(
         incomesRef,
         where('currency', '==', 'ARS'),
@@ -49,14 +43,6 @@ const PesoIncomeCounter = () => {
       const sumPrev = snapPrev.docs.reduce((sum, d) => sum + parseFloat(d.data().amount), 0);
       setPrevTotal(sumPrev);
       console.log('[PesoIncomeCounter] Ingresos ARS mes anterior:', sumPrev);
-
-      // Pagos mensuales mes anterior
-      const prevPaymentsRef = doc(db, `users/${currentUser.uid}/monthlyPayments`, prevMonthKey);
-      const prevPaymentsSnap = await getDocs(prevPaymentsRef);
-      const prevPayments = prevPaymentsSnap.exists() ? prevPaymentsSnap.data().payments || [] : [];
-      const prevPaymentsSum = prevPayments.reduce((acc, p) => acc + (Number(p.amountARS) || 0), 0);
-      setPrevTotalPayments(prevPaymentsSum);
-      console.log('[PesoIncomeCounter] Pagos mensuales ARS mes anterior:', prevPaymentsSum);
     })();
 
     // 2) Subscribir mes actual
@@ -73,32 +59,18 @@ const PesoIncomeCounter = () => {
       console.log('[PesoIncomeCounter] Ingresos ARS mes actual:', sumCurr);
     });
 
-    // 3) Pagos mensuales en ARS del mes actual
-    const paymentsRef = doc(db, `users/${currentUser.uid}/monthlyPayments`, monthKey);
-    const unsubPayments = onSnapshot(paymentsRef, snap => {
-      const payments = snap.exists() ? snap.data().payments || [] : [];
-      const sum = payments.reduce((acc, p) => acc + (Number(p.amountARS) || 0), 0);
-      setTotalPayments(sum);
-      console.log('[PesoIncomeCounter] Pagos mensuales ARS mes actual:', sum);
-      console.log('[PesoIncomeCounter] Resultado mostrado en card:', total - sum);
-    });
-
     return () => {
       unsubscribe();
-      unsubPayments();
     };
   }, [currentUser]);
 
   // Cálculo del porcentaje de variación
-  const currentNetIncome = total - totalPayments;
-  const prevNetIncome = prevTotal - prevTotalPayments;
-  const pct = prevNetIncome > 0
-    ? Math.round(((currentNetIncome - prevNetIncome) / prevNetIncome) * 100)
-    : currentNetIncome > 0
+  const pct = prevTotal > 0
+    ? Math.round(((total - prevTotal) / prevTotal) * 100)
+    : total > 0
       ? 100
       : 0;
-
-  const isIncrease = currentNetIncome >= prevNetIncome;
+  const isIncrease = total >= prevTotal;
 
   return (
     <Card loading={loading}>
@@ -106,7 +78,7 @@ const PesoIncomeCounter = () => {
         className='statics-card'
         contentFontSize={5}
         title={t('userProfile.dashboard.card.incomes.ars')}
-        value={currentNetIncome}
+        value={total}
         precision={2}
         prefix='$'
       />

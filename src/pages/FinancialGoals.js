@@ -99,6 +99,22 @@ const FinancialGoals = () => {
         }
     }, [currentUser]);
 
+    // Nueva función para traer el total de pagos fijos del mes actual
+    async function fetchTotalFixedExpenses(autoCurrency, exchangeRate) {
+        if (!currentUser) return 0;
+        const monthKey = dayjs().format('YYYY-MM');
+        const ref = doc(db, `users/${currentUser.uid}/monthlyPayments`, monthKey);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) return 0;
+        const payments = snap.data().payments || [];
+        return payments.reduce((acc, p) => {
+            const amount = autoCurrency === 'USD'
+                ? (Number(p.amountUSD) || 0) + ((Number(p.amountARS) || 0) / exchangeRate)
+                : (Number(p.amountARS) || 0) + ((Number(p.amountUSD) || 0) * exchangeRate);
+            return acc + amount;
+        }, 0);
+    }
+
     useEffect(() => {
         if (!userData) return;
 
@@ -131,14 +147,16 @@ const FinancialGoals = () => {
                 : (autoCurrency === "USD" ? amount / exchangeRate : amount * exchangeRate));
         }, 0) || 0;
 
-        const net = totalIncome - totalExpenses;
-
-        if (manualMode) {
-            setCalculatedDaily(manualAmount && daysRemaining ? manualAmount / daysRemaining : null);
-        } else {
-            setCalculatedDaily(net / daysRemaining);
-            setManualAmount(Number(net.toFixed(2)));
-        }
+        // Nuevo: obtener totalFixedExpenses de monthlyPayments
+        fetchTotalFixedExpenses(autoCurrency, exchangeRate).then(totalFixedExpenses => {
+            const net = totalIncome - totalExpenses - totalFixedExpenses;
+            if (manualMode) {
+                setCalculatedDaily(manualAmount && daysRemaining ? manualAmount / daysRemaining : null);
+            } else {
+                setCalculatedDaily(net / daysRemaining);
+                setManualAmount(Number(net.toFixed(2)));
+            }
+        });
     }, [manualMode, manualAmount, userData, autoCurrency, exchangeRate]);
 
     const handleSave = async () => {

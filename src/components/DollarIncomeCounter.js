@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Statistic } from 'antd';
 import { RiseOutlined, FallOutlined } from '@ant-design/icons';
 import { db } from '../firebase';
-import { collection, query, where, onSnapshot, Timestamp, doc, getDocs } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, Timestamp, getDocs } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
@@ -13,8 +13,6 @@ const DollarIncomeCounter = () => {
   const [total, setTotal] = useState(0);
   const [prevTotal, setPrevTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [totalPayments, setTotalPayments] = useState(0);
-  const [prevTotalPayments, setPrevTotalPayments] = useState(0);
 
   // Utility para calcular rango de mes
   const getRange = (date) => {
@@ -29,7 +27,6 @@ const DollarIncomeCounter = () => {
 
     // Mes actual
     const [startCur, endCur] = getRange(now);
-    const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const qCurrent = query(
       collection(db, `users/${currentUser.uid}/incomes`),
       where('currency', '==', 'USD'),
@@ -39,13 +36,13 @@ const DollarIncomeCounter = () => {
     const unsubCur = onSnapshot(qCurrent, snap => {
       const sum = snap.docs.reduce((s, d) => s + parseFloat(d.data().amount), 0);
       setTotal(sum);
+      setLoading(false);
       console.log('[DollarIncomeCounter] Ingresos USD mes actual:', sum);
     });
 
     // Mes anterior
     const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const [startPrev, endPrev] = getRange(prevDate);
-    const prevMonthKey = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}`;
     const qPrev = query(
       collection(db, `users/${currentUser.uid}/incomes`),
       where('currency', '==', 'USD'),
@@ -58,57 +55,26 @@ const DollarIncomeCounter = () => {
       console.log('[DollarIncomeCounter] Ingresos USD mes anterior:', sum);
     });
 
-    // Pagos mensuales en USD del mes actual
-    const paymentsRef = doc(db, `users/${currentUser.uid}/monthlyPayments`, monthKey);
-    const unsubPayments = onSnapshot(paymentsRef, snap => {
-      const payments = snap.exists() ? snap.data().payments || [] : [];
-      const sum = payments.reduce((acc, p) => acc + (Number(p.amountUSD) || 0), 0);
-      setTotalPayments(sum);
-      console.log('[DollarIncomeCounter] Pagos mensuales USD mes actual:', sum);
-    });
-
-    // Pagos mensuales en USD del mes anterior
-    const prevPaymentsRef = doc(db, `users/${currentUser.uid}/monthlyPayments`, prevMonthKey);
-    const unsubPrevPayments = onSnapshot(prevPaymentsRef, snap => {
-      const payments = snap.exists() ? snap.data().payments || [] : [];
-      const sum = payments.reduce((acc, p) => acc + (Number(p.amountUSD) || 0), 0);
-      setPrevTotalPayments(sum);
-      console.log('[DollarIncomeCounter] Pagos mensuales USD mes anterior:', sum);
-    });
-
-    // Cuando se suscriben ambos, quitamos loading
-    Promise.all([unsubCur, unsubPrev]).then(() => setLoading(false));
-
     return () => {
       unsubCur();
       unsubPrev();
-      unsubPayments();
-      unsubPrevPayments();
     };
   }, [currentUser]);
 
-  // Log resultado mostrado en card cuando ambos valores están actualizados
-  useEffect(() => {
-    const currentNetIncome = total - totalPayments;
-    console.log('[DollarIncomeCounter] Resultado mostrado en card:', currentNetIncome);
-  }, [total, totalPayments]);
-
   // Cálculo de variación
-  const currentNetIncome = total - totalPayments;
-  const prevNetIncome = prevTotal - prevTotalPayments;
-  const pct = prevNetIncome > 0
-    ? Math.round(((currentNetIncome - prevNetIncome) / prevNetIncome) * 100)
-    : currentNetIncome > 0
+  const pct = prevTotal > 0
+    ? Math.round(((total - prevTotal) / prevTotal) * 100)
+    : total > 0
       ? 100
       : 0;
-  const isIncrease = currentNetIncome >= prevNetIncome;
+  const isIncrease = total >= prevTotal;
 
   return (
     <Card loading={loading}>
       <Statistic
         className='statics-card'
         title={t('userProfile.dashboard.card.incomes.usd')}
-        value={currentNetIncome}
+        value={total}
         precision={2}
         prefix={'$'}
       />

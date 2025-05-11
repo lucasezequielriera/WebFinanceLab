@@ -210,6 +210,8 @@ const AddExpense = ({ onExpenseAdded }) => {
           }
           return isNaN(val) ? 0 : val;
         };
+        const selectedFixedDate = values.fixedDate ? values.fixedDate.toDate() : new Date();
+        const fixedTimestamp = Timestamp.fromDate(selectedFixedDate);
         const newPayment = {
           id: Date.now().toString(),
           title: values.title,
@@ -218,7 +220,8 @@ const AddExpense = ({ onExpenseAdded }) => {
           amountUSD: normalizeAmount(values.amountUSD),
           paid: values.paid || false,
           notes: values.notes || '',
-          createdAt: new Date(),
+          createdAt: selectedFixedDate.toString(),
+          timestamp: fixedTimestamp,
           pdfUrl,
         };
         const updatedPayments = [...payments, newPayment];
@@ -492,6 +495,24 @@ const AddExpense = ({ onExpenseAdded }) => {
             </>
           ) : (
             <>
+
+              {/* DATE */}
+              <Form.Item
+                name="fixedDate"
+                label={t('userProfile.addNewExpense.date')}
+                initialValue={dayjs()}
+                rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.dateRequired') }]}
+              >
+                <DatePicker
+                  style={{ width: '100%' }}
+                  format={(val) =>
+                    dayjs().isSame(val, 'day')
+                      ? t('userProfile.addNewExpense.defaultDataInputDate')
+                      : val.format('DD/MM/YYYY')
+                  }
+                />
+              </Form.Item>
+              
               {/* TITLE */}
               <Form.Item
                 name="title"

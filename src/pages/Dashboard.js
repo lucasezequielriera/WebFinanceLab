@@ -13,6 +13,8 @@ import DollarExpenseCounter           from '../components/DollarExpenseCounter';
 import PesoExpenseCounter             from '../components/PesoExpenseCounter';
 import BalancePesosCounter            from '../components/BalancePesosCounter';
 import BalanceDollarsCounter          from '../components/BalanceDollarsCounter';
+import FixedExpensesPesosCounter      from '../components/FixedExpensesPesosCounter';
+import FixedExpensesDollarsCounter    from '../components/FixedExpensesDollarsCounter';
 import DailyExpensesChart             from '../components/DailyExpensesChart';
 import MonthlySummaryTable            from '../components/MonthlySummaryTable';
 import RecentMovements                from '../components/RecentMovements';
@@ -23,6 +25,8 @@ const Dashboard = () => {
   const [loading, setLoading]               = useState(true);
   const [hasPesosIncome, setHasPesosIncome] = useState(false);
   const [hasUsdIncome, setHasUsdIncome]     = useState(false);
+  const [hasPesosExpenses, setHasPesosExpenses] = useState(false);
+  const [hasDollarsExpenses, setHasDollarsExpenses] = useState(false);
 
   const { currentUser } = useAuth();
   const { t } = useTranslation();
@@ -32,16 +36,25 @@ const Dashboard = () => {
     if (!currentUser) return;
   
     const incomesRef = collection(db, `users/${currentUser.uid}/incomes`);
+    const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
 
-    const unsub = onSnapshot(incomesRef, snap => {
+    const unsubIncomes = onSnapshot(incomesRef, snap => {
       const currencies = snap.docs.map(d => d.data().currency);
-
       setHasPesosIncome(currencies.includes('ARS'));
       setHasUsdIncome(currencies.includes('USD'));
       setLoading(false);
     });
+
+    const unsubExpenses = onSnapshot(expensesRef, snap => {
+      const currencies = snap.docs.map(d => d.data().currency);
+      setHasPesosExpenses(currencies.includes('ARS'));
+      setHasDollarsExpenses(currencies.includes('USD'));
+    });
   
-    return () => unsub();
+    return () => {
+      unsubIncomes();
+      unsubExpenses();
+    };
   }, [currentUser]);
 
   return (
@@ -52,21 +65,28 @@ const Dashboard = () => {
 
             // WITH INCOMES || EXPENSES
             <div>
+              {console.log(hasPesosIncome, hasUsdIncome)}
+              {console.log(hasIncomes, hasExpenses)}
 
               {/* PESOS CARDS */}
-              {hasPesosIncome && (
+              {(hasPesosIncome || hasPesosExpenses) && (
                 <Row className="expenses-counters margin-bottom-medium" gutter={[16, 16]}>
                   <Col xs={24} sm={24} md={24} lg={8}>
                     <Card className="equal-height-card balance-counter">
                       <BalancePesosCounter />
                     </Card>
                   </Col>
-                  <Col xs={24} sm={24} md={12} lg={8}>
+                  <Col xs={24} sm={24} md={12} lg={6}>
                     <Card className="equal-height-card">
                       <PesoIncomeCounter />
                     </Card>
                   </Col>
-                  <Col xs={24} sm={24} md={12} lg={8}>
+                  <Col xs={24} sm={24} md={12} lg={5}>
+                    <Card className="equal-height-card">
+                      <FixedExpensesPesosCounter />
+                    </Card>
+                  </Col>
+                  <Col xs={24} sm={24} md={12} lg={5}>
                     <Card className="equal-height-card">
                       <PesoExpenseCounter />
                     </Card>
@@ -75,26 +95,30 @@ const Dashboard = () => {
               )}
               
               {/* DOLLAR CARDS */}
-              {hasUsdIncome && (
+              {(hasUsdIncome || hasDollarsExpenses) && (
                 <Row className="remainings-counters margin-bottom-medium" gutter={[16, 16]}>
                   <Col xs={24} sm={24} md={24} lg={8}>
                     <Card className="equal-height-card balance-counter">
                       <BalanceDollarsCounter />
                     </Card>
                   </Col>
-                  <Col xs={24} sm={24} md={12} lg={8}>
+                  <Col xs={24} sm={24} md={12} lg={6}>
                     <Card className="equal-height-card">
                       <DollarIncomeCounter />
                     </Card>
                   </Col>
-                  <Col xs={24} sm={24} md={12} lg={8}>
-                    <Card className="equal-height-card">
-                      <DollarExpenseCounter />
-                    </Card>
+                  <Col xs={24} sm={24} md={12} lg={5}>
+                      <Card className="equal-height-card">
+                        <FixedExpensesDollarsCounter />
+                      </Card>
+                  </Col>
+                  <Col xs={24} sm={24} md={12} lg={5}>
+                      <Card className="equal-height-card">
+                        <DollarExpenseCounter />
+                      </Card>
                   </Col>
                 </Row>
               )}
-
               {/* GRAPH + MONTHLY SUMMARY + RECENT MOVEMENTS */}
               <Row className="dashboard-chart" gutter={[16, 16]} style={{ marginTop: 0, marginBottom: 30 }}>
                 <Col xs={24} sm={24} md={24} lg={16}>
