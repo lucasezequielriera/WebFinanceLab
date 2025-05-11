@@ -150,12 +150,12 @@ const FinancialGoals = () => {
         // Nuevo: obtener totalFixedExpenses de monthlyPayments
         fetchTotalFixedExpenses(autoCurrency, exchangeRate).then(totalFixedExpenses => {
             const net = totalIncome - totalExpenses - totalFixedExpenses;
-            if (manualMode) {
-                setCalculatedDaily(manualAmount && daysRemaining ? manualAmount / daysRemaining : null);
-            } else {
-                setCalculatedDaily(net / daysRemaining);
-                setManualAmount(Number(net.toFixed(2)));
-            }
+        if (manualMode) {
+            setCalculatedDaily(manualAmount && daysRemaining ? manualAmount / daysRemaining : null);
+        } else {
+            setCalculatedDaily(net / daysRemaining);
+            setManualAmount(Number(net.toFixed(2)));
+        }
         });
     }, [manualMode, manualAmount, userData, autoCurrency, exchangeRate]);
 
@@ -176,7 +176,7 @@ const FinancialGoals = () => {
             if (!existingDoc.exists()) {
                 await setDoc(monthlyDocRef, { limits, createdAt: new Date().toISOString() }, { merge: true });
             } else {
-                await setDoc(monthlyDocRef, { limits }, { merge: true });
+            await setDoc(monthlyDocRef, { limits }, { merge: true });
             }
 
             notification.success({

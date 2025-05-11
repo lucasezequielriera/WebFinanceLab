@@ -13,7 +13,7 @@ import '../styles/Expenses.css';
 import { EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, FileTextOutlined, InfoCircleOutlined, SettingOutlined, FilePdfOutlined } from '@ant-design/icons';
 import { NumericFormat } from 'react-number-format';
 
-const Expenses = () => {
+const Debts = () => {
   const [loading, setLoading]             = useState(true);
   const [monthlyPayments, setMonthlyPayments] = useState([]);
   const [mpLoading, setMpLoading] = useState(true);
@@ -512,4 +512,4 @@ const Expenses = () => {
   );
 };
 
-export default Expenses;
+export default Debts;

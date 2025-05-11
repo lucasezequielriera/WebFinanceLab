@@ -6,6 +6,10 @@ import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firest
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
+function formatCompactNumber(value) {
+  return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value);
+}
+
 const DollarExpenseCounter = () => {
   const { currentUser } = useAuth();
   const { t } = useTranslation();
@@ -70,8 +74,8 @@ const DollarExpenseCounter = () => {
     <Card loading={loading}>
       <Statistic
         className='statics-card'
-        title={t('userProfile.dashboard.card.expenses.usd')}
-        value={total}
+        title={t('userProfile.dashboard.card.dailyExpenses.usd')}
+        value={formatCompactNumber(total)}
         precision={2}
         prefix={'$'}
       />

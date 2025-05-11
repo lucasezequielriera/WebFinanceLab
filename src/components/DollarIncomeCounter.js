@@ -6,6 +6,10 @@ import { collection, query, where, onSnapshot, Timestamp, getDocs } from 'fireba
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
+function formatCompactNumber(value) {
+  return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value);
+}
+
 const DollarIncomeCounter = () => {
   const { currentUser } = useAuth();
   const { t } = useTranslation();
@@ -74,7 +78,7 @@ const DollarIncomeCounter = () => {
       <Statistic
         className='statics-card'
         title={t('userProfile.dashboard.card.incomes.usd')}
-        value={total}
+        value={formatCompactNumber(total)}
         precision={2}
         prefix={'$'}
       />

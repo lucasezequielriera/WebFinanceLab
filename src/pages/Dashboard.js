@@ -3,7 +3,7 @@ import { Spin, Row, Col, Card }       from 'antd';
 import { SmileOutlined }              from '@ant-design/icons';
 import { useAuth }                    from '../contexts/AuthContext';
 import { db }                         from '../firebase';
-import { collection, onSnapshot }     from 'firebase/firestore';
+import { collection, onSnapshot, query, where, Timestamp } from 'firebase/firestore';
 import { useTranslation }             from 'react-i18next';
 import useMonthlyMovements            from '../hooks/useMonthlyMovements';
 // Components
@@ -35,21 +35,41 @@ const Dashboard = () => {
   useEffect(() => {
     if (!currentUser) return;
   
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const startTimestamp = Timestamp.fromDate(startOfMonth);
+    const endTimestamp = Timestamp.fromDate(endOfMonth);
+  
     const incomesRef = collection(db, `users/${currentUser.uid}/incomes`);
     const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
 
-    const unsubIncomes = onSnapshot(incomesRef, snap => {
+    const unsubIncomes = onSnapshot(
+      query(
+        incomesRef,
+        where('timestamp', '>=', startTimestamp),
+        where('timestamp', '<', endTimestamp)
+      ),
+      snap => {
       const currencies = snap.docs.map(d => d.data().currency);
       setHasPesosIncome(currencies.includes('ARS'));
       setHasUsdIncome(currencies.includes('USD'));
       setLoading(false);
-    });
+      }
+    );
 
-    const unsubExpenses = onSnapshot(expensesRef, snap => {
-      const currencies = snap.docs.map(d => d.data().currency);
-      setHasPesosExpenses(currencies.includes('ARS'));
-      setHasDollarsExpenses(currencies.includes('USD'));
-    });
+    const unsubExpenses = onSnapshot(
+      query(
+        expensesRef,
+        where('timestamp', '>=', startTimestamp),
+        where('timestamp', '<', endTimestamp)
+      ),
+      snap => {
+        const currencies = snap.docs.map(d => d.data().currency);
+        setHasPesosExpenses(currencies.includes('ARS'));
+        setHasDollarsExpenses(currencies.includes('USD'));
+      }
+    );
   
     return () => {
       unsubIncomes();
@@ -65,7 +85,7 @@ const Dashboard = () => {
 
             // WITH INCOMES || EXPENSES
             <div>
-              {console.log(hasPesosIncome, hasUsdIncome)}
+              {console.log(hasPesosIncome, hasPesosExpenses)}
               {console.log(hasIncomes, hasExpenses)}
 
               {/* PESOS CARDS */}
@@ -113,9 +133,9 @@ const Dashboard = () => {
                       </Card>
                   </Col>
                   <Col xs={24} sm={24} md={12} lg={5}>
-                      <Card className="equal-height-card">
-                        <DollarExpenseCounter />
-                      </Card>
+                    <Card className="equal-height-card">
+                      <DollarExpenseCounter />
+                    </Card>
                   </Col>
                 </Row>
               )}

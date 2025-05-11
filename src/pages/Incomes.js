@@ -92,7 +92,7 @@ const Income = () => {
       key: 'date',
       render: ts => {
         const dt = new Date(ts.seconds * 1000);
-        return format(dt, 'dd/MM/yyyy', { locale: es });
+        return format(dt, i18n.language === 'en' ? 'MM/dd/yyyy' : 'dd/MM/yyyy', { locale: currentLocale });
       },
       width: 120,
     },
@@ -195,19 +195,19 @@ const Income = () => {
             color: '#1890ff',
             marginRight: '8px'
           }} />
-          <Select
+        <Select
             style={{ flex: 1 }}
-            placeholder={t("userProfile.incomes.filter.placeholder")}
-            value={selectedMonth}
-            onChange={handleMonthChange}
+          placeholder={t("userProfile.incomes.filter.placeholder")}
+          value={selectedMonth}
+          onChange={handleMonthChange}
             suffixIcon={<CalendarOutlined style={{ color: '#1890ff' }} />}
-          >
-            {months.map(m => (
+        >
+          {months.map(m => (
               <Option key={m.value} value={m.value}>
                 {m.label}
-              </Option>
-            ))}
-          </Select>
+            </Option>
+          ))}
+        </Select>
         </div>
 
         {/* Incomes Table */}
@@ -231,7 +231,7 @@ const Income = () => {
                     <span style={{ color: '#0071de' }}>{t('userProfile.incomes.table.totalARS')} ${totalARS.toFixed(2)}</span>
                     <span style={{ color: '#0071de', opacity: 0.5 }}>|</span>
                     <span style={{ color: '#0071de' }}>{t('userProfile.incomes.table.totalUSD')} ${totalUSD.toFixed(2)}</span>
-                  </div>
+                </div>
                 )}
               </Col>
             </Row>
@@ -260,7 +260,11 @@ const Income = () => {
               label={t('userProfile.incomes.table.editIncome.date')}
               rules={[{ required: true, message: t('userProfile.incomes.table.editIncome.dateRequiredLabel') }]}
             >
-              <DatePicker style={{ width: '100%' }} />
+              <DatePicker 
+                style={{ width: '100%' }} 
+                format={i18n.language === 'en' ? 'MM/DD/YYYY' : 'DD/MM/YYYY'}
+                locale={i18n.language === 'en' ? enUS : es}
+              />
             </Form.Item>
             <Form.Item
               name="title"

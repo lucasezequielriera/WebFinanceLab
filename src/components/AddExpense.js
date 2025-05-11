@@ -179,6 +179,7 @@ const AddExpense = ({ onExpenseAdded }) => {
         form.resetFields();
         setPaymentMethod(null);
         if (onExpenseAdded) onExpenseAdded(newExpense);
+        notification.success({ message: 'Gasto diario agregado', description: 'El gasto fue agregado correctamente.' });
       } else {
         // Gasto fijo: quick add al array payments del mes actual
         const currentMonthKey = dayjs().format('YYYY-MM');
@@ -191,10 +192,16 @@ const AddExpense = ({ onExpenseAdded }) => {
         // Subir PDF si corresponde
         let pdfUrl = '';
         if (pdfFile) {
-          const fileRef = storageRef(storage, `monthlyPayments/${currentUser.uid}/${Date.now()}.pdf`);
-          await uploadBytes(fileRef, pdfFile);
-          pdfUrl = await getDownloadURL(fileRef);
-          setPdfFile(null);
+          try {
+            const fileRef = storageRef(storage, `monthlyPayments/${currentUser.uid}/${Date.now()}.pdf`);
+            await uploadBytes(fileRef, pdfFile);
+            pdfUrl = await getDownloadURL(fileRef);
+            setPdfFile(null);
+          } catch (err) {
+            notification.error({ message: 'Error al subir PDF', description: 'No se pudo subir el archivo PDF.' });
+            setLoading(false);
+            return;
+          }
         }
         // Normalizar montos como en Expenses.js
         const normalizeAmount = (val) => {
@@ -224,11 +231,14 @@ const AddExpense = ({ onExpenseAdded }) => {
           timestamp: fixedTimestamp,
           pdfUrl,
         };
+        console.log('[AddExpense] pdfUrl a guardar:', pdfUrl);
         const updatedPayments = [...payments, newPayment];
         await setDoc(docRef, { payments: updatedPayments }, { merge: true });
         await updateDoc(doc(db, 'users', currentUser.uid), { lastActivity: Timestamp.now() });
         form.resetFields();
+        setExpenseType('daily');
         if (onExpenseAdded) onExpenseAdded(newPayment);
+        notification.success({ message: 'Gasto fijo agregado', description: 'El gasto fijo fue agregado correctamente.' });
       }
       setLoading(false);
     } catch (e) {

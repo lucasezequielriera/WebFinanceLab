@@ -7,10 +7,12 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import moment from 'moment';
 import '../styles/CreditCard.css';
+import { useTranslation } from 'react-i18next';
 
 const CreditCard = ({ card, currentUser, updateCardClosingDate }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [tempClosingDate, setTempClosingDate] = useState(card.closingDate);
+  const { t } = useTranslation();
 
   const getCardLogo = (cardType) => {
     switch (cardType) {
@@ -25,6 +27,13 @@ const CreditCard = ({ card, currentUser, updateCardClosingDate }) => {
       default:
         return '';
     }
+  };
+
+  const getTranslatedCardType = (type) => {
+    if (type === 'Credit Card') return t('userProfile.expenses.creditCardTitle');
+    if (type === 'Debit Card') return t('userProfile.expenses.debitCardTitle');
+    if (type === 'Cash') return t('userProfile.expenses.cashTitle');
+    return type;
   };
 
   const handleEditDate = () => {
@@ -74,7 +83,6 @@ const CreditCard = ({ card, currentUser, updateCardClosingDate }) => {
 
   return (
     <div className="credit-card" style={{ background: card.color }}>
-      {card.cardType !== 'Cash' && <div className="credit-card__type">{card.cardType}</div>}
       <div className="credit-card__name">{card.bank === 'N/A' ? 'Cash' : card.bank}</div>
       {card.cardType !== 'Cash' && <div className="credit-card__number">#### #### #### ####</div>}
       {card.cardType === 'Credit Card' && (

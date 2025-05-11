@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Form, Layout, Menu, Tag, Modal, Button, notification, Space, DatePicker, Input, Col, Row } from 'antd';
-import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined, LeftOutlined, PlusOutlined, DollarOutlined, RiseOutlined, FallOutlined, FileTextOutlined, StockOutlined } from '@ant-design/icons';
+import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined, AlertOutlined, PlusOutlined, DollarOutlined, RiseOutlined, FallOutlined, FileTextOutlined, StockOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -34,6 +34,7 @@ import Tasks from './pages/Tasks';
 import Users from './pages/Users';
 import Configuration from './pages/Configuration';
 import Summary from './pages/Summary';
+import Debts from './pages/Debts';
 
 const { Title, Paragraph } = Typography;
 const { Header, Sider, Content } = Layout;
@@ -97,6 +98,8 @@ const AppLayout = () => {
       setSelectedKey('9');
     } else if (path.startsWith('/general-expenses')) {
       setSelectedKey('10');
+    } else if (path.startsWith('/debts')) {
+      setSelectedKey('13');
     } else if (path.startsWith('/profile')) {
       setSelectedKey('2');
     } else if (path.startsWith('/financial-goals')) {
@@ -176,16 +179,17 @@ const AppLayout = () => {
           key: '9',
           label: <Link to="/detailed-expenses">{t('userProfile.navbar.expenses.dailyExpenses')}</Link>
         },
-        // {
-        //   key: '10',
-        //   label: <Link to="/general-expenses">{t('userProfile.navbar.expenses.monthlyExpenses')}</Link>
-        // },
         {
           key: '5',
           label: <Link to="/expenses">{t('userProfile.navbar.expenses.payments')}</Link>
         },
       ],
     },
+    // {
+    //   key: '13',
+    //   icon: <AlertOutlined />,
+    //   label: <Link to="/debts">{t('userProfile.navbar.debts')}</Link>
+    // },
     {
       key: '7',
       icon: <FlagOutlined />,
@@ -222,29 +226,17 @@ const AppLayout = () => {
     }
   ];
 
-  const getPageIcon = () => {
-    const path = location.pathname;
-    if (path.startsWith('/dashboard'))         return <DashboardOutlined />;
-    if (path.startsWith('/expenses'))          return <CreditCardOutlined />;
-    if (path.startsWith('/incomes'))           return <StockOutlined />;
-    if (path.startsWith('/financial-goals'))   return <FlagOutlined />;
-    if (path.startsWith('/about-us'))          return <InfoCircleOutlined />;
-    if (path.startsWith('/profile'))           return <UserOutlined />;
-    if (path.startsWith('/detailed-expenses')) return <LeftOutlined onClick={() => navigate(-1)}/>;
-    if (path.startsWith('/general-expenses'))  return <LeftOutlined onClick={() => navigate(-1)}/>;
-    return null;
-  };
-
   // Title in Up Navbar
   const getPageTitle = () => {
     if (location.pathname.startsWith('/dashboard'))         return t('userProfile.navbar.dashboard');
     if (location.pathname.startsWith('/incomes'))           return t('userProfile.navbar.incomes');
+    if (location.pathname.startsWith('/expenses'))          return t('userProfile.navbar.expenses.payments');
+    if (location.pathname.startsWith('/summary'))           return t('userProfile.expenses.summary.title');
     if (location.pathname.startsWith('/financial-goals'))   return t('userProfile.navbar.financialGoals');
     if (location.pathname.startsWith('/about-us'))          return t('userProfile.navbar.aboutUs');
     if (location.pathname.startsWith('/profile'))           return t('userProfile.navbar.profile');
     if (location.pathname.startsWith('/detailed-expenses')) return t('userProfile.typeOfAccount.dropdown.dailyExpenses');
-    // if (location.pathname.startsWith('/general-expenses'))  return t('userProfile.typeOfAccount.dropdown.monthlyExpenses');
-    if (location.pathname.startsWith('/expenses'))          return t('userProfile.navbar.expenses.payments');
+    if (location.pathname.startsWith('/debts'))             return t('userProfile.navbar.debts');
     return '';
   };
 
@@ -395,6 +387,7 @@ const AppLayout = () => {
             <Route path="/summary" element={<PrivateRoute><Summary /></PrivateRoute>} />
             <Route path="/expenses" element={<PrivateRoute><Expenses /></PrivateRoute>} />
             <Route path="/incomes" element={<PrivateRoute><Incomes /></PrivateRoute>}/>
+            <Route path="/debts" element={<PrivateRoute><Debts /></PrivateRoute>}/>
             <Route path="/signup" element={<RedirectIfAuthenticated><Signup /></RedirectIfAuthenticated>} />
             <Route path="/login" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

@@ -1,42 +1,30 @@
 import React, { useState, useEffect }                                   from 'react';
-import { Spin, Empty, DatePicker, Table, Button, Input, InputNumber, Checkbox, Popconfirm, Form, Space, message, Select, Divider, Tag, AutoComplete, Modal, Tooltip } from 'antd';
-import { doc, onSnapshot, updateDoc, collection, getDoc, query, where, setDoc, addDoc, deleteDoc } from 'firebase/firestore';
+import { Spin, Empty, DatePicker, message } from 'antd';
+import { doc, onSnapshot, updateDoc, collection, getDoc, query, where } from 'firebase/firestore';
 import { db }                                                           from '../firebase';
-import { storage }                                                      from '../firebase';
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useAuth }                                                      from '../contexts/AuthContext';
 import { useTranslation }                                               from 'react-i18next';
 import moment                                                           from 'moment';
 import dayjs                                                            from 'dayjs';
+import 'dayjs/locale/es';
+import 'dayjs/locale/en';
+import enUS from 'antd/es/date-picker/locale/en_US';
+import esES from 'antd/es/date-picker/locale/es_ES';
 import useMonthlyMovements                                              from '../hooks/useMonthlyMovements';
-// Components
-import CreditCard                                                       from '../components/CreditCard';
 // Styles
 import '../styles/Expenses.css';
-import { PlusOutlined, EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, TagOutlined, DollarOutlined, FileTextOutlined, InfoCircleOutlined, CheckCircleTwoTone, SettingOutlined, FilePdfOutlined } from '@ant-design/icons';
-import { NumericFormat } from 'react-number-format';
-import { useForm, useWatch } from 'antd/es/form/Form';
+import { EditOutlined, FilterOutlined } from '@ant-design/icons';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 
-const Expenses = () => {
+const Summary = () => {
   const [loading, setLoading]             = useState(true);
   const [cards, setCards]                 = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(dayjs());
-  const [monthlyPayments, setMonthlyPayments] = useState([]);
-  const [mpLoading, setMpLoading] = useState(true);
-  const [editingKey, setEditingKey] = useState('');
-  const [form] = Form.useForm();
-  const currentMonthKey = dayjs().format('YYYY-MM');
-  const [noteModal, setNoteModal] = useState({ visible: false, id: null, note: '' });
-  const [uploading, setUploading] = useState(false);
-  const [pdfFile, setPdfFile] = useState(null);
-  const [confirmPdfModal, setConfirmPdfModal] = useState({ visible: false, id: null, row: null, oldPdfUrl: null });
 
   const { currentUser } = useAuth();
   const { t, i18n } = useTranslation();
   const { hasExpenses } = useMonthlyMovements();
   
-  const decimalSeparator = i18n.language === 'es' ? ',' : '.';
-
   const cardColors = {
     Visa: 'linear-gradient(135deg,rgb(106, 114, 255),rgb(112, 186, 255))',
     MasterCard: 'linear-gradient(135deg,rgb(250, 127, 39),rgb(255, 187, 92))',
@@ -47,8 +35,9 @@ const Expenses = () => {
   useEffect(() => {
     if (!currentUser) return;
 
-    const startOfMonth = selectedMonth.startOf('month').toDate();
-    const endOfMonth = selectedMonth.endOf('month').toDate();
+    const safeMonth = selectedMonth || dayjs();
+    const startOfMonth = safeMonth.startOf('month').toDate();
+    const endOfMonth = safeMonth.endOf('month').toDate();
 
     const userExpensesRef = collection(db, `users/${currentUser.uid}/expenses`);
     const expensesQuery = query(userExpensesRef, where('timestamp', '>=', startOfMonth), where('timestamp', '<=', endOfMonth));
@@ -59,21 +48,12 @@ const Expenses = () => {
       updateCreditCards(expensesData);
     });
 
-    setLoading(false);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
 
     return () => unsubscribe();
   }, [currentUser, selectedMonth ]);
-
-  useEffect(() => {
-    if (!currentUser) return;
-    const ref = doc(db, `users/${currentUser.uid}/monthlyPayments`, currentMonthKey);
-    const unsub = onSnapshot(ref, snap => {
-      const data = snap.exists() ? snap.data().payments || [] : [];
-      setMonthlyPayments(data);
-      setMpLoading(false);
-    });
-    return () => unsub();
-  }, [currentUser, currentMonthKey]);
 
   // Al cargar las tarjetas, asegura que cada tarjeta de crédito tenga closingDate
   useEffect(() => {
@@ -241,633 +221,191 @@ const Expenses = () => {
     );
   };
 
-  const groupCardsByType = (cards) => {
-    const creditCards = cards.filter(card => card.cardType === 'Credit Card');
-    const debitCards  = cards.filter(card => card.cardType === 'Debit Card');
-    const cashCards   = cards.filter(card => card.cardType === 'Cash');
-
-    return { creditCards, debitCards, cashCards };
-  };
-
-  const { creditCards, debitCards, cashCards } = groupCardsByType(cards);
-
-  // Renderiza las tarjetas mostrando DatePicker solo para crédito
-  const renderSection = (title, cards) => {
-    if (cards.length === 0) return null;
-    return (
-      <div className="card-section">
-        <h2>{title}</h2>
-        <div className="cards-container">
-          {cards.map((card, index) => (
-            <div key={index} className="card-column">
-              <div className="credit-cards-container">
-                <CreditCard card={card} currentUser={currentUser} updateCardClosingDate={updateCardClosingDate} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const getTitle = (type, count) => {
-    if (type.toLowerCase() === 'cash') {
-      
-      return t('userProfile.expenses.cashTitle');
-    }
-  
-    const keyBase = `userProfile.expenses.${type.toLowerCase()}Card${count === 1 ? 'Title' : 'sTitle'}`;
-
-    return t(keyBase);
-  };
-
-  // Componente auxiliar para mostrar pagos por mes
-  function MonthlyPaymentsSection({ cards, creditCards, debitCards, cashCards }) {
-    return (
-      <div className="monthly-payments-section" style={{ marginTop: 48, color: '#fff', fontFamily: 'monospace' }}>
-        <h2 style={{ borderTop: '1px solid #888', paddingTop: 24, marginBottom: 32, fontWeight: 700, letterSpacing: 1 }}>Pagos por mes</h2>
-        {
-          cards.length > 0 && (() => {
-            const allExpenses = [];
-            [creditCards, debitCards, cashCards].forEach(arr => {
-              arr.forEach(card => {
-                if (card.expenses) {
-                  allExpenses.push(...card.expenses);
-                }
-              });
-            });
-            if (!allExpenses.length) return null;
-            const expensesByMonth = {};
-            allExpenses.forEach(exp => {
-              if (!exp.timestamp) return;
-              const date = exp.timestamp.seconds ? new Date(exp.timestamp.seconds * 1000) : new Date(exp.timestamp);
-              const monthKey = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}`;
-              if (!expensesByMonth[monthKey]) expensesByMonth[monthKey] = [];
-              expensesByMonth[monthKey].push(exp);
-            });
-            const sortedMonths = Object.keys(expensesByMonth).sort((a, b) => b.localeCompare(a));
-            return sortedMonths.map(monthKey => {
-              const monthExpenses = expensesByMonth[monthKey];
-              const monthDate = new Date(monthKey + '-01');
-              const monthLabel = monthDate.toLocaleString('default', { month: 'long', year: 'numeric' });
-              let totalARS = 0, totalUSD = 0;
-              monthExpenses.forEach(e => {
-                if (e.currency === 'ARS') totalARS += Number(e.amount);
-                if (e.currency === 'USD') totalUSD += Number(e.amount);
-              });
-              return (
-                <div key={monthKey} style={{ marginBottom: 48 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #888', padding: '16px 0 8px 0', fontWeight: 700 }}>
-                    <span>{`MES DE ${monthLabel.toUpperCase()}`}</span>
-                    <span style={{ fontSize: 14, fontWeight: 400 }}>Pagos realizados: {monthExpenses.length}</span>
-                  </div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8, marginBottom: 8, fontSize: 15 }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid #888' }}>
-                        <th style={{ textAlign: 'left', padding: 4 }}>Banco</th>
-                        <th style={{ textAlign: 'left', padding: 4 }}>Tipo</th>
-                        <th style={{ textAlign: 'right', padding: 4 }}>$</th>
-                        <th style={{ textAlign: 'right', padding: 4 }}>USD</th>
-                        <th style={{ textAlign: 'center', padding: 4 }}>Estado</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {monthExpenses.map((e, idx) => (
-                        <tr key={idx} style={{ borderBottom: '1px solid #333' }}>
-                          <td style={{ padding: 4 }}>{e.bank || '-'}</td>
-                          <td style={{ padding: 4 }}>{e.cardType || '-'}</td>
-                          <td style={{ textAlign: 'right', padding: 4 }}>{e.currency === 'ARS' ? `$${Number(e.amount).toLocaleString()}` : '-'}</td>
-                          <td style={{ textAlign: 'right', padding: 4 }}>{e.currency === 'USD' ? `U$D${Number(e.amount).toLocaleString()}` : '-'}</td>
-                          <td style={{ textAlign: 'center', padding: 4 }}>{e.status || 'OK'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div style={{ marginTop: 8, fontWeight: 600 }}>
-                    TOTAL $: {totalARS.toLocaleString()}<br/>
-                    TOTAL U$D: {totalUSD.toLocaleString()}<br/>
-                  </div>
-                </div>
-              );
-            });
-          })()
-        }
-      </div>
-    );
-  }
-
-  const saveMonthlyPayments = async (data) => {
-    if (!currentUser) return;
-    const ref = doc(db, `users/${currentUser.uid}/monthlyPayments`, currentMonthKey);
-    await setDoc(ref, { payments: data }, { merge: true });
-  };
-
-  const handleAdd = () => {
-    const newPayment = {
-      id: Date.now().toString(),
-      title: '',
-      category: '',
-      amountARS: 0,
-      amountUSD: 0,
-      paid: false,
-      notes: '',
-      createdAt: new Date(),
-      isNew: true,
+  // Nuevo componente para chips de métodos de pago
+  const PaymentMethodChip = ({ card, isSelected, onClick }) => {
+    const getLogo = (type) => {
+      switch (type) {
+        case 'Visa':
+          return <img src="https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/projectImages%2Fvisa.png?alt=media&token=0af963f5-4b62-4d71-aee0-c1c25dde7290" alt="Visa" style={{ height: 22, marginBottom: 2 }} />;
+        case 'MasterCard':
+          return <img src="https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/projectImages%2Fmastercard.png?alt=media&token=1d150640-6fe9-4466-a6c8-9fb2e0a3d92e" alt="MasterCard" style={{ height: 22, marginBottom: 2 }} />;
+        case 'American Express':
+          return <img src="https://firebasestorage.googleapis.com/v0/b/finance-manager-d4589.appspot.com/o/projectImages%2Famericanexpress.png?alt=media&token=ec68eff4-dbde-4c81-93e8-5d1b0a851e05" alt="Amex" style={{ height: 22, marginBottom: 2 }} />;
+        default:
+          return null;
+      }
     };
-
-    console.log(newPayment)
-    setMonthlyPayments([...monthlyPayments, newPayment]);
-    setEditingKey(newPayment.id);
-    form.setFieldsValue({ title: undefined, category: undefined, ...newPayment });
-  };
-
-  const edit = (record) => {
-    setEditingKey(record.id);
-    form.setFieldsValue(record);
-  };
-
-  const handlePdfChange = (e) => {
-    const file = e.target.files[0];
-    if (file && file.type === 'application/pdf') {
-      setPdfFile(file);
-    } else {
-      message.error('Solo se permiten archivos PDF');
-      setPdfFile(null);
+    const getCardTypeText = (type) => {
+      switch (type) {
+        case 'Credit Card':
+          return 'Crédito';
+        case 'Debit Card':
+          return 'Débito';
+        case 'Cash':
+          return 'Cash';
+        default:
+          return type;
+      }
+    };
+    // Si es efectivo, no hay botón
+    if (card.cardBank === 'Cash') {
+      return null;
     }
-  };
-
-  const save = async (id, overrideRow = null) => {
-    try {
-      const row = overrideRow || await form.validateFields();
-      const oldPayment = monthlyPayments.find(p => p.id === id);
-      // Si el pago tenía pdfUrl y no hay pdfFile nuevo, preguntar qué hacer
-      if (!overrideRow) {
-        if (oldPayment && oldPayment.pdfUrl && !pdfFile && !row.pdfUrl) {
-          setConfirmPdfModal({ visible: true, id, row, oldPdfUrl: oldPayment.pdfUrl });
-          return;
-        }
-      }
-      // Subir PDF si corresponde
-      let pdfUrl = row.pdfUrl || '';
-      if (pdfFile) {
-        setUploading(true);
-        const fileRef = storageRef(storage, `monthlyPayments/${currentUser.uid}/${id}.pdf`);
-        await uploadBytes(fileRef, pdfFile);
-        pdfUrl = await getDownloadURL(fileRef);
-        setUploading(false);
-        setPdfFile(null);
-      } else if (oldPayment && oldPayment.pdfUrl && !row.pdfUrl) {
-        // Si el usuario eligió eliminar el documento
-        pdfUrl = '';
-      }
-      console.log('DEBUG: Valores antes de guardar:', { amountARS: row.amountARS, amountUSD: row.amountUSD, typeofARS: typeof row.amountARS, typeofUSD: typeof row.amountUSD });
-      const newData = [...monthlyPayments];
-      const idx = newData.findIndex(item => item.id === id);
-      if (idx > -1) {
-        // Elimina 'type' si existe y asegura 'category', y elimina isNew
-        const { type, isNew, ...rest } = { 
-          ...newData[idx], 
-          ...row,
-          pdfUrl,
-          amountARS: (() => {
-            if (row.amountARS === '' || row.amountARS === undefined || row.amountARS === null) return 0;
-            if (typeof row.amountARS === 'string') {
-              let clean = row.amountARS.replace(/\$/g, '');
-              if (i18n.language === 'es') {
-                clean = clean.replace(/\./g, '').replace(',', '.'); // quitar puntos de miles y cambiar coma por punto
-              } else {
-                clean = clean.replace(/,/g, ''); // quitar comas de miles
-              }
-              return Number(clean) || 0;
-            }
-            return isNaN(row.amountARS) ? 0 : row.amountARS;
-          })(),
-          amountUSD: (() => {
-            if (row.amountUSD === '' || row.amountUSD === undefined || row.amountUSD === null) return 0;
-            if (typeof row.amountUSD === 'string') {
-              let clean = row.amountUSD.replace(/\$/g, '');
-              if (i18n.language === 'es') {
-                clean = clean.replace(/\./g, '').replace(',', '.');
-              } else {
-                clean = clean.replace(/,/g, '');
-              }
-              return Number(clean) || 0;
-            }
-            return isNaN(row.amountUSD) ? 0 : row.amountUSD;
-          })(),
-        };
-        newData[idx] = { ...rest };
-        setMonthlyPayments(newData);
-        setEditingKey('');
-        await saveMonthlyPayments(newData);
-        message.success('Pago actualizado');
-      }
-    } catch (err) {
-      // Solo mostrar notificación de error si no es un error de validación
-      if (err.errorFields && err.errorFields.length > 0) {
-        // Hay errores de validación, no mostramos notificación
-        return;
-      }
-      message.error('Error al guardar');
-    }
-  };
-
-  // Handler para el modal de confirmación de PDF
-  const handleConfirmPdf = async (keep) => {
-    setConfirmPdfModal({ visible: false, id: null, row: null, oldPdfUrl: null });
-    if (keep) {
-      // Guardar manteniendo el documento
-      await save(confirmPdfModal.id, { ...confirmPdfModal.row, pdfUrl: confirmPdfModal.oldPdfUrl });
-    } else {
-      // Guardar eliminando el documento
-      await save(confirmPdfModal.id, { ...confirmPdfModal.row, pdfUrl: '' });
-    }
-  };
-
-  const cancel = () => {
-    const newData = [...monthlyPayments];
-    const idx = newData.findIndex(item => item.id === editingKey);
-    if (idx > -1 && newData[idx].isNew) {
-      newData.splice(idx, 1);
-      setMonthlyPayments(newData);
-    }
-    setEditingKey('');
-    setPdfFile(null);
-  };
-
-  const handleDelete = async (id) => {
-    const newData = monthlyPayments.filter(item => item.id !== id);
-    setMonthlyPayments(newData);
-    await saveMonthlyPayments(newData);
-    message.success('Pago eliminado');
-  };
-
-  const handlePaidChange = async (checked, record) => {
-    const newData = monthlyPayments.map(item => item.id === record.id ? { ...item, paid: checked } : item);
-    setMonthlyPayments(newData);
-    await saveMonthlyPayments(newData);
-  };
-
-  const isEditing = (record) => record.id === editingKey;
-
-  // Obtener categorías únicas para autocompletar
-  const categoriesList = Array.from(new Set(monthlyPayments.map(p => p.category).filter(Boolean))).sort();
-  const [newCategoryInput, setNewCategoryInput] = useState('');
-
-  // Obtener títulos únicos para autocompletar
-  const titlesList = Array.from(new Set(monthlyPayments.map(p => p.title).filter(Boolean))).sort();
-  const [newTitleInput, setNewTitleInput] = useState('');
-
-  const allowedKeys = [
-    'Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End',
-  ];
-
-  function handleAmountKeyDown(e, value, decimalSeparator) {
-    const key = e.key;
-    // Permitir teclas de control
-    if (allowedKeys.includes(key)) return;
-    // Permitir números
-    if (/\d/.test(key)) return;
-    // Permitir el separador decimal solo si no está presente y no es el primer carácter
-    if (
-      key === decimalSeparator &&
-      value && !value.toString().includes(decimalSeparator) && value.toString().length > 0
-    ) {
-      return;
-    }
-    // Bloquear todo lo demás
-    e.preventDefault();
-  }
-
-  function handleAmountPaste(e, decimalSeparator) {
-    const pasted = e.clipboardData.getData('Text');
-    // Solo permitir números y un solo separador decimal, y máximo dos decimales
-    const regex = decimalSeparator === ','
-      ? /^\d{1,}(,\d{0,2})?$/
-      : /^\d{1,}(\.\d{0,2})?$/;
-    if (!regex.test(pasted)) {
-      e.preventDefault();
-    }
-  }
-
-  function handleAmountBlur(fieldName, form, i18n) {
-    const value = form.getFieldValue(fieldName);
-    if (typeof value === 'string') {
-      let normalized = value;
-      if (i18n.language === 'es') {
-        normalized = value.replace(',', '.');
-      }
-      const num = Number(normalized);
-      if (!isNaN(num)) {
-        form.setFieldsValue({ [fieldName]: num });
-      } else {
-        form.setFieldsValue({ [fieldName]: 0 });
-      }
-    }
-  }
-
-  const columns = [
-    {
-      title: 'Título',
-      dataIndex: 'title',
-      editable: true,
-      render: (text, record) => isEditing(record)
-        ? <Form.Item 
-            name="title" 
-            style={{ margin: 0 }} 
-            rules={[
-              { required: true, message: 'Ingrese un nombre' },
-              { 
-                validator: (_, value) => {
-                  if (!value || value.replace(/\s+/g, '').length === 0) {
-                    return Promise.reject('');
-                  }
-                  return Promise.resolve();
-                }
-              }
-            ]}
-          > 
-            <AutoComplete
-              style={{ width: 180 }}
-              value={form.getFieldValue('title')}
-              onChange={v => {
-                if (!v || v.replace(/\s+/g, '').length === 0) {
-                  form.setFieldsValue({ title: '' });
-                } else {
-                  form.setFieldsValue({ title: v });
-                }
-              }}
-              placeholder="Título del pago"
-              options={titlesList.filter(Boolean).map(tit => ({
-                value: tit,
-                label: tit
-              }))}
-              filterOption={(inputValue, option) =>
-                option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-              }
-            />
-          </Form.Item>
-        : text
-    },
-    {
-      title: 'Monto ARS',
-      dataIndex: 'amountARS',
-      editable: true,
-      render: (text, record) => isEditing(record) 
-        ? <Form.Item 
-            name="amountARS" 
-            style={{ margin: 0 }}
-            initialValue={0}
-            rules={[{ required: true, message: 'Ingrese un monto' }]}
-          >
-            <NumericFormat
-              customInput={Input}
-              allowNegative={false}
-              decimalScale={2}
-              fixedDecimalScale
-              thousandSeparator={i18n.language === 'es' ? '.' : ','}
-              decimalSeparator={i18n.language === 'es' ? ',' : '.'}
-              prefix={"$"}
-              style={{ width: 100 }}
-              placeholder={i18n.language === 'es' ? '0,00' : '0.00'}
-              onValueChange={vals => form.setFieldsValue({ amountARS: vals.floatValue ?? '' })}
-              value={form.getFieldValue('amountARS')}
-            />
-          </Form.Item> 
-        : (text ? `$${Number(text).toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US', { minimumFractionDigits: 2 })}` : '$0,00')
-    },
-    {
-      title: 'Monto USD',
-      dataIndex: 'amountUSD',
-      editable: true,
-      render: (text, record) => isEditing(record) 
-        ? <Form.Item 
-            name="amountUSD" 
-            style={{ margin: 0 }}
-            initialValue={0}
-            rules={[{ required: true, message: 'Ingrese un monto' }]}
-          >
-            <NumericFormat
-              customInput={Input}
-              allowNegative={false}
-              decimalScale={2}
-              fixedDecimalScale
-              thousandSeparator={i18n.language === 'es' ? '.' : ','}
-              decimalSeparator={i18n.language === 'es' ? ',' : '.'}
-              prefix={"$"}
-              style={{ width: 100 }}
-              placeholder={i18n.language === 'es' ? '0,00' : '0.00'}
-              onValueChange={vals => form.setFieldsValue({ amountUSD: vals.floatValue ?? '' })}
-              value={form.getFieldValue('amountUSD')}
-            />
-          </Form.Item> 
-        : (text ? `$${Number(text).toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US', { minimumFractionDigits: 2 })}` : '$0,00')
-    },
-    {
-      title: 'Pago',
-      dataIndex: 'paid',
-      align: 'center',
-      width: 48,
-      render: (_, record) => {
-        const editable = isEditing(record);
-        return editable ? (
-          <Form.Item name="paid" valuePropName="checked" style={{ margin: 0 }}>
-            <Checkbox />
-          </Form.Item>
-        ) : (
-          record.paid ? (
-            <CheckOutlined style={{ color: '#52c41a', fontSize: 16 }} />
-          ) : (
-            <CloseOutlined style={{ color: 'red', fontSize: 16 }} />
-          )
-        );
-      }
-    },
-    {
-      title: 'Info',
-      dataIndex: 'noteInfo',
-      align: 'center',
-      width: 48,
-      render: (text, record) => {
-        const editing = isEditing(record);
-        const hasNote = record.notes && record.notes.trim() !== '';
-        if (editing) {
-          return (
-            <>
-              <Form.Item name="notes" style={{ display: 'none' }} />
-              <span onClick={() => openNoteModal(record)} style={{ cursor: 'pointer' }}>
-                <InfoCircleOutlined style={{ color: hasNote ? '#1890ff' : '#d9d9d9', fontSize: 16 }} />
-              </span>
-            </>
-          );
-        } else {
-          return hasNote ? (
-            <Tooltip title={record.notes} placement="top">
-              <InfoCircleOutlined style={{ color: '#1890ff', fontSize: 16 }} />
-            </Tooltip>
-          ) : null;
-        }
-      }
-    },
-    {
-      title: 'PDF',
-      dataIndex: 'pdf',
-      align: 'center',
-      width: 40,
-      render: (_, record) => {
-        const editing = isEditing(record);
-        const hasPdf = !!(pdfFile || record.pdfUrl);
-        if (editing) {
-          return (
-            <label style={{ cursor: 'pointer' }}>
-              <FilePdfOutlined style={{ color: hasPdf ? '#d4380d' : '#d9d9d9', fontSize: 18, verticalAlign: 'middle' }} />
-              <input type="file" accept="application/pdf" onChange={handlePdfChange} disabled={uploading} style={{ display: 'none' }} />
-            </label>
-          );
-        } else {
-          return record.pdfUrl
-            ? <a href={record.pdfUrl} target="_blank" rel="noopener noreferrer"><FilePdfOutlined style={{ color: '#d4380d', fontSize: 18, cursor: 'pointer' }} /></a>
-            : null;
-        }
-      }
-    },
-    {
-      title: <SettingOutlined style={{ fontSize: 16 }} />,
-      dataIndex: 'actions',
-      align: 'center',
-      width: 48,
-      render: (_, record) => {
-        const editable = isEditing(record);
-        return (
-          <div style={{ minWidth: '50px', display: 'flex', gap: 8, alignItems: 'center' }}>
-            {editable ? (
-              <>
-                <Tag icon={<CheckOutlined />} onClick={() => save(record.id)} style={{ cursor: 'pointer', margin: 0 }} />
-                <Tag icon={<CloseOutlined />} onClick={cancel} style={{ cursor: 'pointer', margin: 0 }} />
-                <Tag icon={<FileTextOutlined />} onClick={() => openNoteModal(record)} style={{ cursor: 'pointer', margin: 0 }} />
-              </>
-            ) : (
-              <>
-                <Tag icon={<EditOutlined />} onClick={() => edit(record)} style={{ cursor: 'pointer', margin: 0 }} />
-                <Popconfirm title="¿Seguro que deseas eliminar?" onConfirm={() => handleDelete(record.id)}>
-                  <Tag icon={<DeleteOutlined />} color="red" style={{ cursor: 'pointer', margin: 0 }} />
-                </Popconfirm>
-              </>
-            )}
-          </div>
-        );
-      }
-    }
-  ];
-
-  // Calcular totales
-  const totalARS = monthlyPayments.reduce((sum, p) => sum + (Number(p.amountARS) || 0), 0);
-  const totalUSD = monthlyPayments.reduce((sum, p) => sum + (Number(p.amountUSD) || 0), 0);
-
-  // Solo pagos guardados en la DB
-  const savedPayments = monthlyPayments.filter(p => !p.isNew);
-
-  const EditableTable = () => (
-    <Form form={form} component={false}>
-      <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 16 }}>
-        <Button
-          icon={<PlusOutlined />}
-          onClick={e => {
-            if (!editingKey) handleAdd();
-          }}
-          type="primary"
-          loading={editingKey}
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 0 }}>
+        <button
+          onClick={() => onClick(card)}
           style={{
-            transition: 'all 0.3s ease',
-            opacity: editingKey ? 0.5 : 1
-          }}
-        >
-          Agregar pago
-        </Button>
-      </div>
-      <Table
-        bordered
-        dataSource={monthlyPayments}
-        columns={columns}
-        rowKey="id"
-        loading={mpLoading}
-        pagination={{ pageSize: 8 }}
-        scroll={{ x: true }}
-        size="medium"
-        locale={{
-          emptyText: <Empty description={"No hay pagos registrados en este mes"} />
-        }}
-      />
-      {/* Totales debajo de la tabla */}
-      {savedPayments.length > 0 && (
-        <div
-          style={{
-            textAlign: 'left',
-            marginTop: 0,
-            marginLeft: 2,
-            borderRadius: 10,
-            background: '#fff',
-            boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
-            padding: '14px 20px',
-            maxWidth: 240,
-            border: '1px solid #f0f0f0',
             display: 'flex',
             flexDirection: 'column',
-            gap: 0
+            alignItems: 'center',
+            background: isSelected ? '#1890ff' : '#232733',
+            color: '#fff',
+            borderRadius: 16,
+            padding: '8px 16px 6px 16px',
+            fontWeight: 600,
+            fontSize: 16,
+            boxShadow: '0 2px 8px #0002',
+            minWidth: 60,
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            marginBottom: 2
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', fontWeight: 500, fontSize: 16, color: '#222' }}>
-            Total ARS:
-            <span style={{ marginLeft: 8, fontWeight: 700, fontSize: 16, color: '#0071de' }}>
-              ${totalARS.toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US', { minimumFractionDigits: 2 })}
-            </span>
-          </div>
-          <div style={{ borderTop: '1px solid #f0f0f0', margin: '10px 0 8px 0' }} />
-          <div style={{ display: 'flex', alignItems: 'center', fontWeight: 500, fontSize: 16, color: '#222' }}>
-            Total USD:
-            <span style={{ marginLeft: 8, fontWeight: 700, fontSize: 16, color: '#0071de' }}>
-              ${totalUSD.toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US', { minimumFractionDigits: 2 })}
-            </span>
-          </div>
+          {getLogo(card.cardBank)}
+          <span style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>{getCardTypeText(card.cardType)}</span>
+        </button>
+      </div>
+    );
+  };
+
+  const PaymentMethodsBar = ({ cards, selectedCard, onCardSelect, i18n, updateCardClosingDate, setSelectedCard }) => {
+    if (cards.length === 1 && cards[0].bank === 'N/A') return null;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'row', gap: 12, margin: '18px 0 18px 0' }}>
+        {cards.map((card, idx) => (
+          <PaymentMethodChip
+            key={idx}
+            card={card}
+            isSelected={
+              selectedCard &&
+              selectedCard.bank === card.bank &&
+              selectedCard.cardBank === card.cardBank &&
+              selectedCard.cardType === card.cardType
+            }
+            onClick={onCardSelect}
+            i18n={i18n}
+            updateCardClosingDate={updateCardClosingDate}
+            setSelectedCard={setSelectedCard}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  const PaymentSummaryCard = ({ title, cards, showClosing, t, i18n }) => {
+    const [selectedCard, setSelectedCard] = useState(cards[0] || null);
+    const [editingDate, setEditingDate] = useState(false);
+    const [tempDate, setTempDate] = useState(null);
+
+    // Calcula totales para la tarjeta seleccionada o para todas si no hay selección
+    const calculateTotals = (cards) => {
+      let totalARS = 0, totalUSD = 0;
+      const cardsToSum = selectedCard 
+        ? cards.filter(c => c.cardBank === selectedCard.cardBank)
+        : cards;
+
+      cardsToSum.forEach(card => {
+        card.amounts.forEach(a => {
+          if (a.currency === 'ARS') totalARS += Number(a.amount);
+          if (a.currency === 'USD') totalUSD += Number(a.amount);
+        });
+      });
+      return { totalARS, totalUSD };
+    };
+
+    const { totalARS, totalUSD } = calculateTotals(cards);
+
+    // Determina si hay botones
+    const hasButtons = !(cards.length === 1 && cards[0].bank === 'N/A');
+
+    return (
+      <div
+        className="payment-summary-card"
+        style={{
+          background: 'rgb(10 20 47)',
+          borderRadius: 18,
+          padding: 32,
+          boxShadow: '0 2px 16px #0003',
+          minWidth: 280,
+          maxWidth: 420,
+          flex: '1 1 340px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}
+      >
+        <div style={{ fontWeight: 800, fontSize: 28, color: '#fff', marginBottom: 8 }}>
+          {title === 'N/A' ? 'Efectivo' : title}
         </div>
-      )}
-    </Form>
-  );
-
-  const openNoteModal = (record) => {
-    setNoteModal({ visible: true, id: record.id, note: record.notes || '' });
-  };
-
-  const handleNoteChange = (e) => {
-    setNoteModal((prev) => ({ ...prev, note: e.target.value }));
-  };
-
-  const handleNoteSave = async () => {
-    // Buscar si el registro está en edición
-    const editing = monthlyPayments.find(item => item.id === noteModal.id && isEditing(item));
-    if (editing) {
-      // Actualizar el valor en monthlyPayments (sin guardar en la DB)
-      const newData = monthlyPayments.map(item =>
-        item.id === noteModal.id ? { ...item, notes: noteModal.note } : item
-      );
-      setMonthlyPayments(newData);
-      form.setFieldsValue({ notes: noteModal.note });
-      setNoteModal({ visible: false, id: null, note: '' });
-      message.success('Nota actualizada (se guardará al confirmar los cambios)');
-    } else {
-      // Guardar en la db inmediatamente
-      const newData = monthlyPayments.map(item =>
-        item.id === noteModal.id ? { ...item, notes: noteModal.note } : item
-      );
-      setMonthlyPayments(newData);
-      await saveMonthlyPayments(newData);
-      setNoteModal({ visible: false, id: null, note: '' });
-      message.success('Nota guardada');
-    }
-  };
-
-  const handleNoteCancel = () => {
-    setNoteModal({ visible: false, id: null, note: '' });
+        {/* Área de botones, siempre ocupa el mismo espacio */}
+        <div style={{ minHeight: 54, margin: '18px 0' }}>
+          {hasButtons ? (
+            <PaymentMethodsBar
+              cards={cards}
+              selectedCard={selectedCard}
+              onCardSelect={setSelectedCard}
+              i18n={i18n}
+              updateCardClosingDate={updateCardClosingDate}
+              setSelectedCard={setSelectedCard}
+            />
+          ) : (
+            <div style={{ height: 36 }} />
+          )}
+        </div>
+        {/* Fecha de cierre: si la tarjeta seleccionada es de crédito, mostrar aquí */}
+        {selectedCard && selectedCard.cardType === 'Credit Card' && selectedCard.closingDate ? (
+          <div style={{ color: '#bfc2ce', fontSize: 18, margin: '8px 0 0 0', display: 'flex', alignItems: 'center', gap: 10, minHeight: 32 }}>
+            {i18n.language === 'en' ? 'Closing on' : 'Cierra el'} {i18n.language === 'en' ? dayjs(selectedCard.closingDate).format('MMM D') : dayjs(selectedCard.closingDate).format('D [de] MMMM')}
+            <EditOutlined
+              style={{ cursor: 'pointer', fontSize: 22, color: '#1890ff' }}
+              onClick={() => {
+                setEditingDate(true);
+                setTempDate(selectedCard.closingDate);
+              }}
+            />
+            {editingDate && (
+              <DatePicker
+                open
+                value={dayjs(tempDate)}
+                onChange={async val => {
+                  setTempDate(val);
+                  setEditingDate(false);
+                  if (val) {
+                    const fechaString = val.format('YYYY-MM-DD');
+                    await updateCardClosingDate(selectedCard.bank, selectedCard.cardBank, selectedCard.cardType, fechaString);
+                    setSelectedCard({ ...selectedCard, closingDate: fechaString });
+                    message.success('Fecha de cierre actualizada');
+                  }
+                }}
+                onOpenChange={open => { if (!open) setEditingDate(false); }}
+                format={i18n.language === 'en' ? 'MMM D' : 'D [de] MMMM'}
+                style={{ marginLeft: 8 }}
+                getPopupContainer={trigger => trigger.parentNode}
+              />
+            )}
+          </div>
+        ) : (
+          <div style={{ minHeight: 32, margin: '8px 0 0 0' }} />
+        )}
+        <div style={{ display: 'flex', gap: 3, fontWeight: 700, fontSize: 28, flexDirection: 'column' }}>
+          <span style={{ borderTop: '1px solid #232733', margin: '18px 0' }} />
+          <span style={{ color: '#4d8cff' }}>{`ARS ${totalARS.toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US')}`}</span>
+          <span style={{ color: '#6be6b2' }}>{`USD ${totalUSD.toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US')}`}</span>
+        </div>
+      </div>
+    );
   };
 
   // Limpia undefined de objetos/arrays
@@ -884,6 +422,21 @@ const Expenses = () => {
     return obj;
   }
 
+  useEffect(() => {
+    // Configurar el locale de dayjs según el idioma
+    dayjs.locale(i18n.language);
+  }, [i18n.language]);
+
+  // Agrupa las tarjetas por banco
+  const groupCardsByBank = (cards) => {
+    const bankMap = {};
+    cards.forEach(card => {
+      if (!bankMap[card.bank]) bankMap[card.bank] = [];
+      bankMap[card.bank].push(card);
+    });
+    return bankMap;
+  };
+
   return (
     <>
       <div className='container-page'>
@@ -892,40 +445,79 @@ const Expenses = () => {
           {hasExpenses ? <>
 
             {/* Cards filter per month */}
-            <div className="filter" style={{ marginBottom: 24 }}>
-              <span style={{marginRight: 5 }}>{t('userProfile.expenses.filter')}</span> 
+            <div style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              marginBottom: 16,
+              maxWidth: '250px',
+              width: '100%',
+              paddingBottom: 1
+            }}>
+              <FilterOutlined style={{ 
+                fontSize: '20px', 
+                color: '#1890ff',
+                marginRight: '8px'
+              }} />
               <DatePicker
+                key={i18n.language}
                 picker="month"
-                allowClear={false}
-                value={dayjs(selectedMonth).isValid() ? dayjs(selectedMonth) : dayjs()}
-                onChange={(value) => {
-                  if (!value || !dayjs(value).isValid()) {
-                    setSelectedMonth(dayjs());
-                  } else {
-                    setSelectedMonth(dayjs(value));
-                  }
-                }}
-                style={{ margin: 0 }}
+                value={selectedMonth}
+                onChange={val => setSelectedMonth(val || dayjs())}
+                format={i18n.language === 'en' ? 'MMM YYYY' : 'MMMM YYYY'}
+                locale={i18n.language === 'en' ? enUS : esES}
+                style={{ width: '100%' }}
+                className={i18n.language === 'es' ? 'datepicker-capitalize' : ''}
               />
             </div>
 
             {/* Card */}
-            <div>
-              <div className='cards margin-top-large margin-bottom-large'>
-                {renderSection(getTitle('credit', creditCards.length), creditCards)}
-              </div>
-              <div className='cards margin-top-large margin-bottom-large'>
-                {renderSection(getTitle('debit', debitCards.length), debitCards)}
-              </div>
-              <div className='cards margin-top-large margin-bottom-large'>
-                {renderSection(getTitle('cash', cashCards.length), cashCards)}
-              </div>
+            <div
+              style={{
+                width: '100%',
+                marginBottom: 32,
+              }}
+            >
+              {cards.length === 0 ? (
+                <div style={{ width: '100%', textAlign: 'center', marginTop: 40 }}>
+                  <Empty description="No hay resumen para mostrar" />
+                </div>
+              ) : (
+                <TransitionGroup
+                  className="cards-transition-group"
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 16,
+                    justifyContent: 'flex-start',
+                    alignItems: 'stretch',
+                    width: '100%',
+                  }}
+                >
+                  {(() => {
+                    const grouped = Object.entries(groupCardsByBank(cards));
+                    // Ordena alfabéticamente, pero pone 'N/A' al final
+                    grouped.sort(([a], [b]) => {
+                      if (a === 'N/A') return 1;
+                      if (b === 'N/A') return -1;
+                      return a.localeCompare(b);
+                    });
+                    return grouped.map(([bank, bankCards]) => (
+                      <CSSTransition key={bank} timeout={400} classNames="fade-card">
+                        <PaymentSummaryCard
+                          title={bank}
+                          cards={bankCards}
+                          showClosing={bankCards.some(c => c.cardType === 'Credit Card')}
+                          t={t}
+                          i18n={i18n}
+                        />
+                      </CSSTransition>
+                    ));
+                  })()}
+                </TransitionGroup>
+              )}
             </div>
-            {/* --- PAGOS POR MES --- */}
-          {/* <MonthlyPaymentsSection cards={cards} creditCards={creditCards} debitCards={debitCards} cashCards={cashCards} /> */}
 
-            {/* <h2 style={{ color: 'black', fontWeight: 700, letterSpacing: 1, marginBottom: 16 }}>Control de pagos del mes</h2> */}
-            {/* <EditableTable /> */}
           </>:
 
           // EMPTY DATA MESSAGE
@@ -935,38 +527,9 @@ const Expenses = () => {
 
         </Spin>
       </div>
-      <Modal
-        title="Agregar información"
-        open={noteModal.visible}
-        onOk={handleNoteSave}
-        onCancel={handleNoteCancel}
-        okText="Guardar"
-        cancelText="Cancelar"
-      >
-        <Input.TextArea
-          value={noteModal.note}
-          onChange={handleNoteChange}
-          rows={4}
-          placeholder="Agrega una nota para este pago"
-        />
-      </Modal>
-      <Modal
-        open={confirmPdfModal.visible}
-        title="¿Qué hacer con el documento adjunto?"
-        onCancel={() => setConfirmPdfModal({ visible: false, id: null, row: null, oldPdfUrl: null })}
-        footer={[
-          <Button key="keep" type="primary" onClick={() => handleConfirmPdf(true)}>
-            Mantener documento
-          </Button>,
-          <Button key="remove" danger onClick={() => handleConfirmPdf(false)}>
-            Eliminar documento
-          </Button>
-        ]}
-      >
-        Este pago tiene un documento adjunto. ¿Quieres mantenerlo o eliminarlo?
-      </Modal>
+
     </>
   );
 };
 
-export default Expenses;
+export default Summary;

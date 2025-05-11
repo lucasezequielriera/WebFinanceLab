@@ -5,6 +5,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { Card, Statistic, Progress } from 'antd';
 import { useTranslation } from 'react-i18next';
 
+function formatCompactNumber(value) {
+  return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value);
+}
+
 const BalancePesosCounter = () => {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -59,7 +63,7 @@ const BalancePesosCounter = () => {
         paymentsSum = payments.reduce((acc, p) => acc + (Number(p.amountARS) || 0), 0);
         setTotalPayments(paymentsSum);
         // Obtener gastos diarios en ARS
-        const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
+      const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
         const qExpenses = query(
           expensesRef,
           where('currency', '==', 'ARS'),
@@ -75,7 +79,7 @@ const BalancePesosCounter = () => {
           console.log('[BalancePesosCounter] Pagos mensuales ARS mes actual:', paymentsSum);
           console.log('[BalancePesosCounter] Gastos diarios ARS mes actual:', expensesSum);
           console.log('[BalancePesosCounter] Resultado mostrado en card:', result);
-        });
+      });
         // Limpiar expenses listener al desmontar
         return () => unsubExpenses();
       });
@@ -86,15 +90,12 @@ const BalancePesosCounter = () => {
   }, [currentUser]);
 
   return (
-    (() => {
-      console.log('[BalancePesosCounter] Render: ingresos ARS:', totalIncome, '- pagos mensuales ARS:', totalPayments, '- gastos diarios ARS:', totalExpenses, '=', remaining);
-    })(),
     <Card loading={loading}>
       <div>
           <Statistic
             className='statics-card'
             title={t('userProfile.dashboard.card.balance.ars')}
-            value={remaining}
+            value={formatCompactNumber(remaining)}
             precision={2}
             prefix={'$'}
           />

@@ -27,34 +27,29 @@
     "userProfile.dashboard.card.balance.usd": "Balance USD",
     "userProfile.dashboard.card.incomes.ars": "Ingresos ARS",
     "userProfile.dashboard.card.incomes.usd": "Ingresos USD",
-    "userProfile.dashboard.card.expenses.ars": "Gastos ARS",
-    "userProfile.dashboard.card.expenses.usd": "Gastos USD",
+    "userProfile.dashboard.card.fixedExpenses.ars": "Gastos Fijos ARS",
+    "userProfile.dashboard.card.fixedExpenses.usd": "Gastos Fijos USD",
+    "userProfile.dashboard.card.dailyExpenses.ars": "Gastos Diarios ARS",
+    "userProfile.dashboard.card.dailyExpenses.usd": "Gastos Diarios USD",
     "userProfile.dashboard.card.vsLastMonth": "este mes",
     "userProfile.dashboard.dailyExpenses.title": "Flujo de Dinero",
     "userProfile.dashboard.dailyExpenses.tooltip": {
         "expensesDay": "Día",
         "expensesAmount": "Gastos"
     },
-
-    "userProfile.navbar.signup": "Registrarme",
-    "userProfile.navbar.login": "Ingresar",
-    "userProfile.navbar.dashboard": "Dashboard",
-    "userProfile.navbar.expenses":{
-        "dropdown": "Gastos",
-        "summary": "Resumen",
-        "dailyExpenses": "Diarios",
-        "monthlyExpenses": "Mensuales",
-        "payments": "Fijos"
+    "userProfile.dashboard.recentMovements": {
+        "title": "Últimos Movimientos",
+        "today": "Hoy",
+        "yesterday": "Ayer",
+        "viewAll": "Ver Todos",
+        "noMovements": "No hay movimientos para mostrar",
+        "movementType": {
+            "income": "Ingreso",
+            "dailyExpense": "Gasto Diario",
+            "fixedExpense": "Gasto Fijo",
+            "fixedPayment": "Pago Fijo"
+        }
     },
-    "userProfile.navbar.incomes": "Ingresos",
-    "userProfile.navbar.financialGoals": "Mis Objetivos",
-    "userProfile.navbar.aboutUs": "Sobre Nosotros",
-    "userProfile.navbar.profile": "Perfil",
-    "userProfile.navbar.logout": "Cerrar Sesión",
-    "userProfile.navbar.addIncome": "Agregar Ingreso",
-    "userProfile.navbar.addExpense": "Agregar Gasto",
-    "userProfile.navbar.addTarget": "Agregar Objetivo",
-    "userProfile.navbar.addStock": "Agregar Acción",
 
     "userProfile.incomes.filter.placeholder": "Selecciona mes",
     "userProfile.incomes.table": {
@@ -86,6 +81,13 @@
         "noIncomes": "No hay ingresos para mostrar"
     },
 
+    "userProfile.expenses.summary": {
+        "title": "Resumen de Gastos",
+        "creditCard": "Tarjeta de Crédito",
+        "debitCard": "Tarjeta de Débito",
+        "cash": "Efectivo",
+        "closingDate": "Fecha de Cierre"
+    },
     "userProfile.expenses.title": "Mis Gastos",
     "userProfile.expenses.generalExpensesButton": "Gastos Mensuales",
     "userProfile.expenses.detailedExpensesButton": "Gastos Detallados",
@@ -128,6 +130,27 @@
         "totalARS": "Total ARS:",
         "totalUSD": "Total USD:"
     },
+
+    "userProfile.navbar.signup": "Registrarme",
+    "userProfile.navbar.login": "Ingresar",
+    "userProfile.navbar.dashboard": "Dashboard",
+    "userProfile.navbar.expenses":{
+        "dropdown": "Gastos",
+        "summary": "Resumen",
+        "dailyExpenses": "Diarios",
+        "monthlyExpenses": "Mensuales",
+        "payments": "Fijos"
+    },
+    "userProfile.navbar.incomes": "Ingresos",
+    "userProfile.navbar.debts": "Deudas",
+    "userProfile.navbar.financialGoals": "Mis Objetivos",
+    "userProfile.navbar.aboutUs": "Sobre Nosotros",
+    "userProfile.navbar.profile": "Perfil",
+    "userProfile.navbar.logout": "Cerrar Sesión",
+    "userProfile.navbar.addIncome": "Agregar Ingreso",
+    "userProfile.navbar.addExpense": "Agregar Gasto",
+    "userProfile.navbar.addTarget": "Agregar Objetivo",
+    "userProfile.navbar.addStock": "Agregar Acción",
 
     "userProfile.financialGoals.title": "Mis Objetivos Financieros",
     "userProfile.financialGoals.subtitle": "Aquí puedes fijar tus objetivos financieros y configurarlo todo. Nosotros te ayudamos a que puedas mantener tus finanzas y tener la capacidad de ahorro que tanto buscas.",

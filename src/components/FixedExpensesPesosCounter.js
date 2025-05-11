@@ -7,6 +7,10 @@ import { useAuth } from '../contexts/AuthContext';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 
+function formatCompactNumber(value) {
+  return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value);
+}
+
 const FixedExpensesPesosCounter = () => {
   const [total, setTotal] = useState(0);
   const [prevTotal, setPrevTotal] = useState(0);
@@ -52,8 +56,8 @@ const FixedExpensesPesosCounter = () => {
     <Card loading={loading}>
       <Statistic
         className='statics-card'
-        title={'Gastos fijos (ARS)'}
-        value={total}
+        title={t('userProfile.dashboard.card.fixedExpenses.ars')}
+        value={formatCompactNumber(total)}
         precision={2}
         prefix={'$'}
       />

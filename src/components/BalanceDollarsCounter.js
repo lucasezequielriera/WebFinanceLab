@@ -5,6 +5,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { Card, Statistic, Progress } from 'antd';
 import { useTranslation } from 'react-i18next';
 
+function formatCompactNumber(value) {
+  return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value);
+}
+
 const BalanceDollarsCounter = () => {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -41,7 +45,7 @@ const BalanceDollarsCounter = () => {
       where('timestamp', '<',  endTimestamp)
     );
 
-    let income = 0;
+      let income = 0;
     getDocs(qIncomes).then(snapIncomes => {
       snapIncomes.forEach((d) => {
         income += Number(d.data().amount);
@@ -57,7 +61,7 @@ const BalanceDollarsCounter = () => {
         paymentsSum = payments.reduce((acc, p) => acc + (Number(p.amountUSD) || 0), 0);
         setTotalPayments(paymentsSum);
         // Obtener gastos diarios en USD
-        const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
+    const expensesRef = collection(db, `users/${currentUser.uid}/expenses`);
         const qExpenses = query(
           expensesRef,
           where('currency', '==', 'USD'),
@@ -69,11 +73,11 @@ const BalanceDollarsCounter = () => {
           setTotalExpenses(expensesSum);
           const result = income - paymentsSum - expensesSum;
           setRemaining(result);
-          setLoading(false);
+      setLoading(false);
           console.log('[BalanceDollarsCounter] Pagos mensuales USD mes actual:', paymentsSum);
           console.log('[BalanceDollarsCounter] Gastos diarios USD mes actual:', expensesSum);
           console.log('[BalanceDollarsCounter] Resultado mostrado en card:', result);
-        });
+    });
         // Limpiar expenses listener al desmontar
         return () => unsubExpenses();
       });
@@ -91,7 +95,7 @@ const BalanceDollarsCounter = () => {
           <Statistic
             className='statics-card'
             title={t('userProfile.dashboard.card.balance.usd')}
-            value={remaining}
+            value={formatCompactNumber(remaining)}
             precision={2}
             prefix={'$'}
           />

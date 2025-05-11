@@ -27,34 +27,29 @@
     "userProfile.dashboard.card.balance.usd": "Balance USD",
     "userProfile.dashboard.card.incomes.ars": "Incomes ARS",
     "userProfile.dashboard.card.incomes.usd": "Incomes USD",
-    "userProfile.dashboard.card.expenses.ars": "Expenses ARS",
-    "userProfile.dashboard.card.expenses.usd": "Expenses USD",
+    "userProfile.dashboard.card.fixedExpenses.ars": "Fixed Expenses ARS",
+    "userProfile.dashboard.card.fixedExpenses.usd": "Fixed Expenses USD",
+    "userProfile.dashboard.card.dailyExpenses.ars": "Daily Expenses ARS",
+    "userProfile.dashboard.card.dailyExpenses.usd": "Daily Expenses USD",
     "userProfile.dashboard.card.vsLastMonth": "this month",
     "userProfile.dashboard.dailyExpenses.title": "Cash Flow",
     "userProfile.dashboard.dailyExpenses.tooltip": {
         "expensesDay": "Day",
         "expensesAmount": "Expenses"
     },
-
-    "userProfile.navbar.signup": "Sign Up",
-    "userProfile.navbar.login": "Login",
-    "userProfile.navbar.dashboard": "Dashboard",
-    "userProfile.navbar.expenses":{
-        "dropdown": "Expenses",
-        "summary": "Summary",
-        "dailyExpenses": "Daily",
-        "monthlyExpenses": "Monthly",
-        "payments": "Fixed"
+    "userProfile.dashboard.recentMovements": {
+        "title": "Recent Movements",
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "viewAll": "View All",
+        "noMovements": "No movements to show",
+        "movementType": {
+            "income": "Income",
+            "dailyExpense": "Daily Expense",
+            "fixedExpense": "Fixed Expense",
+            "fixedPayment": "Fixed Payment"
+        }
     },
-    "userProfile.navbar.incomes": "Incomes",
-    "userProfile.navbar.financialGoals": "Financial Goals",
-    "userProfile.navbar.aboutUs": "About Us",
-    "userProfile.navbar.profile": "Profile",
-    "userProfile.navbar.logout": "Logout",
-    "userProfile.navbar.addIncome": "Add Income",
-    "userProfile.navbar.addExpense": "Add Expense",
-    "userProfile.navbar.addTarget": "Add Target",
-    "userProfile.navbar.addStock": "Add Stock",
 
     "userProfile.incomes.filter.placeholder": "Select month",
     "userProfile.incomes.table": {
@@ -86,6 +81,13 @@
         "noIncomes": "No incomes to show."
     },
 
+    "userProfile.expenses.summary": {
+        "title": "Expenses Summary",
+        "creditCard": "Credit Card",
+        "debitCard": "Debit Card",
+        "cash": "Cash",
+        "closingDate": "Closing Date"
+    },
     "userProfile.expenses.title": "My Expenses",
     "userProfile.expenses.generalExpensesButton": "General Expenses",
     "userProfile.expenses.detailedExpensesButton": "Detailed Expenses",
@@ -129,6 +131,27 @@
         "totalARS": "Total ARS:",
         "totalUSD": "Total USD:"
     },
+
+    "userProfile.navbar.signup": "Sign Up",
+    "userProfile.navbar.login": "Login",
+    "userProfile.navbar.dashboard": "Dashboard",
+    "userProfile.navbar.expenses":{
+        "dropdown": "Expenses",
+        "summary": "Summary",
+        "dailyExpenses": "Daily",
+        "monthlyExpenses": "Monthly",
+        "payments": "Fixed"
+    },
+    "userProfile.navbar.incomes": "Incomes",
+    "userProfile.navbar.debts": "Debts",
+    "userProfile.navbar.financialGoals": "Financial Goals",
+    "userProfile.navbar.aboutUs": "About Us",
+    "userProfile.navbar.profile": "Profile",
+    "userProfile.navbar.logout": "Logout",
+    "userProfile.navbar.addIncome": "Add Income",
+    "userProfile.navbar.addExpense": "Add Expense",
+    "userProfile.navbar.addTarget": "Add Target",
+    "userProfile.navbar.addStock": "Add Stock",
 
     "userProfile.financialGoals.title": "Financial Goals",
     "userProfile.financialGoals.subtitle": "You can check your financial goals here and configure everything.",

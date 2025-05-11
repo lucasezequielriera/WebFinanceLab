@@ -5,8 +5,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { collection, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import dayjs from 'dayjs';
 import { DollarOutlined, ArrowDownOutlined, ArrowUpOutlined, CreditCardOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
-const { Title } = Typography;
 
 function groupByDay(movements) {
   return movements.reduce((acc, mov) => {
@@ -30,6 +31,9 @@ const RecentMovements = () => {
   const [movements, setMovements] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const { Title } = Typography;
+  const { t } = useTranslation();
+
   useEffect(() => {
     if (!currentUser) return;
 
@@ -45,7 +49,7 @@ const RecentMovements = () => {
       incomes = snapshot.docs.map(doc => {
         const d = doc.data();
         return {
-          type: 'Ingreso',
+          type: t('userProfile.dashboard.recentMovements.movementType.income'),
           description: d.title || d.description || '',
           amount: Number(d.amount),
           currency: d.currency || 'ARS',
@@ -63,7 +67,7 @@ const RecentMovements = () => {
       expenses = snapshot.docs.map(doc => {
         const d = doc.data();
         return {
-          type: d.fixed ? 'Gasto Fijo' : 'Gasto Diario',
+          type: d.fixed ? t('userProfile.dashboard.recentMovements.movementType.fixedExpense') : t('userProfile.dashboard.recentMovements.movementType.dailyExpense'),
           description: d.description || '',
           amount: Number(d.amount),
           currency: d.currency || 'ARS',
@@ -96,7 +100,7 @@ const RecentMovements = () => {
             date = dayjs();
           }
           return {
-            type: 'Pago Fijo',
+            type: t('userProfile.dashboard.recentMovements.movementType.fixedPayment'),
             description: p.description || p.title || p.bank || '',
             amount: Number(p.amountARS) > 0 ? Number(p.amountARS) : Number(p.amountUSD),
             currency: Number(p.amountARS) > 0 ? 'ARS' : 'USD',
@@ -133,7 +137,12 @@ const RecentMovements = () => {
   return (
     <Spin spinning={loading}>
       <div style={{ maxHeight: '100%', padding: 0, overflowY: 'auto' }}>
-        <p style={{ margin: 0, marginBottom: 10, fontSize: 18, fontWeight: 600 }}>Últimos movimientos</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <p style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>{t('userProfile.dashboard.recentMovements.title')}</p>
+          <Link to="/detailed-expenses" style={{ color: '#1890ff', fontSize: 14 }}>
+            {t('userProfile.dashboard.recentMovements.viewAll')}
+          </Link>
+        </div>
         {days.map(day => (
           <div key={day}>
             <Title level={5} style={{ margin: '12px 0 4px 0', color: '#888', fontWeight: 600, fontSize: 15 }}>{getDayLabel(day)}</Title>
@@ -144,16 +153,16 @@ const RecentMovements = () => {
                 <List.Item>
                   <List.Item.Meta
                     avatar={
-                      item.type === 'Ingreso' ? <ArrowDownOutlined style={{ color: 'rgb(0, 163, 137)', fontSize: 18 }} />
-                      : item.type === 'Pago Fijo' ? <CreditCardOutlined style={{ color: '#0071de', fontSize: 18 }} />
-                      : <ArrowUpOutlined style={{ color: item.type === 'Gasto Fijo' ? '#faad14' : 'rgb(207, 0, 0)', fontSize: 18 }} />
+                      item.type === t('userProfile.dashboard.recentMovements.movementType.income') ? <ArrowDownOutlined style={{ color: 'rgb(0, 163, 137)', fontSize: 18 }} />
+                      : item.type === t('userProfile.dashboard.recentMovements.movementType.fixedPayment') ? <CreditCardOutlined style={{ color: '#0071de', fontSize: 18 }} />
+                      : <ArrowUpOutlined style={{ color: item.type === t('userProfile.dashboard.recentMovements.movementType.fixedExpense') ? '#faad14' : 'rgb(207, 0, 0)', fontSize: 18 }} />
                     }
-                    title={<span>{item.type} <Tag color={item.type === 'Ingreso' ? 'green' : item.type === 'Pago Fijo' ? 'blue' : item.type === 'Gasto Fijo' ? 'gold' : 'red'}>{item.currency}</Tag></span>}
-                    description={<span>{item.description || <i>Sin descripción</i>}</span>}
+                    title={<span>{item.type} <Tag style={{ marginLeft: 5 }} color={item.type === t('userProfile.dashboard.recentMovements.movementType.income') ? 'green' : 'red'}>{item.currency}</Tag></span>}
+                    description={<span>{item.description || <i>{t('userProfile.dashboard.recentMovements.noMovements')}</i>}</span>}
                   />
                   <div style={{ minWidth: 90, textAlign: 'right' }}>
-                    <b style={{ color: item.type === 'Ingreso' ? 'rgb(0, 163, 137)' : item.type === 'Pago Fijo' ? '#0071de' : item.type === 'Gasto Fijo' ? '#faad14' : 'rgb(207, 0, 0)' }}>
-                      {item.type === 'Ingreso' ? '+' : '-'}${item.amount.toFixed(2)}
+                    <b style={{ color: item.type === t('userProfile.dashboard.recentMovements.movementType.income') ? 'rgb(0, 163, 137)' : item.type === t('userProfile.dashboard.recentMovements.movementType.fixedPayment') ? '#0071de' : item.type === t('userProfile.dashboard.recentMovements.movementType.fixedExpense') ? '#faad14' : 'rgb(207, 0, 0)' }}>
+                      {item.type === t('userProfile.dashboard.recentMovements.movementType.income') ? '+' : '-'}${item.amount.toFixed(2)}
                     </b>
                     <div style={{ fontSize: 12, color: '#888' }}>{item.date.format('HH:mm')}</div>
                   </div>

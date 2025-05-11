@@ -112,7 +112,7 @@
       width: 250px;
     }
   }
-
+  
   .add-payment-btn {
     transition: all 0.3s ease !important;
   }
@@ -154,3 +154,57 @@
     }
   }
 
+  .datepicker-capitalize input {
+    text-transform: capitalize;
+  }
+
+  @media screen and (min-width: 1324px) and (max-width: 1696px) {
+    .payment-summary-card {
+      width: calc(25% - 16px) !important;
+      max-width: calc(25% - 16px) !important;
+      min-width: 0 !important;
+    }
+  }
+
+  @media screen and (min-width: 952px) and (max-width: 1323px) {
+    .payment-summary-card {
+      width: calc(50% - 16px) !important;
+      max-width: calc(50% - 16px) !important;
+      min-width: 0 !important;
+    }
+  }
+
+  @media screen and (min-width: 769px) and (max-width: 951px) {
+    .payment-summary-card {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+    }
+  }
+
+  @media (max-width: 751px) {
+    .payment-summary-card {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+    }
+  }
+
+  .fade-card-enter {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+  .fade-card-enter-active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition: opacity 0.4s, transform 0.4s;
+  }
+  .fade-card-exit {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  .fade-card-exit-active {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+    transition: opacity 0.4s, transform 0.4s;
+  }
