@@ -137,6 +137,38 @@
         "totalUSD": "Total USD:"
     },
 
+    "userProfile.expenses.fixedExpenses": {
+        "title": "Fixed Expenses",
+        "totalARS": "Total ARS:",
+        "totalUSD": "Total USD:",
+        "noFixedExpenses": "No fixed expenses recorded this month.",
+        "table": {
+            "title": "Title",
+            "amountUsd": "Amount USD",
+            "amountArs": "Amount ARS",
+            "paid": "Paid",
+            "info": "Info",
+            "addInfo": "Add Information",
+            "placeHolderInfo": "Fixed expense information",
+            "save": "Save",
+            "cancel": "Cancel",
+            "pdf": "PDF",
+            "keepDocumentModal": {
+                "title": "What to do with the attached document?",
+                "subtitle": "This payment has an attached document. Do you want to keep it or delete it?",
+                "keep": "Keep document",
+                "remove": "Delete document"
+            },
+            "delete": {
+                "ask": "Delete fixed expense?",
+                "deleted": "Fixed expense deleted",
+                "error": "Error deleting"
+            },
+            "edited": "Fixed expense updated",
+            "error": "Error updating"
+        }
+    },
+
     "userProfile.navbar.signup": "Sign Up",
     "userProfile.navbar.login": "Login",
     "userProfile.navbar.dashboard": "Dashboard",

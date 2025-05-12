@@ -1,5 +1,5 @@
 import React, { useState, useEffect }                                   from 'react';
-import { Spin, Empty, Table, Button, Input, Checkbox, Popconfirm, Form, message, Tag, AutoComplete, Modal, Tooltip } from 'antd';
+import { Spin, Empty, Table, Button, Input, Checkbox, Popconfirm, Form, message, Tag, AutoComplete, Modal, Tooltip, DatePicker } from 'antd';
 import { doc, onSnapshot, setDoc }                                      from 'firebase/firestore';
 import { db }                                                           from '../firebase';
 import { storage }                                                      from '../firebase';
@@ -10,8 +10,10 @@ import dayjs                                                            from 'da
 import useMonthlyMovements                                              from '../hooks/useMonthlyMovements';
 // Styles
 import '../styles/Expenses.css';
-import { EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, FileTextOutlined, InfoCircleOutlined, SettingOutlined, FilePdfOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, FileTextOutlined, InfoCircleOutlined, SettingOutlined, FilePdfOutlined, FilterOutlined } from '@ant-design/icons';
 import { NumericFormat } from 'react-number-format';
+import enUS from 'antd/es/date-picker/locale/en_US';
+import esES from 'antd/es/date-picker/locale/es_ES';
 
 const FixedExpenses = () => {
   const [loading, setLoading]             = useState(true);
@@ -19,7 +21,7 @@ const FixedExpenses = () => {
   const [mpLoading, setMpLoading] = useState(true);
   const [editingKey, setEditingKey] = useState('');
   const [form] = Form.useForm();
-  const currentMonthKey = dayjs().format('YYYY-MM');
+  const [selectedMonth, setSelectedMonth] = useState(dayjs());
   const [noteModal, setNoteModal] = useState({ visible: false, id: null, note: '' });
   const [uploading, setUploading] = useState(false);
   const [pdfFile, setPdfFile] = useState(null);
@@ -31,7 +33,8 @@ const FixedExpenses = () => {
 
   useEffect(() => {
     if (!currentUser) return;
-    const ref = doc(db, `users/${currentUser.uid}/monthlyPayments`, currentMonthKey);
+    const monthKey = selectedMonth.format('YYYY-MM');
+    const ref = doc(db, `users/${currentUser.uid}/monthlyPayments`, monthKey);
     const unsub = onSnapshot(ref, snap => {
       const data = snap.exists() ? snap.data().payments || [] : [];
       setMonthlyPayments(data);
@@ -39,11 +42,12 @@ const FixedExpenses = () => {
       setLoading(false);
     });
     return () => unsub();
-  }, [currentUser, currentMonthKey]);
+  }, [currentUser, selectedMonth]);
 
   const saveMonthlyPayments = async (data) => {
     if (!currentUser) return;
-    const ref = doc(db, `users/${currentUser.uid}/monthlyPayments`, currentMonthKey);
+    const monthKey = selectedMonth.format('YYYY-MM');
+    const ref = doc(db, `users/${currentUser.uid}/monthlyPayments`, monthKey);
     await setDoc(ref, { payments: data }, { merge: true });
   };
 
@@ -126,7 +130,7 @@ const FixedExpenses = () => {
         setMonthlyPayments(newData);
         setEditingKey('');
         await saveMonthlyPayments(newData);
-        message.success('Pago actualizado');
+        message.success(t("userProfile.expenses.fixedExpenses.table.edited"));
       }
     } catch (err) {
       // Solo mostrar notificación de error si no es un error de validación
@@ -134,7 +138,7 @@ const FixedExpenses = () => {
         // Hay errores de validación, no mostramos notificación
         return;
       }
-      message.error('Error al guardar');
+      message.error(t("userProfile.expenses.fixedExpenses.table.error"));
     }
   };
 
@@ -165,7 +169,7 @@ const FixedExpenses = () => {
     const newData = monthlyPayments.filter(item => item.id !== id);
     setMonthlyPayments(newData);
     await saveMonthlyPayments(newData);
-    message.success('Pago eliminado');
+    message.success(t("userProfile.expenses.fixedExpenses.table.delete.deleted"));
   };
 
   const isEditing = (record) => record.id === editingKey;
@@ -175,7 +179,7 @@ const FixedExpenses = () => {
 
   const columns = [
     {
-      title: 'Título',
+      title: t("userProfile.expenses.fixedExpenses.table.title"),
       dataIndex: 'title',
       editable: true,
       render: (text, record) => isEditing(record)
@@ -217,7 +221,7 @@ const FixedExpenses = () => {
         : text
     },
     {
-      title: 'Monto ARS',
+      title: t("userProfile.expenses.fixedExpenses.table.amountArs"),
       dataIndex: 'amountARS',
       editable: true,
       render: (text, record) => isEditing(record) 
@@ -244,7 +248,7 @@ const FixedExpenses = () => {
         : (text ? `$${Number(text).toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US', { minimumFractionDigits: 2 })}` : '$0,00')
     },
     {
-      title: 'Monto USD',
+      title: t("userProfile.expenses.fixedExpenses.table.amountUsd"),
       dataIndex: 'amountUSD',
       editable: true,
       render: (text, record) => isEditing(record) 
@@ -271,7 +275,7 @@ const FixedExpenses = () => {
         : (text ? `$${Number(text).toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US', { minimumFractionDigits: 2 })}` : '$0,00')
     },
     {
-      title: 'Pago',
+      title: t("userProfile.expenses.fixedExpenses.table.paid"),
       dataIndex: 'paid',
       align: 'center',
       width: 48,
@@ -291,7 +295,7 @@ const FixedExpenses = () => {
       }
     },
     {
-      title: 'Info',
+      title: t("userProfile.expenses.fixedExpenses.table.info"),
       dataIndex: 'noteInfo',
       align: 'center',
       width: 48,
@@ -317,7 +321,7 @@ const FixedExpenses = () => {
       }
     },
     {
-      title: 'PDF',
+      title: t("userProfile.expenses.fixedExpenses.table.pdf"),
       dataIndex: 'pdf',
       align: 'center',
       width: 40,
@@ -356,7 +360,7 @@ const FixedExpenses = () => {
             ) : (
               <>
                 <Tag icon={<EditOutlined />} onClick={() => edit(record)} style={{ cursor: 'pointer', margin: 0 }} />
-                <Popconfirm title="¿Seguro que deseas eliminar?" onConfirm={() => handleDelete(record.id)}>
+                <Popconfirm title={t("userProfile.expenses.fixedExpenses.table.delete.ask")} onConfirm={() => handleDelete(record.id)}>
                   <Tag icon={<DeleteOutlined />} color="red" style={{ cursor: 'pointer', margin: 0 }} />
                 </Popconfirm>
               </>
@@ -386,7 +390,7 @@ const FixedExpenses = () => {
         scroll={{ x: true }}
         size="medium"
         locale={{
-          emptyText: <Empty description={"No hay pagos registrados en este mes"} />
+          emptyText: <Empty description={t("userProfile.expenses.fixedExpenses.noFixedExpenses")} />
         }}
       />
       {/* Totales debajo de la tabla */}
@@ -465,19 +469,48 @@ const FixedExpenses = () => {
     <>
     <div className='container-page'>
       <Spin spinning={loading}>
+        {hasExpenses ? (
+          <>
+            {/* Month filter */}
+            <div style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              marginBottom: 16,
+              maxWidth: '250px',
+              width: '100%',
+              paddingBottom: 1
+            }}>
+              <FilterOutlined style={{ 
+                fontSize: '20px', 
+                color: '#1890ff',
+                marginRight: '8px'
+              }} />
+              <DatePicker
+                key={i18n.language}
+                picker="month"
+                value={selectedMonth}
+                onChange={val => setSelectedMonth(val || dayjs())}
+                format={i18n.language === 'en' ? 'MMM YYYY' : 'MMMM YYYY'}
+                locale={i18n.language === 'en' ? enUS : esES}
+                style={{ width: '100%' }}
+                className={i18n.language === 'es' ? 'datepicker-capitalize' : ''}
+              />
+            </div>
 
-          {hasExpenses ? <EditableTable />:
-
-        // EMPTY DATA MESSAGE
-        <div style={{ marginTop: 40 }}>
+            <EditableTable />
+          </>
+        ) : (
+          // EMPTY DATA MESSAGE
+          <div style={{ marginTop: 40 }}>
             <Empty description={t("No hay gastos registrados en este mes")}/>
-        </div>}
-
+          </div>
+        )}
       </Spin>
     </div>
 
       <Modal
-        title="Agregar información"
+        title={t("userProfile.expenses.fixedExpenses.table.addInfo")}
         open={noteModal.visible}
         onOk={handleNoteSave}
         onCancel={handleNoteCancel}
@@ -488,24 +521,24 @@ const FixedExpenses = () => {
           value={noteModal.note}
           onChange={handleNoteChange}
           rows={4}
-          placeholder="Agrega una nota para este pago"
+          placeholder={t("userProfile.expenses.fixedExpenses.table.placeHolderInfo")}
         />
       </Modal>
 
       <Modal
         open={confirmPdfModal.visible}
-        title="¿Qué hacer con el documento adjunto?"
+        title={t("userProfile.expenses.fixedExpenses.table.keepDocumentModal.title")}
         onCancel={() => setConfirmPdfModal({ visible: false, id: null, row: null, oldPdfUrl: null })}
         footer={[
           <Button key="keep" type="primary" onClick={() => handleConfirmPdf(true)}>
-            Mantener documento
+            {t("userProfile.expenses.fixedExpenses.table.keepDocumentModal.keep")}
           </Button>,
           <Button key="remove" danger onClick={() => handleConfirmPdf(false)}>
-            Eliminar documento
+            {t("userProfile.expenses.fixedExpenses.table.keepDocumentModal.remove")}
           </Button>
         ]}
       >
-        Este pago tiene un documento adjunto. ¿Quieres mantenerlo o eliminarlo?
+        {t("userProfile.expenses.fixedExpenses.table.keepDocumentModal.subtitle")}
       </Modal>
 
     </>

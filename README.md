@@ -23,3 +23,46 @@ npm i
 - LV 1 (Free Account) (Just 1 limit in Financial Goals)
 - LV 2 (Premium Account (Telegram & Whatsapp Actived))
 - LV 3 (Black Account)
+
+
+** READ DATABASE **
+
+/users/ = App Users
+/tasksToDo/ = Tasks to do by WebFinanceLab Admin
+
+/UIDUser/ =
+
+COLLECTIONS:
+
+expenseLimitsByMonth -> months -> createdAt: Timestamp, limits: [{ amount: Number, color: String, label: String }]
+expenses -> docNumber
+incomes -> docNumber
+monthlyPayments -> months
+results -> "Change"
+webFinanceLab -> main -> tasksToDo -> docNumber
+
+FIELDS:
+
+age: String,
+city: String,
+country: String,
+creditCards: [{
+    amounts: [{
+        amount: String,
+        currency: String
+    }],
+    bank: String,
+    cardBank: String,
+    cardType: String,
+    color: String
+}],
+displayBalance: String,
+email: Email,
+firstName: String,
+gender: String,
+language: String,
+lastActivity: Timestamp,
+lastName: String,
+phone: String,
+photoURL: String,
+user_access_level: Number

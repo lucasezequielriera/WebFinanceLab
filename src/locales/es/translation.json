@@ -130,10 +130,43 @@
         "table": {
             "category": "Categoría",
             "totalPesos": "Total (Pesos)",
-            "totalDollars": "Total (Dólares)"
+            "totalDollars": "Total (Dólares)",
+            "noExpenses": "No expenses to show."
         },
         "totalARS": "Total ARS:",
         "totalUSD": "Total USD:"
+    },
+
+    "userProfile.expenses.fixedExpenses": {
+        "title": "Gastos Fijos",
+        "totalARS": "Total ARS:",
+        "totalUSD": "Total USD:",
+        "noFixedExpenses": "No hay gastos fijos registrados en este mes",
+        "table": {
+            "title": "Título",
+            "amountUsd": "Monto USD",
+            "amountArs": "Monto ARS",
+            "paid": "Pago",
+            "info": "Info",
+            "addInfo": "Agregar Información",
+            "placeHolderInfo": "Información del gasto fijo",
+            "save": "Guardar",
+            "cancel": "Cancelar",
+            "pdf": "PDF",
+            "keepDocumentModal": {
+                "title": "¿Qué hacer con el documento adjunto?",
+                "subtitle": "Este pago tiene un documento adjunto. ¿Quieres mantenerlo o eliminarlo?",
+                "keep": "Mantener documento",
+                "remove": "Eliminar documento"
+            },
+            "delete": {
+                "ask": "¿Eliminar gasto fijo?",
+                "deleted": "Gasto fijo eliminado",
+                "error": "Error al eliminar"
+            },
+            "edited": "Gasto fijo actualizado",
+            "error": "Error al actualizar"
+        }
     },
 
     "userProfile.navbar.signup": "Registrarme",
@@ -172,7 +205,7 @@
     "userProfile.financialGoals.suggestedLimit.automaticModeTooltip": "Sus ingresos - los gastos habituales, convertidos en la moneda seleccionada, divididos por el número de días restantes.",
     "userProfile.financialGoals.suggestedLimit.manualModeTooltip": "Puede calcular cuánto dinero puede gastar introduciendo su dinero disponible. Se dividirá por el número de días que quedan en el mes.",
     "userProfile.financialGoals.suggestedLimit.helpText": "* Esta sugerencia es meramente informativa.",
-    "userProfile.financialGoals.withoutData": "No hay ingresos y/o gastos registrados en este mes para configurar tus límites y sugerencias.",
+    "userProfile.financialGoals.withoutData": "No hay ingresos y gastos registrados en este mes para configurar tus límites y sugerencias.",
 
     "userProfile.aboutUs.title": "Sobre Nosotros",
     "userProfile.aboutUs.text": "En WebFinanceLab creemos que las finanzas personales no deben ser un misterio ni una carga. Nacimos con una misión clara: ayudarte a tomar el control de tu dinero de forma sencilla, visual y desde cualquier parte del mundo.\n\nSomos un equipo apasionado por la tecnología, el diseño y las finanzas. Creamos una plataforma intuitiva, moderna y accesible, pensada para personas reales que quieren organizar sus ingresos, controlar sus gastos y alcanzar sus objetivos financieros sin complicaciones.\n\nTodas las funciones de Finanzas Web han sido diseñadas para hacerte la vida más fácil: desde registrar tus gastos diarios con un solo clic, hasta visualizar tu salud financiera en gráficos claros y motivadores. Queremos que tomar decisiones sobre tu dinero sea tan fácil como usar tu aplicación favorita.\n\nEsto es sólo el principio. Seguimos creciendo, aprendiendo y mejorando cada día, impulsados por la comunidad que confía en nosotros.\n\nWebFinanceLab: Tu dinero, bajo control.",
