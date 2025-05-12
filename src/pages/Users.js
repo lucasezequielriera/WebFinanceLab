@@ -177,7 +177,7 @@ const Users = () => {
                         ? 'green'
                         : dayjs().diff(dayjs(user.lastActivity && user.lastActivity.toDate ? user.lastActivity.toDate() : user.lastActivity), 'hour') >= 1
                           ? 'blue'
-                          : 'default'
+                          : 'green'
                     }>
                       {dayjs().diff(dayjs(user.lastActivity && user.lastActivity.toDate ? user.lastActivity.toDate() : user.lastActivity), 'minute') < 5
                         ? 'Activo ahora'
