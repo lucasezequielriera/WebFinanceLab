@@ -8,24 +8,6 @@ import { DollarOutlined, ArrowDownOutlined, ArrowUpOutlined, CreditCardOutlined 
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-
-function groupByDay(movements) {
-  return movements.reduce((acc, mov) => {
-    const day = mov.date.format('YYYY-MM-DD');
-    if (!acc[day]) acc[day] = [];
-    acc[day].push(mov);
-    return acc;
-  }, {});
-}
-
-function getDayLabel(date) {
-  const today = dayjs().startOf('day');
-  const d = dayjs(date).startOf('day');
-  if (d.isSame(today)) return 'Hoy';
-  if (d.isSame(today.subtract(1, 'day'))) return 'Ayer';
-  return d.format('dddd DD/MM/YYYY');
-}
-
 const RecentMovements = () => {
   const { currentUser } = useAuth();
   const [movements, setMovements] = useState([]);
@@ -134,12 +116,29 @@ const RecentMovements = () => {
   const grouped = groupByDay(movements);
   const days = Object.keys(grouped).sort((a, b) => dayjs(b).valueOf() - dayjs(a).valueOf());
 
+  function groupByDay(movements) {
+    return movements.reduce((acc, mov) => {
+      const day = mov.date.format('YYYY-MM-DD');
+      if (!acc[day]) acc[day] = [];
+      acc[day].push(mov);
+      return acc;
+    }, {});
+  }
+
+  function getDayLabel(date) {
+    const today = dayjs().startOf('day');
+    const d = dayjs(date).startOf('day');
+    if (d.isSame(today)) return t('userProfile.dashboard.recentMovements.today');
+    if (d.isSame(today.subtract(1, 'day'))) return t('userProfile.dashboard.recentMovements.yesterday');
+    return d.format('dddd DD/MM/YYYY');
+  }
+
   return (
     <Spin spinning={loading}>
       <div style={{ maxHeight: '100%', padding: 0, overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
           <p style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>{t('userProfile.dashboard.recentMovements.title')}</p>
-          <Link to="/detailed-expenses" style={{ color: '#1890ff', fontSize: 14 }}>
+          <Link to="/daily-expenses" style={{ color: '#1890ff', fontSize: 14 }}>
             {t('userProfile.dashboard.recentMovements.viewAll')}
           </Link>
         </div>

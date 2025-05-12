@@ -182,7 +182,7 @@ const Dashboard = () => {
                     style={{ marginTop: 16 }}
                     title={
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span>{t('userProfile.dashboard.monthlyTimeline.title')}</span>
+                        <span style={{ fontSize: '18px', fontWeight: 'bold' }}>{t('userProfile.dashboard.monthlyTimeline.title')}</span>
                       </div>
                     }
                   >

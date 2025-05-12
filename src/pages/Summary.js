@@ -238,11 +238,11 @@ const Summary = () => {
     const getCardTypeText = (type) => {
       switch (type) {
         case 'Credit Card':
-          return 'Crédito';
+          return t('userProfile.expenses.summary.creditCard');
         case 'Debit Card':
-          return 'Débito';
+          return t('userProfile.expenses.summary.debitCard');
         case 'Cash':
-          return 'Cash';
+          return t('userProfile.expenses.summary.cash');
         default:
           return type;
       }
@@ -283,7 +283,7 @@ const Summary = () => {
   const PaymentMethodsBar = ({ cards, selectedCard, onCardSelect, i18n, updateCardClosingDate, setSelectedCard }) => {
     if (cards.length === 1 && cards[0].bank === 'N/A') return null;
     return (
-      <div style={{ display: 'flex', flexDirection: 'row', gap: 12, margin: '18px 0 18px 0' }}>
+      <div className='payment-summary-card-buttons' style={{ display: 'flex', flexDirection: 'row', gap: 12, margin: '18px 0 18px 0' }}>
         {cards.map((card, idx) => (
           <PaymentMethodChip
             key={idx}
@@ -346,11 +346,11 @@ const Summary = () => {
           justifyContent: 'space-between',
         }}
       >
-        <div style={{ fontWeight: 800, fontSize: 28, color: '#fff', marginBottom: 8 }}>
-          {title === 'N/A' ? 'Efectivo' : title}
+        <div className='payment-summary-card-title' style={{ fontWeight: 800, fontSize: 28, color: '#fff', marginBottom: 8 }}>
+          {title === 'N/A' ? t('userProfile.expenses.summary.cash') : title}
         </div>
         {/* Área de botones, siempre ocupa el mismo espacio */}
-        <div style={{ minHeight: 54, margin: '18px 0' }}>
+        <div className="payment-summary-card-buttons" style={{ minHeight: 54, margin: '18px 0' }}>
           {hasButtons ? (
             <PaymentMethodsBar
               cards={cards}
@@ -366,7 +366,7 @@ const Summary = () => {
           </div>
         {/* Fecha de cierre: si la tarjeta seleccionada es de crédito, mostrar aquí */}
         {selectedCard && selectedCard.cardType === 'Credit Card' && selectedCard.closingDate ? (
-          <div style={{ color: '#bfc2ce', fontSize: 18, margin: '8px 0 0 0', display: 'flex', alignItems: 'center', gap: 10, minHeight: 32 }}>
+          <div style={{ color: 'white', fontSize: 15, margin: '8px 0 0 0', display: 'flex', alignItems: 'center', gap: 10, minHeight: 32, fontWeight: 700 }}>
             {i18n.language === 'en' ? 'Closing on' : 'Cierra el'} {i18n.language === 'en' ? dayjs(selectedCard.closingDate).format('MMM D') : dayjs(selectedCard.closingDate).format('D [de] MMMM')}
             <EditOutlined
               style={{ cursor: 'pointer', fontSize: 22, color: '#1890ff' }}
@@ -397,10 +397,10 @@ const Summary = () => {
             )}
           </div>
         ) : (
-          <div style={{ minHeight: 32, margin: '8px 0 0 0' }} />
+          <div className="payment-summary-card-closing-date" style={{ minHeight: 32, margin: '8px 0 0 0' }} />
         )}
         <div style={{ display: 'flex', gap: 3, fontWeight: 700, fontSize: 28, flexDirection: 'column' }}>
-          <span style={{ borderTop: '1px solid #232733', margin: '18px 0' }} />
+          <span style={{ borderTop: '1px solid #232733', margin: '8px 0 18px 0' }} />
           <span style={{ color: '#4d8cff' }}>{`ARS ${totalARS.toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US')}`}</span>
           <span style={{ color: '#6be6b2' }}>{`USD ${totalUSD.toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US')}`}</span>
         </div>

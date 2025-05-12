@@ -52,7 +52,7 @@
         }
     },
     "userProfile.dashboard.monthlyTimeline": {
-        "title": "Comparación Mensual",
+        "title": "Comparación Mensual de Gastos",
         "noData": "No hay datos para mostrar"
     },
 
@@ -88,8 +88,8 @@
 
     "userProfile.expenses.summary": {
         "title": "Resumen de Gastos",
-        "creditCard": "Tarjeta de Crédito",
-        "debitCard": "Tarjeta de Débito",
+        "creditCard": "Crédito",
+        "debitCard": "Débito",
         "cash": "Efectivo",
         "closingDate": "Fecha de Cierre"
     },

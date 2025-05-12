@@ -44,7 +44,7 @@ const MiniMonthlyTimeline = ({ expensesByMonth, onMonthClick, selectedMonth }) =
             <Tooltip
               key={month.key}
               title={
-                <div style={{ textAlign: 'center' }}>
+                <div style={{ textAlign: 'left' }}>
                   <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
                     {month.name}
                   </div>

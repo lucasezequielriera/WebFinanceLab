@@ -158,6 +158,12 @@
     text-transform: capitalize;
   }
 
+  .payment-summary-card-buttons {
+    margin-top: 10px !important;
+    margin-bottom: 0 !important;
+    flex-flow: row wrap;
+  }
+
   @media screen and (min-width: 1324px) and (max-width: 1696px) {
     .payment-summary-card {
       width: calc(25% - 16px) !important;
@@ -187,6 +193,15 @@
       width: 100% !important;
       max-width: 100% !important;
       min-width: 0 !important;
+    }
+  }
+
+  @media (max-width: 735px) {
+    .payment-summary-card-buttons {
+      margin-bottom: 0 !important;
+    }
+    .payment-summary-card-closing-date {
+      display: none;
     }
   }
 
