@@ -282,9 +282,16 @@ const Summary = () => {
 
   const PaymentMethodsBar = ({ cards, selectedCard, onCardSelect, i18n, updateCardClosingDate, setSelectedCard }) => {
     if (cards.length === 1 && cards[0].bank === 'N/A') return null;
+
+    // Sort cards by cardBank in the specified order
+    const sortedCards = [...cards].sort((a, b) => {
+      const order = { 'Visa': 0, 'MasterCard': 1, 'American Express': 2 };
+      return (order[a.cardBank] ?? 3) - (order[b.cardBank] ?? 3);
+    });
+
     return (
       <div className='payment-summary-card-buttons' style={{ display: 'flex', flexDirection: 'row', gap: 12, margin: '18px 0 18px 0' }}>
-        {cards.map((card, idx) => (
+        {sortedCards.map((card, idx) => (
           <PaymentMethodChip
             key={idx}
             card={card}
@@ -305,7 +312,13 @@ const Summary = () => {
   };
 
   const PaymentSummaryCard = ({ title, cards, showClosing, t, i18n }) => {
-    const [selectedCard, setSelectedCard] = useState(cards[0] || null);
+    // Sort cards by cardBank in the specified order
+    const sortedCards = [...cards].sort((a, b) => {
+      const order = { 'Visa': 0, 'MasterCard': 1, 'American Express': 2 };
+      return (order[a.cardBank] ?? 3) - (order[b.cardBank] ?? 3);
+    });
+
+    const [selectedCard, setSelectedCard] = useState(sortedCards[0] || null);
     const [editingDate, setEditingDate] = useState(false);
     const [tempDate, setTempDate] = useState(null);
 
@@ -353,7 +366,7 @@ const Summary = () => {
         <div className="payment-summary-card-buttons" style={{ minHeight: 54, margin: '18px 0' }}>
           {hasButtons ? (
             <PaymentMethodsBar
-              cards={cards}
+              cards={sortedCards}
               selectedCard={selectedCard}
               onCardSelect={setSelectedCard}
               i18n={i18n}
