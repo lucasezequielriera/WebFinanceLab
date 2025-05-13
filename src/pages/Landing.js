@@ -327,7 +327,7 @@ const Landing = () => {
           alignItems: 'center',
           minHeight: '100vh'
         }}>
-          <Title level={1} className="animate-on-scroll" style={{ 
+          <Title level={1} className="title-landing animate-on-scroll" style={{ 
             color: 'white',
             marginBottom: '20px',
             fontSize: '3.5rem',
@@ -857,6 +857,12 @@ const Landing = () => {
           .ant-dropdown-menu-item span {
             font-size: 14px;
             font-weight: 500;
+          }
+
+          @media (max-width: 768px) {
+            .title-landing {
+              font-size: 3.0rem !important;
+            }
           }
         `}
       </style>
