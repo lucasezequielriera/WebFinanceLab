@@ -7,17 +7,21 @@ import landingEN from './locales/en/landing.json';
 import landingES from './locales/es/landing.json';
 import authEN from './locales/en/auth.json';
 import authES from './locales/es/auth.json';
+import legalEN from './locales/en/legal.json';
+import legalES from './locales/es/legal.json';
 
 const resources = {
   en: {
     translation: translationEN,
     landing: landingEN,
-    auth: authEN
+    auth: authEN,
+    legal: legalEN
   },
   es: {
     translation: translationES,
     landing: landingES,
-    auth: authES
+    auth: authES,
+    legal: legalES
   }
 };
 

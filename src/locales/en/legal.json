@@ -1,0 +1,145 @@
+{
+  "terms": {
+    "title": "Terms and Conditions",
+    "backToHome": "Back to Home",
+    "sections": {
+      "acceptance": {
+        "title": "1. Terms Acceptance",
+        "content": "By accessing and using WebFinanceLab, you agree to be bound by these terms and conditions. If you disagree with any part of these terms, you may not access the service."
+      },
+      "description": {
+        "title": "2. Service Description",
+        "content": "WebFinanceLab is a financial management platform that allows users to manage their personal and business finances, including expense tracking, income management, and financial reporting."
+      },
+      "accounts": {
+        "title": "3. User Accounts",
+        "content": "To use our services, you must register and create an account. You are responsible for maintaining the confidentiality of your account and password, and you accept responsibility for all activities that occur under your account."
+      },
+      "privacy": {
+        "title": "4. Privacy and Data Protection",
+        "content": "The processing of your personal data is carried out in accordance with our Privacy Policy and in compliance with the General Data Protection Regulation (GDPR) and other applicable laws."
+      },
+      "acceptableUse": {
+        "title": "5. Acceptable Use",
+        "content": "You agree not to use the service for:",
+        "items": [
+          "Illegal or fraudulent activities",
+          "Violating intellectual property rights",
+          "Interfering with service operation",
+          "Sharing confidential third-party information"
+        ]
+      },
+      "jurisdiction": {
+        "title": "6. Jurisdiction and Applicable Law",
+        "content": "These terms shall be governed and construed in accordance with the laws of Spain, without regard to its conflict of law provisions.",
+        "euUsers": "For users in the European Union:",
+        "euItems": [
+          "Compliance with GDPR (General Data Protection Regulation)",
+          "Right to data portability",
+          "Right to be forgotten and data erasure",
+          "Explicit consent for data processing",
+          "72-hour data breach notification"
+        ],
+        "nonEuUsers": "For users in European countries outside the EU:",
+        "nonEuItems": [
+          "Compliance with local data protection laws",
+          "Adaptation to country-specific regulations",
+          "Respect for local jurisdictions",
+          "Compliance with international data transfer agreements"
+        ],
+        "ukUsers": "For users in the United Kingdom:",
+        "ukItems": [
+          "Compliance with UK GDPR and Data Protection Act 2018",
+          "Registration with the Information Commissioner's Office (ICO)",
+          "Compliance with Privacy and Electronic Communications Regulations (PECR)",
+          "Adaptation to post-Brexit regulations"
+        ],
+        "americasUsers": "For users in other American countries:",
+        "americasItems": [
+          "Canada: Compliance with PIPEDA (Personal Information Protection and Electronic Documents Act)",
+          "Mexico: Compliance with Federal Law on Protection of Personal Data Held by Private Parties",
+          "Brazil: Compliance with LGPD (Lei Geral de Proteção de Dados)",
+          "Chile: Compliance with Law No. 19.628 on Privacy Protection",
+          "Colombia: Compliance with Law 1581 of 2012 on Personal Data Protection",
+          "Peru: Compliance with Personal Data Protection Law No. 29733"
+        ],
+        "argentinaUsers": "For users in Argentina:",
+        "argentinaItems": [
+          "Law No. 25.326 on Personal Data Protection applies",
+          "Users have the right to access, rectify and delete their personal data",
+          "The National Directorate of Personal Data Protection is the enforcement authority"
+        ],
+        "usUsers": "For users in the United States:",
+        "usItems": [
+          "Federal and state data protection laws apply",
+          "Compliance with CCPA (California Consumer Privacy Act) for California users",
+          "Compliance with COPPA (Children's Online Privacy Protection Act)",
+          "Right to request information about collected personal data"
+        ]
+      },
+      "compliance": {
+        "title": "7. International Compliance",
+        "content": "WebFinanceLab complies with international data protection and privacy regulations, including:",
+        "items": [
+          "GDPR (General Data Protection Regulation) for the European Union",
+          "Council of Europe Convention 108 for non-EU countries",
+          "Argentina's Personal Data Protection Law",
+          "Applicable US privacy laws",
+          "International data transfer agreements (SCC)"
+        ]
+      },
+      "dataTransfer": {
+        "title": "8. International Data Transfer",
+        "content": "WebFinanceLab ensures that all international data transfers comply with applicable regulations:",
+        "items": [
+          "Standard Contractual Clauses (SCC) for transfers outside the EU",
+          "Data Protection Impact Assessments (DPIA)",
+          "Processing activity records",
+          "Appropriate technical and organizational measures"
+        ]
+      }
+    }
+  },
+  "legal": {
+    "title": "Legal Notice",
+    "sections": {
+      "info": {
+        "title": "1. Legal Information",
+        "content": "WebFinanceLab is a registered financial management platform operating under the data protection regulations of:",
+        "items": [
+          "European Union (GDPR)",
+          "Argentina (Personal Data Protection Law No. 25.326)",
+          "United States (CCPA, COPPA and applicable state laws)",
+          "Canada (PIPEDA)",
+          "Mexico (Federal Law on Protection of Personal Data)",
+          "Brazil (LGPD)",
+          "Chile (Law No. 19.628)",
+          "Colombia (Law 1581 of 2012)",
+          "Peru (Law No. 29733)"
+        ],
+        "note": "Note: The platform complies with all applicable data protection regulations, ensuring the security and privacy of all users' data, regardless of their geographical location."
+      },
+      "intellectual": {
+        "title": "2. Intellectual Property",
+        "content": "All content of WebFinanceLab, including text, graphics, logos, icons, images, audio clips, digital downloads, and data compilations, is the property of WebFinanceLab or its content suppliers and is protected by intellectual property laws."
+      },
+      "dataProtection": {
+        "title": "3. Data Protection",
+        "content": "In accordance with GDPR and LOPDGDD, we inform you that:",
+        "items": [
+          "Data Controller: WebFinanceLab",
+          "Purpose: User management and financial services provision",
+          "Legitimacy: User consent and legal obligations compliance",
+          "Recipients: Data will not be transferred to third parties except by legal obligation",
+          "Rights: Access, rectification, erasure, restriction, opposition, and portability"
+        ]
+      },
+      "contact": {
+        "title": "4. Contact",
+        "email": "webfinancelab@gmail.com",
+        "phone": "+34 627 043 397"
+      }
+    }
+  },
+  "lastUpdate": "Last update:"
+} 

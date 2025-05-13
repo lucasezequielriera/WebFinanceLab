@@ -1,0 +1,145 @@
+{
+  "terms": {
+    "title": "Términos y Condiciones",
+    "backToHome": "Volver al inicio",
+    "sections": {
+      "acceptance": {
+        "title": "1. Aceptación de los Términos",
+        "content": "Al acceder y utilizar WebFinanceLab, usted acepta estar sujeto a estos términos y condiciones. Si no está de acuerdo con alguna parte de estos términos, no podrá acceder al servicio."
+      },
+      "description": {
+        "title": "2. Descripción del Servicio",
+        "content": "WebFinanceLab es una plataforma de gestión financiera que permite a los usuarios gestionar sus finanzas personales y empresariales, incluyendo el seguimiento de gastos, ingresos y la generación de informes financieros."
+      },
+      "accounts": {
+        "title": "3. Cuentas de Usuario",
+        "content": "Para utilizar nuestros servicios, debe registrarse y crear una cuenta. Usted es responsable de mantener la confidencialidad de su cuenta y contraseña, y acepta la responsabilidad por todas las actividades que ocurran bajo su cuenta."
+      },
+      "privacy": {
+        "title": "4. Privacidad y Protección de Datos",
+        "content": "El tratamiento de sus datos personales se realiza de acuerdo con nuestra Política de Privacidad y en cumplimiento con el Reglamento General de Protección de Datos (RGPD) y otras leyes aplicables."
+      },
+      "acceptableUse": {
+        "title": "5. Uso Aceptable",
+        "content": "Usted acepta no utilizar el servicio para:",
+        "items": [
+          "Actividades ilegales o fraudulentas",
+          "Violar derechos de propiedad intelectual",
+          "Interferir con el funcionamiento del servicio",
+          "Compartir información confidencial de terceros"
+        ]
+      },
+      "jurisdiction": {
+        "title": "6. Jurisdicción y Ley Aplicable",
+        "content": "Estos términos se regirán e interpretarán de acuerdo con las leyes de España, sin tener en cuenta sus disposiciones sobre conflictos de leyes.",
+        "euUsers": "Para usuarios en la Unión Europea:",
+        "euItems": [
+          "Cumplimiento con el RGPD (Reglamento General de Protección de Datos)",
+          "Derecho a la portabilidad de datos",
+          "Derecho al olvido y supresión de datos",
+          "Consentimiento explícito para el tratamiento de datos",
+          "Notificación de violaciones de datos en 72 horas"
+        ],
+        "nonEuUsers": "Para usuarios en países europeos fuera de la UE:",
+        "nonEuItems": [
+          "Cumplimiento con las leyes locales de protección de datos",
+          "Adaptación a regulaciones específicas de cada país",
+          "Respeto a las jurisdicciones locales",
+          "Cumplimiento con acuerdos de transferencia internacional de datos"
+        ],
+        "ukUsers": "Para usuarios en Reino Unido:",
+        "ukItems": [
+          "Cumplimiento con UK GDPR y Data Protection Act 2018",
+          "Registro en la Information Commissioner's Office (ICO)",
+          "Cumplimiento con Privacy and Electronic Communications Regulations (PECR)",
+          "Adaptación a las regulaciones post-Brexit"
+        ],
+        "americasUsers": "Para usuarios en otros países de América:",
+        "americasItems": [
+          "Canadá: Cumplimiento con PIPEDA (Personal Information Protection and Electronic Documents Act)",
+          "México: Cumplimiento con Ley Federal de Protección de Datos Personales en Posesión de Particulares",
+          "Brasil: Cumplimiento con LGPD (Lei Geral de Proteção de Dados)",
+          "Chile: Cumplimiento con Ley N° 19.628 sobre Protección de la Vida Privada",
+          "Colombia: Cumplimiento con Ley 1581 de 2012 de Protección de Datos Personales",
+          "Perú: Cumplimiento con Ley de Protección de Datos Personales N° 29733"
+        ],
+        "argentinaUsers": "Para usuarios en Argentina:",
+        "argentinaItems": [
+          "Se aplica la Ley de Protección de Datos Personales N° 25.326",
+          "Los usuarios tienen derecho a acceder, rectificar y suprimir sus datos personales",
+          "La Dirección Nacional de Protección de Datos Personales es la autoridad de aplicación"
+        ],
+        "usUsers": "Para usuarios en Estados Unidos:",
+        "usItems": [
+          "Se aplican las leyes federales y estatales de protección de datos",
+          "Cumplimiento con CCPA (California Consumer Privacy Act) para usuarios de California",
+          "Cumplimiento con COPPA (Children's Online Privacy Protection Act)",
+          "Derecho a solicitar información sobre datos personales recopilados"
+        ]
+      },
+      "compliance": {
+        "title": "7. Cumplimiento Internacional",
+        "content": "WebFinanceLab cumple con las regulaciones internacionales de protección de datos y privacidad, incluyendo:",
+        "items": [
+          "RGPD (Reglamento General de Protección de Datos) para la Unión Europea",
+          "Convenio 108 del Consejo de Europa para países no-UE",
+          "Ley de Protección de Datos Personales de Argentina",
+          "Leyes de privacidad de Estados Unidos aplicables",
+          "Acuerdos de transferencia internacional de datos (SCC)"
+        ]
+      },
+      "dataTransfer": {
+        "title": "8. Transferencia Internacional de Datos",
+        "content": "WebFinanceLab garantiza que todas las transferencias internacionales de datos cumplen con las regulaciones aplicables:",
+        "items": [
+          "Cláusulas Contractuales Estándar (SCC) para transferencias fuera de la UE",
+          "Evaluaciones de impacto en la protección de datos (DPIA)",
+          "Registro de actividades de tratamiento",
+          "Medidas técnicas y organizativas apropiadas"
+        ]
+      }
+    }
+  },
+  "legal": {
+    "title": "Aviso Legal",
+    "sections": {
+      "info": {
+        "title": "1. Información Legal",
+        "content": "WebFinanceLab es una plataforma de gestión financiera registrada que opera bajo las regulaciones de protección de datos de:",
+        "items": [
+          "Unión Europea (RGPD)",
+          "Argentina (Ley de Protección de Datos Personales N° 25.326)",
+          "Estados Unidos (CCPA, COPPA y leyes estatales aplicables)",
+          "Canadá (PIPEDA)",
+          "México (Ley Federal de Protección de Datos Personales)",
+          "Brasil (LGPD)",
+          "Chile (Ley N° 19.628)",
+          "Colombia (Ley 1581 de 2012)",
+          "Perú (Ley N° 29733)"
+        ],
+        "note": "Nota: La plataforma cumple con todas las regulaciones de protección de datos aplicables, garantizando la seguridad y privacidad de los datos de todos los usuarios, independientemente de su ubicación geográfica."
+      },
+      "intellectual": {
+        "title": "2. Propiedad Intelectual",
+        "content": "Todo el contenido de WebFinanceLab, incluyendo textos, gráficos, logotipos, iconos, imágenes, clips de audio, descargas digitales y compilaciones de datos, es propiedad de WebFinanceLab o de sus proveedores de contenido y está protegido por las leyes de propiedad intelectual."
+      },
+      "dataProtection": {
+        "title": "3. Protección de Datos",
+        "content": "De acuerdo con el RGPD y la LOPDGDD, le informamos que:",
+        "items": [
+          "Responsable del tratamiento: WebFinanceLab",
+          "Finalidad: Gestión de usuarios y prestación de servicios financieros",
+          "Legitimación: Consentimiento del usuario y cumplimiento de obligaciones legales",
+          "Destinatarios: No se cederán datos a terceros salvo obligación legal",
+          "Derechos: Acceso, rectificación, supresión, limitación, oposición y portabilidad"
+        ]
+      },
+      "contact": {
+        "title": "4. Contacto",
+        "email": "webfinancelab@gmail.com",
+        "phone": "+34 627 043 397"
+      }
+    }
+  },
+  "lastUpdate": "Última actualización:"
+} 
