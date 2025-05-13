@@ -1,61 +1,80 @@
-import React, { useState }                                      from 'react';
-import { useAuth }                                              from '../contexts/AuthContext';
-import { useNavigate }                                          from 'react-router-dom';
-import { Form, Input, Button, Typography, Card, notification }  from 'antd';
-import { UserOutlined }                                         from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { Form, Input, Button, Typography, Alert, Card } from 'antd';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
+import { MailOutlined, UserOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 // Styles
 import '../styles/Auth.css';
 
-const { Title } = Typography;
-
 const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [isExiting, setIsExiting] = useState(false);
 
   const { resetPassword } = useAuth();
-
+  const { Title } = Typography;
   const navigate = useNavigate();
+  const { t } = useTranslation('auth');
+  useEffect(() => {
+    // Reset animation state when component mounts
+    setIsExiting(false);
+  }, []);
 
-  const openNotificationWithIcon = (type, message, description) => {
-    notification[type]({
-        message: message,
-        description: description,
-    });
+  const handleNavigation = (path) => {
+    setIsExiting(true);
+    setTimeout(() => {
+      navigate(path);
+    }, 500); // Match this with the animation duration
   };
 
   async function handleSubmit(values) {
     try {
+      setMessage('');
+      setError('');
       setLoading(true);
-
       await resetPassword(values.email);
-      openNotificationWithIcon('success', 'Success', 'Check your inbox for further instructions');
-
+      setMessage(t('forgotPassword.message'));
       setTimeout(() => {
-        navigate('/login');
-      }, 3000);
-    } catch {
-        openNotificationWithIcon('error', 'Error', 'Failed to reset password');
+        handleNavigation('/login');
+      }, 2000);
+    } catch (err) {
+      console.error('Error during password reset:', err);
+      setError(t('forgotPassword.errors.resetFailed'));
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (
     <div className="auth-container">
-      <Card className="auth-card">
+      <Card className={`auth-card ${isExiting ? 'slide-out' : ''}`}>
         <div className="auth-avatar">
           <UserOutlined style={{ fontSize: '48px', color: '#1890ff' }} />
         </div>
-        <Title level={3} className="auth-title">Password Reset</Title>
+
+        <Title level={3} className="auth-title">{t('forgotPassword.title')}</Title>
+
+        {error && <Alert style={{ marginBottom: '16px' }} message={error} type="error" showIcon />}
+        {message && <Alert style={{ marginBottom: '16px' }} message={message} type="success" showIcon />}
+
         <Form onFinish={handleSubmit} className="auth-form">
-          <Form.Item name="email" rules={[{ required: true, message: 'Please input your email!' }]}>
-            <Input prefix={<UserOutlined />} placeholder="Email" />
+          <Form.Item name="email" rules={[{ required: true, message: t('forgotPassword.errors.requiredEmail') }]}>
+            <Input prefix={<MailOutlined />} placeholder={t('forgotPassword.email')} />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" className="auth-button" loading={loading}>
-              Reset Password
+              {t('forgotPassword.resetButton')}
             </Button>
           </Form.Item>
         </Form>
+        
+        <div className="auth-links">
+          <Link to="/login" onClick={(e) => {
+            e.preventDefault();
+            handleNavigation('/login');
+          }}>{t('forgotPassword.backToLogin')}</Link>
+        </div>
       </Card>
     </div>
   );

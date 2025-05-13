@@ -35,6 +35,9 @@ import Summary from './pages/Summary';
 import Debts from './pages/Debts';
 import DailyExpenses from './pages/DailyExpenses';
 import FixedExpenses from './pages/FixedExpenses';
+import Landing from './pages/Landing';
+import Legal from './pages/Legal';
+import { LanguageProvider } from './contexts/LanguageContext';
 
 const { Title, Paragraph } = Typography;
 const { Header, Sider, Content } = Layout;
@@ -48,7 +51,7 @@ const RedirectIfAuthenticated = ({ children }) => {
   return children;
 };
 
-const AppLayout = () => {
+const AppLayout = ({ children }) => {
   const {currentUser, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -121,6 +124,11 @@ const AppLayout = () => {
     };
   }, [currentUser, location]);
 
+  // Si estamos en la landing page, no mostramos el layout de la app
+  if (location.pathname === '/') {
+    return <Landing />;
+  }
+
   const toggle = () => {
     setCollapsed(!collapsed);
   };
@@ -128,6 +136,7 @@ const AppLayout = () => {
   const handleLogout = async () => {
     try {
       await logout();
+      navigate('/');
     } catch {
       console.error('Failed to logout');
     }
@@ -280,9 +289,7 @@ const AppLayout = () => {
 
   return (
     <Layout className="main-container" style={{ minHeight: '100vh' }}>
-
       <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
-
         {/* APP LOGO NAVBAR DESKTOP */}
         <div className="user-greeting" style={{ display: 'flex', color: 'white', padding: '10px', textAlign: 'center' }}>
           <img src={logo} alt="#" style={{ width: 60 }}/>
@@ -327,11 +334,9 @@ const AppLayout = () => {
             </Tag>
           </div>
         )}
-        
       </Sider>
 
       <Layout className="site-layout">
-
         <Header className="site-layout-background" style={{ padding: 0 }}>
           {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
             className: 'trigger',
@@ -343,8 +348,6 @@ const AppLayout = () => {
           { !isAuthPage &&
           <div className="mobile-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 80, background: 'linear-gradient(90deg, rgb(0 68 121), rgb(0 163 137), rgb(0, 191, 145))', padding: '0px 20px' }}>
             <span style={{ fontSize: '20px', fontWeight: 500, color: 'white', display: 'flex', alignItems: 'center' }}>
-
-              {/* TITLE NAVBAR UP MOBILE */}
               { isMobile ?
                 <div className="user-greeting" style={{ display: 'flex', color: 'white', textAlign: 'center', marginLeft: "-10px" }}>
                   <img src={logo} alt="#" style={{ width: 60 }}/>
@@ -371,98 +374,73 @@ const AppLayout = () => {
                 </div> :
                 <span style={{ display: 'flex', alignItems: 'center' }}>{getPageTitle()}</span>
               }
-
             </span>
 
-            {/* User Badge & Dropdown in Mobile*/}
             <AccountTypeBadge type={userData?.user_access_level === 0 ? 'admin'
             : userData?.user_access_level === 2 ? 'premium'
             : userData?.user_access_level === 3 ? 'gold'
             : 'free'} />
-            
           </div> }
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" />} />
-            <Route path="/dashboard" element={<PrivateRoute><Dashboard expenses={expenses} handleExpenseAdded={handleExpenseAdded} /></PrivateRoute>} />
-            <Route path="/summary" element={<PrivateRoute><Summary /></PrivateRoute>} />
-            <Route path="/fixed-expenses" element={<PrivateRoute><FixedExpenses /></PrivateRoute>} />
-            <Route path="/incomes" element={<PrivateRoute><Incomes /></PrivateRoute>}/>
-            <Route path="/debts" element={<PrivateRoute><Debts /></PrivateRoute>}/>
-            <Route path="/signup" element={<RedirectIfAuthenticated><Signup /></RedirectIfAuthenticated>} />
-            <Route path="/login" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
-            <Route path="/financial-goals" element={<PrivateRoute><FinancialGoals /></PrivateRoute>} />
-            <Route path="/about-us" element={<PrivateRoute><AboutUs /></PrivateRoute>} />
-            <Route path="/daily-expenses" element={<PrivateRoute><DailyExpenses /></PrivateRoute>} />
-            <Route path="/general-expenses" element={<PrivateRoute><GeneralExpenses /></PrivateRoute>} />
-            <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>}>
-              <Route path="tasks" element={<Tasks />} />
-              <Route path="users" element={<Users />} />
-              <Route path="configuration" element={<Configuration />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/dashboard" />} />
-          </Routes>
+
+          {children}
 
           {actionsVisible && (
             <Space>
-            <div
-              className="actions-overlay visible"
-              onClick={() => setActionsVisible(false)}
-            />
+              <div
+                className="actions-overlay visible"
+                onClick={() => setActionsVisible(false)}
+              />
             </Space>
           )}
         </Content>
+
         <Modal open={isModalVisible} onCancel={handleCancel} footer={null}>
           <AddExpense onExpenseAdded={handleExpenseAdded} />
         </Modal>
+
         {!currentUser && (
           <div className="mobile-nav">
-          {/* NAVBAR DOWN MOBILE NO LOGUED */}
-          {location.pathname === '/signup' ? (
-            <Button type="link" icon={<UserOutlined />}><Link to="/login"></Link>{t("userProfile.navbar.login")}</Button>
-          ) : (
-            <Button type="link" icon={<UserOutlined />}><Link to="/signup"></Link>{t("userProfile.navbar.signup")}</Button>
-          )}
-        </div>
+            {location.pathname === '/signup' ? (
+              <Button type="link" icon={<UserOutlined />}><Link to="/login"></Link>{t("userProfile.navbar.login")}</Button>
+            ) : (
+              <Button type="link" icon={<UserOutlined />}><Link to="/signup"></Link>{t("userProfile.navbar.signup")}</Button>
+            )}
+          </div>
         )}
 
-
-        {/* MENU ADD INCOME AND EXPENSE BUTTON */}
-
-        {/* SHADOW SCREEN */}
         <div
           className={`actions-overlay ${actionsVisible ? 'visible' : ''}`}
           onClick={() => setActionsVisible(false)}
         />
-        {/* ADD INCOME & EXPENSE BUTTON */}
-        {currentUser && isMobile && (<div className={`fab-container ${actionsVisible ? 'open' : ''}`}>
-          <div className="fab-main" onClick={toggleActions}>
-            <PlusOutlined />
-          </div>
-          <Button
-            className="fab-action expense"
-            type="primary"
-            icon={<RiseOutlined style={{ fontSize: 18 }}/>}
-            onClick={() => {
-              setActionsVisible(false);
-              openIncome();
-            }}
-            style={{ width: 100 }}
-          > Ingreso</Button>
-          <Button
-            className="fab-action income"
-            type="primary"
-            shape="circle"
-            icon={<FallOutlined />}
-            onClick={() => {
-              setActionsVisible(false);
-              openExpense()
-            }}
-          > Gasto</Button>
-        </div>)}
 
-        {/* ——— Modal para Agregar Ingreso ——— */}
+        {currentUser && isMobile && (
+          <div className={`fab-container ${actionsVisible ? 'open' : ''}`}>
+            <div className="fab-main" onClick={toggleActions}>
+              <PlusOutlined />
+            </div>
+            <Button
+              className="fab-action expense"
+              type="primary"
+              icon={<RiseOutlined style={{ fontSize: 18 }}/>}
+              onClick={() => {
+                setActionsVisible(false);
+                openIncome();
+              }}
+              style={{ width: 100 }}
+            > Ingreso</Button>
+            <Button
+              className="fab-action income"
+              type="primary"
+              shape="circle"
+              icon={<FallOutlined />}
+              onClick={() => {
+                setActionsVisible(false);
+                openExpense()
+              }}
+            > Gasto</Button>
+          </div>
+        )}
+
         <Modal className="add-expense-modal"
           open={incomeModalVisible}
           onCancel={() => setIncomeModalVisible(false)}
@@ -481,18 +459,17 @@ const AppLayout = () => {
             onFinish={handleIncomeSubmit}
             initialValues={{ date: dayjs(), currency: 'USD' }}
           >
-
             <Form.Item
               name="date"
               label={t('userProfile.addNewIncome.date') || "Fecha"}
               rules={[{ required: true, message: t('userProfile.addNewIncome.errorMessages') || "Seleccione una fecha" }]}
             >
               <DatePicker style={{ width: '100%' }}
-              format={(val) =>
-                dayjs().isSame(val, 'day')
-                  ? t('userProfile.addNewExpense.defaultDataInputDate')
-                  : val.format('DD/MM/YYYY')
-              } />
+                format={(val) =>
+                  dayjs().isSame(val, 'day')
+                    ? t('userProfile.addNewExpense.defaultDataInputDate')
+                    : val.format('DD/MM/YYYY')
+                } />
             </Form.Item>
 
             <Form.Item
@@ -530,20 +507,55 @@ const AppLayout = () => {
             </Button>
           </Form>
         </Modal>
-      
       </Layout>
-
     </Layout>
   );
 };
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <AppLayout />
-      </Router>
-    </AuthProvider>
+    <Router>
+      <LanguageProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/legal" element={<Legal />} />
+            <Route
+              path="/*"
+              element={
+                <PrivateRoute>
+                  <AppLayout>
+                    <Routes>
+                      <Route path="dashboard" element={<Dashboard />} />
+                      <Route path="profile" element={<UserProfile />} />
+                      <Route path="incomes" element={<Incomes />} />
+                      <Route path="fixed-expenses" element={<FixedExpenses />} />
+                      <Route path="daily-expenses" element={<DailyExpenses />} />
+                      <Route path="general-expenses" element={<GeneralExpenses />} />
+                      <Route path="summary" element={<Summary />} />
+                      <Route path="financial-goals" element={<FinancialGoals />} />
+                      <Route path="about-us" element={<AboutUs />} />
+                      <Route path="debts" element={<Debts />} />
+                      <Route
+                        path="admin/*"
+                        element={
+                          <AdminRoute>
+                            <Admin />
+                          </AdminRoute>
+                        }
+                      />
+                    </Routes>
+                  </AppLayout>
+                </PrivateRoute>
+              }
+            />
+          </Routes>
+        </AuthProvider>
+      </LanguageProvider>
+    </Router>
   );
 }
 

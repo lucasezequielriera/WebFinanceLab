@@ -1,0 +1,54 @@
+{
+  "hero": {
+    "title": "WebFinanceLab",
+    "subtitle": "Tu solución completa para la gestión financiera personal y empresarial"
+  },
+  "language": {
+    "english": "Inglés",
+    "spanish": "Español"
+  },
+  "features": {
+    "title": "Características Principales",
+    "dashboard": {
+      "title": "Dashboard Intuitivo",
+      "description": "Visualiza tus finanzas de manera clara y organizada con nuestro dashboard personalizado."
+    },
+    "expenses": {
+      "title": "Seguimiento de Gastos",
+      "description": "Registra y categoriza tus gastos para mantener un control preciso de tus finanzas."
+    },
+    "income": {
+      "title": "Gestión de Ingresos",
+      "description": "Administra tus ingresos y establece metas financieras alcanzables."
+    },
+    "collaboration": {
+      "title": "Colaboración",
+      "description": "Comparte y gestiona finanzas con tu familia o equipo de trabajo."
+    }
+  },
+  "benefits": {
+    "title": "¿Por qué elegir WebFinanceLab?",
+    "items": {
+      "control": "Control total de tus finanzas personales",
+      "analysis": "Análisis detallado de gastos e ingresos",
+      "goals": "Metas financieras personalizadas",
+      "reports": "Reportes y estadísticas en tiempo real"
+    },
+    "cta": {
+      "title": "Comienza Ahora",
+      "subtitle": "Únete a miles de usuarios que ya están mejorando sus finanzas",
+      "button": "Crear Cuenta Gratis"
+    }
+  },
+  "buttons": {
+    "login": "Iniciar Sesión",
+    "signup": "Registrarse",
+    "dashboard": "Ir al Dashboard"
+  },
+  "footer": {
+    "description": "Tu compañero financiero personal. Gestiona tus finanzas de manera inteligente y eficiente.",
+    "contact": "Contacto",
+    "legal": "Términos y Condiciones",
+    "copyright": "© 2024 WebFinanceLab. Todos los derechos reservados."
+  }
+} 

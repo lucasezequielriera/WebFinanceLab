@@ -1,0 +1,54 @@
+{
+  "hero": {
+    "title": "WebFinanceLab",
+    "subtitle": "Your complete solution for personal and business financial management"
+  },
+  "language": {
+    "english": "English",
+    "spanish": "Spanish"
+  },
+  "features": {
+    "title": "Main Features",
+    "dashboard": {
+      "title": "Intuitive Dashboard",
+      "description": "View your finances clearly and organized with our customized dashboard."
+    },
+    "expenses": {
+      "title": "Expense Tracking",
+      "description": "Record and categorize your expenses to maintain precise control of your finances."
+    },
+    "income": {
+      "title": "Income Management",
+      "description": "Manage your income and set achievable financial goals."
+    },
+    "collaboration": {
+      "title": "Collaboration",
+      "description": "Share and manage finances with your family or work team."
+    }
+  },
+  "benefits": {
+    "title": "Why choose WebFinanceLab?",
+    "items": {
+      "control": "Total control of your personal finances",
+      "analysis": "Detailed analysis of expenses and income",
+      "goals": "Customized financial goals",
+      "reports": "Real-time reports and statistics"
+    },
+    "cta": {
+      "title": "Start Now",
+      "subtitle": "Join thousands of users who are already improving their finances",
+      "button": "Create Free Account"
+    }
+  },
+  "buttons": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "dashboard": "Go to Dashboard"
+  },
+  "footer": {
+    "description": "Your personal financial companion. Manage your finances intelligently and efficiently.",
+    "contact": "Contact",
+    "legal": "Terms and Conditions",
+    "copyright": "© 2024 WebFinanceLab. All rights reserved."
+  }
+} 

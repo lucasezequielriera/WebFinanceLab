@@ -1,22 +1,38 @@
-import React, { useState }                              from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Typography, Alert, Card } from 'antd';
-import { useAuth }                                      from '../contexts/AuthContext';
-import { useNavigate }                                  from 'react-router-dom';
-import { updateProfile }                                from "firebase/auth"; 
-import { db }                                           from '../firebase';
-import { setDoc, doc }                                  from "firebase/firestore";
-import { UserOutlined, LockOutlined }                   from '@ant-design/icons';
+import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useNavigate, Link } from 'react-router-dom';
+import { updateProfile } from "firebase/auth"; 
+import { db } from '../firebase';
+import { setDoc, doc } from "firebase/firestore";
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 // Styles
 import '../styles/Auth.css';
 
 const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isExiting, setIsExiting] = useState(false);
 
   const { signup } = useAuth();
+  const { selectedLanguage } = useLanguage();
   const { Title } = Typography;
-
   const navigate = useNavigate();
+  const { t } = useTranslation('auth');
+
+  useEffect(() => {
+    // Reset animation state when component mounts
+    setIsExiting(false);
+  }, []);
+
+  const handleNavigation = (path) => {
+    setIsExiting(true);
+    setTimeout(() => {
+      navigate(path);
+    }, 500); // Match this with the animation duration
+  };
 
   async function handleSubmit(values) {
     try {
@@ -34,7 +50,7 @@ const Signup = () => {
         firstName: firstName,
         lastName: lastName,
         email: email,
-        language: 'en',
+        language: selectedLanguage,
         age: '',
         city: '',
         gender: '',
@@ -42,48 +58,52 @@ const Signup = () => {
         user_access_level: 1
       });
 
-      navigate('/dashboard');
+      handleNavigation('/dashboard');
     } catch (err) {
       console.error('Error during signup:', err);
-      setError('Failed to create an account');
+      setError(t('signup.errors.signupFailed'));
       setLoading(false);
     }
   }
 
   return (
     <div className="auth-container">
-
-      <Card className="auth-card">
+      <Card className={`auth-card ${isExiting ? 'slide-out' : ''}`}>
         <div className="auth-avatar">
-          <img src={require('../assets/transparent-logo.png')} alt="Web Finance" style={{ width: 100 }} />
+          <UserOutlined style={{ fontSize: '48px', color: '#1890ff' }} />
         </div>
 
-        <Title level={3} className="auth-title">Sign Up</Title>
+        <Title level={3} className="auth-title">{t('signup.title')}</Title>
 
-        {error && <Alert message={error} type="error" showIcon />}
+        {error && <Alert style={{ marginBottom: '16px' }} message={error} type="error" showIcon />}
 
         <Form onFinish={handleSubmit} className="auth-form">
-          <Form.Item name="firstName" rules={[{ required: true, message: 'Please input your first name!' }]}>
-            <Input prefix={<UserOutlined />} placeholder="First Name" />
+          <Form.Item name="firstName" rules={[{ required: true, message: t('signup.errors.requiredFirstName') }]}>
+            <Input prefix={<UserOutlined />} placeholder={t('signup.firstName')} />
           </Form.Item>
-          <Form.Item name="lastName" rules={[{ required: true, message: 'Please input your last name!' }]}>
-            <Input prefix={<UserOutlined />} placeholder="Last Name" />
+          <Form.Item name="lastName" rules={[{ required: true, message: t('signup.errors.requiredLastName') }]}>
+            <Input prefix={<UserOutlined />} placeholder={t('signup.lastName')}/>
           </Form.Item>
-          <Form.Item name="email" rules={[{ required: true, message: 'Please input your email!' }]}>
-            <Input prefix={<UserOutlined />} placeholder="Email" />
+          <Form.Item name="email" rules={[{ required: true, message: t('signup.errors.requiredEmail') }]}>
+            <Input prefix={<UserOutlined />} placeholder={t('signup.email')} />
           </Form.Item>
-          <Form.Item name="password" rules={[{ required: true, message: 'Please input your password!' }]}>
-            <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+          <Form.Item name="password" rules={[{ required: true, message: t('signup.errors.requiredPassword') }]}>
+            <Input.Password prefix={<LockOutlined />} placeholder={t('signup.password')} />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" className="auth-button" loading={loading}>
-              Sign Up
+              {t('signup.signupButton')}
             </Button>
           </Form.Item>
         </Form>
         
+        <div className="auth-links">
+          <Link to="/login" onClick={(e) => {
+            e.preventDefault();
+            handleNavigation('/login');
+          }}>{t('signup.haveAccount')}</Link>
+        </div>
       </Card>
-
     </div>
   );
 }

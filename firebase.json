@@ -26,18 +26,22 @@
     "rewrites": [
       {
         "source": "/",
-        "destination": "/landing.html"
+        "destination": "/index.html"
       },
       {
         "source": "/login",
         "destination": "/index.html"
       },
       {
-        "source": "/dashboard",
+        "source": "/signup",
         "destination": "/index.html"
       },
       {
         "source": "/dashboard/**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "**",
         "destination": "/index.html"
       }
     ]
