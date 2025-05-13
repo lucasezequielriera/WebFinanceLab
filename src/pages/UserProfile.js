@@ -49,7 +49,6 @@ const UserProfile = () => {
         gender: "",
         phone: "",
         photoURL: DEFAULT_PROFILE_PICTURE_URL,
-        displayBalance: "",
         language: ""
     });
 
@@ -145,11 +144,6 @@ const UserProfile = () => {
             setInitialUserData({
                 ...userData,
                 photoURL: photoURL,
-            });
-
-            await updateDoc(doc(db, "users", currentUser.uid), {
-                ...userData,
-                displayBalance: userData.displayBalance,
             });
 
             i18n.changeLanguage(userData.language);

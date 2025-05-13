@@ -21,11 +21,14 @@ const resources = {
   }
 };
 
+// Obtener el idioma guardado en localStorage o usar 'en' como fallback
+const savedLanguage = localStorage.getItem('language') || 'en';
+
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'en', // idioma por defecto
+    lng: savedLanguage,
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false

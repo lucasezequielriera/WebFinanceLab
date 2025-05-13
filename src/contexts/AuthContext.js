@@ -1,17 +1,18 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { auth } from '../firebase';
-import { db } from '../firebase';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { auth, db } from '../firebase';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  updateProfile
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import i18n from '../i18n'; // 👈 Asegurate de importar i18n
+import i18n from '../i18n';
+import { useLanguage } from './LanguageContext';
 
-const AuthContext = React.createContext();
+const AuthContext = createContext();
 
 export function useAuth() {
   return useContext(AuthContext);
@@ -19,46 +20,74 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { setSelectedLanguage } = useLanguage();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-
       if (user) {
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
             const data = userDoc.data();
-            const language = data.language || 'es'; // 🇪🇸 Default a español
-            i18n.changeLanguage(language);
+            if (data.language) {
+              setSelectedLanguage(data.language);
+              i18n.changeLanguage(data.language);
+            }
           }
         } catch (error) {
           console.error("Error reading user language:", error);
         }
       }
+      setCurrentUser(user);
+      setLoading(false);
     });
 
-    return () => unsubscribe();
-  }, []);
+    return unsubscribe;
+  }, [setSelectedLanguage]);
 
-  const signup = async (email, password) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+  const signup = async (email, password, firstName, lastName) => {
+    try {
+      // Crear el usuario
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-    // 👇 Guarda idioma por defecto al registrarse
-    await setDoc(doc(db, "users", user.uid), {
-      language: 'es'
-    }, { merge: true });
+      // Actualizar el perfil del usuario con nombre y apellido
+      await updateProfile(user, {
+        displayName: `${firstName} ${lastName}`
+      });
 
-    return userCredential;
+      // Crear el documento del usuario en Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        firstName,
+        lastName,
+        language: i18n.language,
+        createdAt: new Date().toISOString(),
+        user_access_level: 1 // Nivel de acceso por defecto
+      });
+
+      return user;
+    } catch (error) {
+      console.error("Error during signup:", error);
+      throw error;
+    }
   };
 
-  const login = (email, password) => {
-    return signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
-      const user = userCredential.user;
-      setCurrentUser(user);
-      return userCredential;
-    });
+  const login = async (email, password) => {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      if (data.language) {
+        setSelectedLanguage(data.language);
+        i18n.changeLanguage(data.language);
+      }
+    }
+
+    return user;
   };
 
   const resetPassword = (email) => {
@@ -66,23 +95,21 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    return signOut(auth).catch(error => {
-      console.error("Error during logout:", error);
-      throw error;
-    });
+    return signOut(auth);
   };
 
   const value = {
     currentUser,
-    login,
+    loading,
     signup,
+    login,
     resetPassword,
     logout
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 }

@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Spin } from 'antd';
 
-export default function PrivateRoute({ children }) {
+export default function PublicRoute({ children }) {
   const { currentUser, loading } = useAuth();
 
   if (loading) {
@@ -20,5 +20,5 @@ export default function PrivateRoute({ children }) {
     );
   }
 
-  return currentUser ? children : <Navigate to="/login" />;
-}
+  return currentUser ? <Navigate to="/dashboard" /> : children;
+} 

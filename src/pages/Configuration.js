@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Select, Tag, Spin, notification, Typography, Popconfirm, Button } from 'antd';
 import { db } from '../firebase';
-import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { DeleteOutlined } from '@ant-design/icons';
 
 const USER_LEVELS = [
@@ -55,11 +55,11 @@ const Configuration = () => {
   const handleDeleteUser = async (userId) => {
     setUpdatingId(userId);
     try {
-      await updateDoc(doc(db, 'users', userId), { deleted: true }); // Soft delete (opcional)
-      await import('firebase/firestore').then(fb => fb.deleteDoc(doc(db, 'users', userId)));
+      await deleteDoc(doc(db, 'users', userId));
       setUsers(prev => prev.filter(u => u.id !== userId));
-      notification.success({ message: 'Usuario eliminado' });
+      notification.success({ message: 'Usuario eliminado permanentemente' });
     } catch (e) {
+      console.error('Error al eliminar usuario:', e);
       notification.error({ message: 'Error al eliminar usuario' });
     } finally {
       setUpdatingId(null);

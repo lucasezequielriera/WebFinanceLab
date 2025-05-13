@@ -3,9 +3,6 @@ import { Form, Input, Button, Typography, Alert, Card } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { updateProfile } from "firebase/auth"; 
-import { db } from '../firebase';
-import { setDoc, doc } from "firebase/firestore";
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 // Styles
@@ -40,24 +37,7 @@ const Signup = () => {
       setLoading(true);
 
       const { firstName, lastName, email, password } = values;
-      const userCredential = await signup(email, password);
-
-      await updateProfile(userCredential.user, {
-        displayName: `${firstName} ${lastName}`
-      });
-
-      await setDoc(doc(db, "users", userCredential.user.uid), {
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        language: selectedLanguage,
-        age: '',
-        city: '',
-        gender: '',
-        displayBalance: 'USD',
-        user_access_level: 1
-      });
-
+      await signup(email, password, firstName, lastName);
       handleNavigation('/dashboard');
     } catch (err) {
       console.error('Error during signup:', err);

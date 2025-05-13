@@ -38,6 +38,7 @@ import FixedExpenses from './pages/FixedExpenses';
 import Landing from './pages/Landing';
 import Legal from './pages/Legal';
 import { LanguageProvider } from './contexts/LanguageContext';
+import PublicRoute from './components/PublicRoute';
 
 const { Title, Paragraph } = Typography;
 const { Header, Sider, Content } = Layout;
@@ -519,9 +520,21 @@ function App() {
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/login" element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            } />
+            <Route path="/signup" element={
+              <PublicRoute>
+                <Signup />
+              </PublicRoute>
+            } />
+            <Route path="/forgot-password" element={
+              <PublicRoute>
+                <ForgotPassword />
+              </PublicRoute>
+            } />
             <Route path="/legal" element={<Legal />} />
             <Route
               path="/*"

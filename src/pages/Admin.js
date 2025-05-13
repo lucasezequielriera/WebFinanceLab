@@ -6,6 +6,9 @@ import {
   UserOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
+import Tasks from './Tasks';
+import Users from './Users';
+import Configuration from './Configuration';
 
 const adminMenuItems = [
   {
@@ -44,8 +47,10 @@ const Admin = () => {
         items={adminMenuItems}
         onClick={({ key }) => navigate(key)}
       />
-      <div style={{ flex: 1, padding: 10, height: 'calc(100vh - 80px)' }}>
-        <Outlet />
+      <div style={{ flex: 1, padding: 10, height: 'calc(100vh - 80px)', overflow: 'auto' }}>
+        {location.pathname === '/admin/tasks' && <Tasks />}
+        {location.pathname === '/admin/users' && <Users />}
+        {location.pathname === '/admin/configuration' && <Configuration />}
       </div>
     </div>
   );
