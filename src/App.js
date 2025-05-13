@@ -330,9 +330,10 @@ const AppLayout = ({ children }) => {
                 setActionsVisible(false);
                 openIncome();
               }} style={{ fontSize: 14, color: 'white', fontWeight: 500, background: 'transparent',
-              border: '1px solid white !important', textShadow: '0 0 16px black', borderColor: '#344e6d' }}>
+              border: '1px solid white !important', textShadow: '0 0 16px black', borderColor: '#344e6d', marginBottom: 10 }}>
               {t('userProfile.navbar.addIncome')}
             </Tag>
+            <span style={{ color: 'grey', textAlign: 'center', fontSize: 12, marginTop: 10 }}>Version 1.0.2</span>
           </div>
         )}
       </Sider>
