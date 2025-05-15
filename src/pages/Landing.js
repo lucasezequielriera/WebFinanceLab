@@ -554,7 +554,7 @@ const Landing = () => {
           </div>
           <Divider style={{ borderColor: 'rgba(255,255,255,0.1)' }} />
           <Paragraph style={{ color: 'rgba(255,255,255,0.7)' }}>
-            {t('footer.copyright')}
+            <a href="https://www.synapsis.team" style={{ color: 'rgba(255,255,255,0.7)' }}>{t('footer.copyright')}</a>
           </Paragraph>
         </div>
       </div>
