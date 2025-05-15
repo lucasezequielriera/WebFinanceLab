@@ -323,11 +323,17 @@ const Summary = () => {
     const [tempDate, setTempDate] = useState(null);
 
     // Calcula totales para la tarjeta seleccionada o para todas si no hay selección
+    // ... existing code ...
+    // Calcula totales para la tarjeta seleccionada o para todas si no hay selección
     const calculateTotals = (cards) => {
       let totalARS = 0, totalUSD = 0;
       const cardsToSum = selectedCard 
-        ? cards.filter(c => c.cardBank === selectedCard.cardBank)
-        : cards;
+      ? cards.filter(
+          c =>
+            c.cardBank === selectedCard.cardBank &&   // -- mismo plástico (Visa, MC…)
+            c.cardType === selectedCard.cardType       // -- mismo tipo (Crédito / Débito)
+        )
+      : cards;
 
       cardsToSum.forEach(card => {
         card.amounts.forEach(a => {
