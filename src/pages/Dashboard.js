@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Spin, Row, Col, Card }       from 'antd';
 import { SmileOutlined }              from '@ant-design/icons';
 import { useAuth }                    from '../contexts/AuthContext';
+import { useDashboardConfig }         from '../contexts/DashboardConfigContext';
 import { db }                         from '../firebase';
 import { collection, onSnapshot, query, where, Timestamp } from 'firebase/firestore';
 import { useTranslation }             from 'react-i18next';
@@ -15,6 +16,10 @@ import BalancePesosCounter            from '../components/BalancePesosCounter';
 import BalanceDollarsCounter          from '../components/BalanceDollarsCounter';
 import FixedExpensesPesosCounter      from '../components/FixedExpensesPesosCounter';
 import FixedExpensesDollarsCounter    from '../components/FixedExpensesDollarsCounter';
+import UnifiedExpensesDollarsCounter  from '../components/UnifiedExpensesDollarsCounter';
+import SimpleUnifiedExpensesDollarsCounter from '../components/SimpleUnifiedExpensesDollarsCounter';
+import UnifiedExpensesPesosCounter from '../components/UnifiedExpensesPesosCounter';
+import SimpleUnifiedExpensesPesosCounter from '../components/SimpleUnifiedExpensesPesosCounter';
 import DailyExpensesChart             from '../components/DailyExpensesChart';
 import MonthlySummaryTable            from '../components/MonthlySummaryTable';
 import RecentMovements                from '../components/RecentMovements';
@@ -34,6 +39,7 @@ const Dashboard = () => {
   const { currentUser } = useAuth();
   const { t } = useTranslation();
   const { hasIncomes, hasExpenses } = useMonthlyMovements();
+  const { expenseViewMode, loading: configLoading } = useDashboardConfig();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -112,7 +118,7 @@ const Dashboard = () => {
 
   return (
     <div className='container-page'>
-      <Spin spinning={loading}>
+      <Spin spinning={loading || configLoading}>
         <div className="dashboard-container margin-top-small">
           {(hasIncomes || hasExpenses) ? (
 
@@ -134,16 +140,38 @@ const Dashboard = () => {
                       <PesoIncomeCounter />
                     </Card>
                   </Col>
-                  <Col xs={24} sm={24} md={12} lg={5}>
-                    <Card className="equal-height-card">
-                      <FixedExpensesPesosCounter />
-                    </Card>
-                  </Col>
-                  <Col xs={24} sm={24} md={12} lg={5}>
-                    <Card className="equal-height-card">
-                      <PesoExpenseCounter />
-                    </Card>
-                  </Col>
+                  
+                  {/* Render expense cards based on configuration */}
+                  {expenseViewMode === 'separated' && (
+                    <>
+                      <Col xs={24} sm={24} md={12} lg={5}>
+                        <Card className="equal-height-card">
+                          <FixedExpensesPesosCounter />
+                        </Card>
+                      </Col>
+                      <Col xs={24} sm={24} md={12} lg={5}>
+                        <Card className="equal-height-card">
+                          <PesoExpenseCounter />
+                        </Card>
+                      </Col>
+                    </>
+                  )}
+                  
+                  {expenseViewMode === 'unified' && (
+                    <Col xs={24} sm={24} md={12} lg={10}>
+                      <Card className="equal-height-card">
+                        <SimpleUnifiedExpensesPesosCounter />
+                      </Card>
+                    </Col>
+                  )}
+                  
+                  {expenseViewMode === 'hybrid' && (
+                    <Col xs={24} sm={24} md={12} lg={10}>
+                      <Card className="equal-height-card">
+                        <UnifiedExpensesPesosCounter />
+                      </Card>
+                    </Col>
+                  )}
                 </Row>
               )}
               
@@ -160,16 +188,38 @@ const Dashboard = () => {
                       <DollarIncomeCounter />
                     </Card>
                   </Col>
-                  <Col xs={24} sm={24} md={12} lg={5}>
+                  
+                  {/* Render expense cards based on configuration */}
+                  {expenseViewMode === 'separated' && (
+                    <>
+                      <Col xs={24} sm={24} md={12} lg={5}>
+                        <Card className="equal-height-card">
+                          <FixedExpensesDollarsCounter />
+                        </Card>
+                      </Col>
+                      <Col xs={24} sm={24} md={12} lg={5}>
+                        <Card className="equal-height-card">
+                          <DollarExpenseCounter />
+                        </Card>
+                      </Col>
+                    </>
+                  )}
+                  
+                  {expenseViewMode === 'unified' && (
+                    <Col xs={24} sm={24} md={12} lg={10}>
                       <Card className="equal-height-card">
-                        <FixedExpensesDollarsCounter />
+                        <SimpleUnifiedExpensesDollarsCounter />
                       </Card>
-                  </Col>
-                  <Col xs={24} sm={24} md={12} lg={5}>
-                    <Card className="equal-height-card">
-                      <DollarExpenseCounter />
-                    </Card>
-                  </Col>
+                    </Col>
+                  )}
+                  
+                  {expenseViewMode === 'hybrid' && (
+                    <Col xs={24} sm={24} md={12} lg={10}>
+                      <Card className="equal-height-card">
+                        <UnifiedExpensesDollarsCounter />
+                      </Card>
+                    </Col>
+                  )}
                 </Row>
               )}
               {/* GRAPH + MONTHLY SUMMARY + RECENT MOVEMENTS */}

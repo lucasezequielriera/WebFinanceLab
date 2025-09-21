@@ -4,6 +4,7 @@ import { collection, query, onSnapshot, where, Timestamp, getDocs, doc } from 'f
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Statistic, Progress } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { DollarOutlined, RiseOutlined, FallOutlined } from '@ant-design/icons';
 
 function formatCompactNumber(value) {
   return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value);
@@ -90,19 +91,234 @@ const BalancePesosCounter = () => {
   }, [currentUser]);
 
   return (
-    <Card loading={loading}>
-      <div>
-          <Statistic
-            className='statics-card'
-            title={t('userProfile.dashboard.card.balance.ars')}
-            value={formatCompactNumber(remaining)}
-            precision={2}
-            prefix={'$'}
-          />
-          <Progress showInfo={false} percent={progressPercent} strokeColor={twoColors} status='active' />
+    (() => {
+      console.log('[BalancePesosCounter] Render: ingresos ARS:', totalIncome, '- pagos mensuales ARS:', totalPayments, '- gastos diarios ARS:', totalExpenses, '=', remaining);
+    })(),
+    <Card 
+      loading={loading}
+      style={{ 
+        marginBottom: 0,
+        borderRadius: 20,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+        border: 'none',
+        background: 'linear-gradient(135deg, #1a202c 0%, #2d3748 100%)',
+        overflow: 'hidden',
+        position: 'relative',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        transform: 'translateY(0)',
+        cursor: 'pointer'
+      }}
+      bodyStyle={{ 
+        padding: 0,
+        position: 'relative',
+        zIndex: 2,
+        background: 'transparent'
+      }}
+      className="custom-balance-card-pesos"
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.18)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.12)';
+      }}
+    >
+      {/* Decorative background element */}
+      <div style={{
+        position: 'absolute',
+        top: -30,
+        right: -30,
+        width: 100,
+        height: 100,
+        background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+        borderRadius: '50%',
+        zIndex: 1,
+        opacity: 0.1
+      }} />
+      
+      {/* Content container with padding */}
+      <div style={{
+        padding: '32px 28px 24px 28px',
+        position: 'relative',
+        zIndex: 2
+      }}>
+        {/* Header section */}
+        <div style={{ 
+          display: 'flex',
+          alignItems: 'center',
+          marginBottom: 24,
+          position: 'relative',
+          zIndex: 3
+        }}>
+          <div style={{
+            width: 48,
+            height: 48,
+            borderRadius: 14,
+            background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: 16,
+            boxShadow: '0 4px 16px rgba(59, 130, 246, 0.3)'
+          }}>
+            <DollarOutlined style={{ color: 'white', fontSize: '20px' }} />
+          </div>
+          <div>
+            <div style={{ 
+              fontSize: '18px', 
+              fontWeight: '700', 
+              color: '#ffffff',
+              marginBottom: 4,
+              lineHeight: 1.2
+            }}>
+              {t('userProfile.dashboard.card.balance.ars')}
+            </div>
+            <div style={{ 
+              fontSize: '13px', 
+              color: '#a0aec0',
+              fontWeight: '500'
+            }}>
+              Balance Total
+            </div>
+          </div>
+        </div>
+        
+        {/* Amount section */}
+        <div style={{ marginBottom: 20, position: 'relative', zIndex: 3 }}>
+          <div style={{
+            fontSize: '13px',
+            color: '#a0aec0',
+            fontWeight: '600',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            marginBottom: 8
+          }}>
+            Disponible
+          </div>
+          <div style={{
+            fontSize: '32px',
+            fontWeight: '800',
+            color: '#ffffff',
+            lineHeight: 1,
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: 6
+          }}>
+            <DollarOutlined style={{ fontSize: '24px', color: '#3b82f6' }} />
+            {formatCompactNumber(remaining)}
+            <span style={{ 
+              fontSize: '16px', 
+              color: '#a0aec0',
+              fontWeight: '600',
+              marginLeft: 4
+            }}>
+              ARS
+            </span>
+          </div>
+        </div>
+        
+        {/* Progress section */}
+        <div style={{ position: 'relative', zIndex: 3 }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 8
+          }}>
+            <span style={{
+              fontSize: '12px',
+              color: '#a0aec0',
+              fontWeight: '600'
+            }}>
+              Progreso del mes
+            </span>
+            <span style={{
+              fontSize: '12px',
+              color: '#3b82f6',
+              fontWeight: '700'
+            }}>
+              {progressPercent}%
+            </span>
+          </div>
+          <div style={{
+            height: 8,
+            background: 'rgba(160, 174, 192, 0.2)',
+            borderRadius: 4,
+            overflow: 'hidden',
+            position: 'relative'
+          }}>
+            <div style={{
+              height: '100%',
+              width: `${Math.min(progressPercent, 100)}%`,
+              background: 'linear-gradient(90deg, #3b82f6, #1d4ed8)',
+              borderRadius: 4,
+              transition: 'width 0.3s ease',
+              boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
+            }} />
+          </div>
+        </div>
+        
+        {/* Summary section */}
+        <div style={{
+          marginTop: 20,
+          padding: '16px',
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: 12,
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          position: 'relative',
+          zIndex: 3
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 8
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <RiseOutlined style={{ color: '#10b981', fontSize: '12px' }} />
+              <span style={{ fontSize: '11px', color: '#10b981', fontWeight: '600' }}>
+                Ingresos
+              </span>
+            </div>
+            <span style={{ fontSize: '12px', color: '#ffffff', fontWeight: '600' }}>
+              ${formatCompactNumber(totalIncome)}
+            </span>
+          </div>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <FallOutlined style={{ color: '#ef4444', fontSize: '12px' }} />
+              <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: '600' }}>
+                Gastos
+              </span>
+            </div>
+            <span style={{ fontSize: '12px', color: '#ffffff', fontWeight: '600' }}>
+              ${formatCompactNumber(totalExpenses + totalPayments)}
+            </span>
+          </div>
+        </div>
       </div>
     </Card>
   );
 };
 
 export default BalancePesosCounter;
+
+// Estilos CSS para eliminar el fondo blanco del Card
+const style = document.createElement('style');
+style.textContent = `
+  .custom-balance-card-pesos .ant-card {
+    background: transparent !important;
+  }
+  .custom-balance-card-pesos .ant-card-body {
+    background: transparent !important;
+  }
+  .custom-balance-card-pesos .ant-card-content {
+    background: transparent !important;
+  }
+`;
+document.head.appendChild(style);

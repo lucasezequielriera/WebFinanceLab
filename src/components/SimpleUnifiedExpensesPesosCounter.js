@@ -1,27 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Statistic } from 'antd';
-import { RiseOutlined, FallOutlined, DollarOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import { Card } from 'antd';
+import { DollarOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import { db } from '../firebase';
-import { collection, query, where, onSnapshot, Timestamp, getDocs } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, getDocs } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import dayjs from 'dayjs';
 
 function formatCompactNumber(value) {
   return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value);
 }
 
-const DollarIncomeCounter = () => {
+const SimpleUnifiedExpensesPesosCounter = () => {
   const { currentUser } = useAuth();
   const { t } = useTranslation();
 
-  const [total, setTotal] = useState(0);
-  const [prevTotal, setPrevTotal] = useState(0);
+  const [fixedTotal, setFixedTotal] = useState(0);
+  const [dailyTotal, setDailyTotal] = useState(0);
+  const [prevFixedTotal, setPrevFixedTotal] = useState(0);
+  const [prevDailyTotal, setPrevDailyTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Utility para calcular rango de mes
+  // Helper para rango de mes
   const getRange = (date) => {
     const start = new Date(date.getFullYear(), date.getMonth(), 1);
-    const end   = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+    const end = new Date(date.getFullYear(), date.getMonth() + 1, 1);
     return [Timestamp.fromDate(start), Timestamp.fromDate(end)];
   };
 
@@ -29,49 +32,70 @@ const DollarIncomeCounter = () => {
     if (!currentUser) return;
     const now = new Date();
 
-    // Mes actual
+    // Gastos diarios - Mes actual
     const [startCur, endCur] = getRange(now);
-    const qCurrent = query(
-      collection(db, `users/${currentUser.uid}/incomes`),
-      where('currency', '==', 'USD'),
+    const qDailyCurrent = query(
+      collection(db, `users/${currentUser.uid}/expenses`),
+      where('currency', '==', 'ARS'),
       where('timestamp', '>=', startCur),
       where('timestamp', '<', endCur)
     );
-    const unsubCur = onSnapshot(qCurrent, snap => {
-      const sum = snap.docs.reduce((s, d) => s + parseFloat(d.data().amount), 0);
-      setTotal(sum);
-      setLoading(false);
-      console.log('[DollarIncomeCounter] Ingresos USD mes actual:', sum);
-    });
 
-    // Mes anterior
+    // Gastos fijos - Mes actual
+    const currentMonthKey = dayjs().format('YYYY-MM');
+    const fixedRef = doc(db, `users/${currentUser.uid}/monthlyPayments`, currentMonthKey);
+
+    // Gastos diarios - Mes anterior
     const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const [startPrev, endPrev] = getRange(prevDate);
-    const qPrev = query(
-      collection(db, `users/${currentUser.uid}/incomes`),
-      where('currency', '==', 'USD'),
+    const qDailyPrev = query(
+      collection(db, `users/${currentUser.uid}/expenses`),
+      where('currency', '==', 'ARS'),
       where('timestamp', '>=', startPrev),
       where('timestamp', '<', endPrev)
     );
-    const unsubPrev = onSnapshot(qPrev, snap => {
+
+    // Gastos fijos - Mes anterior
+    const prevMonthKey = dayjs().subtract(1, 'month').format('YYYY-MM');
+    const prevFixedRef = doc(db, `users/${currentUser.uid}/monthlyPayments`, prevMonthKey);
+
+    // Suscripciones
+    const unsubDaily = onSnapshot(qDailyCurrent, snap => {
       const sum = snap.docs.reduce((s, d) => s + parseFloat(d.data().amount), 0);
-      setPrevTotal(sum);
-      console.log('[DollarIncomeCounter] Ingresos USD mes anterior:', sum);
+      setDailyTotal(sum);
     });
 
+    const unsubFixed = onSnapshot(fixedRef, snap => {
+      const payments = snap.exists() ? snap.data().payments || [] : [];
+      const totalARS = payments.reduce((sum, p) => sum + (Number(p.amountARS) || 0), 0);
+      setFixedTotal(totalARS);
+      setLoading(false);
+    });
+
+    // Mes anterior (una sola vez)
+    (async () => {
+      const prevDailySnap = await getDocs(qDailyPrev);
+      const prevDailySum = prevDailySnap.docs.reduce((s, d) => s + parseFloat(d.data().amount), 0);
+      setPrevDailyTotal(prevDailySum);
+
+      const prevFixedSnap = await getDoc(prevFixedRef);
+      const prevPayments = prevFixedSnap.exists() ? prevFixedSnap.data().payments || [] : [];
+      const prevFixedSum = prevPayments.reduce((sum, p) => sum + (Number(p.amountARS) || 0), 0);
+      setPrevFixedTotal(prevFixedSum);
+    })();
+
     return () => {
-      unsubCur();
-      unsubPrev();
+      unsubDaily();
+      unsubFixed();
     };
   }, [currentUser]);
 
-  // Cálculo de variación
-  const pct = prevTotal > 0
-    ? Math.round(((total - prevTotal) / prevTotal) * 100)
-    : total > 0
-      ? 100
-      : 0;
-  const isIncrease = total >= prevTotal;
+  // Cálculos
+  const totalExpenses = fixedTotal + dailyTotal;
+  const prevTotalExpenses = prevFixedTotal + prevDailyTotal;
+  const diff = totalExpenses - prevTotalExpenses;
+  const pct = prevTotalExpenses > 0 ? ((diff / prevTotalExpenses) * 100).toFixed(0) : 0;
+  const isIncrease = diff >= 0;
 
   return (
     <Card 
@@ -94,7 +118,7 @@ const DollarIncomeCounter = () => {
         zIndex: 2,
         background: 'transparent'
       }}
-      className="custom-income-card"
+      className="custom-simple-expenses-card-pesos"
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-4px)';
         e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.18)';
@@ -111,7 +135,7 @@ const DollarIncomeCounter = () => {
         right: -30,
         width: 100,
         height: 100,
-        background: 'linear-gradient(135deg, #10b981, #059669)',
+        background: 'linear-gradient(135deg, #ef4444, #dc2626)',
         borderRadius: '50%',
         zIndex: 1,
         opacity: 0.1
@@ -129,12 +153,12 @@ const DollarIncomeCounter = () => {
             width: 48,
             height: 48,
             borderRadius: 14,
-            background: 'linear-gradient(135deg, #10b981, #059669)',
+            background: 'linear-gradient(135deg, #ef4444, #dc2626)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             marginRight: 16,
-            boxShadow: '0 4px 16px rgba(16, 185, 129, 0.3)'
+            boxShadow: '0 4px 16px rgba(239, 68, 68, 0.3)'
           }}>
             <DollarOutlined style={{ 
               color: 'white', 
@@ -149,19 +173,19 @@ const DollarIncomeCounter = () => {
               margin: 0,
               marginBottom: 4
             }}>
-              {t('userProfile.dashboard.card.incomes.usd')}
+              Gastos ARS
             </h3>
             <p style={{
               color: '#94a3b8',
               fontSize: '12px',
               margin: 0
             }}>
-              Ingresos del mes
+              Total del mes
             </p>
           </div>
         </div>
 
-        {/* Amount section */}
+        {/* Total amount section */}
         <div style={{ marginBottom: 20 }}>
           <div style={{
             color: '#94a3b8',
@@ -171,7 +195,7 @@ const DollarIncomeCounter = () => {
             textTransform: 'uppercase',
             letterSpacing: '0.5px'
           }}>
-            Total ingresado
+            Total gastado
           </div>
           <div style={{
             display: 'flex',
@@ -179,7 +203,7 @@ const DollarIncomeCounter = () => {
             gap: 8
           }}>
             <DollarOutlined style={{ 
-              color: '#10b981', 
+              color: '#ef4444', 
               fontSize: '24px' 
             }} />
             <span style={{
@@ -188,19 +212,19 @@ const DollarIncomeCounter = () => {
               fontWeight: 700,
               lineHeight: 1
             }}>
-              {formatCompactNumber(total)}
+              {formatCompactNumber(totalExpenses)}
             </span>
             <span style={{
               color: '#94a3b8',
               fontSize: '16px',
               fontWeight: 500
             }}>
-              USD
+              ARS
             </span>
           </div>
         </div>
 
-        {/* Progress section */}
+        {/* Variation section */}
         <div style={{ marginBottom: 20 }}>
           <div style={{
             color: '#94a3b8',
@@ -219,17 +243,17 @@ const DollarIncomeCounter = () => {
           }}>
             {isIncrease ? (
               <ArrowUpOutlined style={{ 
-                color: '#10b981', 
+                color: '#ef4444', 
                 fontSize: '16px' 
               }} />
             ) : (
               <ArrowDownOutlined style={{ 
-                color: '#ef4444', 
+                color: '#10b981', 
                 fontSize: '16px' 
               }} />
             )}
             <span style={{
-              color: isIncrease ? '#10b981' : '#ef4444',
+              color: isIncrease ? '#ef4444' : '#10b981',
               fontSize: '18px',
               fontWeight: 600
             }}>
@@ -257,8 +281,8 @@ const DollarIncomeCounter = () => {
             alignItems: 'center'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <RiseOutlined style={{ 
-                color: '#10b981', 
+              <DollarOutlined style={{ 
+                color: '#ef4444', 
                 fontSize: '14px' 
               }} />
               <span style={{
@@ -270,11 +294,11 @@ const DollarIncomeCounter = () => {
               </span>
             </div>
             <span style={{
-              color: '#10b981',
+              color: '#ef4444',
               fontSize: '14px',
               fontWeight: 600
             }}>
-              ${formatCompactNumber(total)}
+              ${formatCompactNumber(totalExpenses)}
             </span>
           </div>
           <div style={{
@@ -284,7 +308,7 @@ const DollarIncomeCounter = () => {
             marginTop: 8
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <FallOutlined style={{ 
+              <DollarOutlined style={{ 
                 color: '#94a3b8', 
                 fontSize: '14px' 
               }} />
@@ -301,29 +325,28 @@ const DollarIncomeCounter = () => {
               fontSize: '14px',
               fontWeight: 500
             }}>
-              ${formatCompactNumber(prevTotal)}
+              ${formatCompactNumber(prevTotalExpenses)}
             </span>
           </div>
         </div>
       </div>
-
     </Card>
   );
 };
 
+export default SimpleUnifiedExpensesPesosCounter;
+
 // Inject custom CSS to ensure transparent background
 const style = document.createElement('style');
 style.textContent = `
-  .custom-income-card .ant-card {
+  .custom-simple-expenses-card-pesos .ant-card {
     background: transparent !important;
   }
-  .custom-income-card .ant-card-body {
+  .custom-simple-expenses-card-pesos .ant-card-body {
     background: transparent !important;
   }
-  .custom-income-card .ant-card-content {
+  .custom-simple-expenses-card-pesos .ant-card-content {
     background: transparent !important;
   }
 `;
 document.head.appendChild(style);
-
-export default DollarIncomeCounter;

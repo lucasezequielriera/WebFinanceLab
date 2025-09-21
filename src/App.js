@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Form, Layout, Menu, Tag, Modal, Button, notification, Space, DatePicker, Input, Col, Row } from 'antd';
-import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined, AlertOutlined, PlusOutlined, DollarOutlined, RiseOutlined, FallOutlined, FileTextOutlined, StockOutlined } from '@ant-design/icons';
+import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined, AlertOutlined, PlusOutlined, DollarOutlined, RiseOutlined, FallOutlined, FileTextOutlined, StockOutlined, SettingOutlined } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -31,6 +31,9 @@ import AdminRoute from './components/AdminRoute';
 import Tasks from './pages/Tasks';
 import Users from './pages/Users';
 import Configuration from './pages/Configuration';
+import DashboardConfig from './pages/DashboardConfig';
+import ProfileConfig from './pages/ProfileConfig';
+import LanguageConfig from './pages/LanguageConfig';
 import Summary from './pages/Summary';
 import Debts from './pages/Debts';
 import DailyExpenses from './pages/DailyExpenses';
@@ -38,6 +41,7 @@ import FixedExpenses from './pages/FixedExpenses';
 import Landing from './pages/Landing';
 import Legal from './pages/Legal';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { DashboardConfigProvider } from './contexts/DashboardConfigContext';
 import PublicRoute from './components/PublicRoute';
 
 const { Title, Paragraph } = Typography;
@@ -90,6 +94,7 @@ const AppLayout = ({ children }) => {
       }
     };
 
+    console.log('Current path:', path);
     if (path.startsWith('/dashboard')) {
       setSelectedKey('1');
     } else if (path.startsWith('/incomes')) {
@@ -108,6 +113,9 @@ const AppLayout = ({ children }) => {
       setSelectedKey('2');
     } else if (path.startsWith('/financial-goals')) {
       setSelectedKey('7');
+    } else if (path.startsWith('/configuration')) {
+      console.log('Configuration route detected, setting key to 15');
+      setSelectedKey('15');
     } else if (path.startsWith('/about-us')) {
       setSelectedKey('6');
     } else if (path.startsWith('/signup')) {
@@ -209,6 +217,11 @@ const AppLayout = ({ children }) => {
       key: '6',
       icon: <InfoCircleOutlined />,
       label: <Link to="/about-us">{t('userProfile.navbar.aboutUs')}</Link>
+    },
+    {
+      key: '15',
+      icon: <SettingOutlined />,
+      label: <Link to="/configuration">Configuración</Link>
     },
     {
       key: '2',
@@ -519,6 +532,7 @@ function App() {
     <Router>
       <LanguageProvider>
         <AuthProvider>
+          <DashboardConfigProvider>
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={
@@ -552,6 +566,10 @@ function App() {
                       <Route path="summary" element={<Summary />} />
                       <Route path="financial-goals" element={<FinancialGoals />} />
                       <Route path="about-us" element={<AboutUs />} />
+                      <Route path="configuration" element={<Configuration />} />
+                      <Route path="configuration/dashboard" element={<DashboardConfig />} />
+                      <Route path="configuration/profile" element={<ProfileConfig />} />
+                      <Route path="configuration/language" element={<LanguageConfig />} />
                       <Route path="debts" element={<Debts />} />
                       <Route
                         path="admin/*"
@@ -567,6 +585,7 @@ function App() {
               }
             />
           </Routes>
+          </DashboardConfigProvider>
         </AuthProvider>
       </LanguageProvider>
     </Router>
