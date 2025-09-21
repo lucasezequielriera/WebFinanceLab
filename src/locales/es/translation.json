@@ -34,6 +34,8 @@
     "userProfile.dashboard.card.dailyExpenses.usd": "Gastos Diarios USD",
     "userProfile.dashboard.card.vsLastMonth": "este mes",
     "userProfile.dashboard.dailyExpenses.title": "Flujo de Dinero",
+    "userProfile.dashboard.dailyExpenses.subtitle": "Gastos diarios del mes",
+    "userProfile.dashboard.dailyExpenses.balance": "Balance",
     "userProfile.dashboard.dailyExpenses.tooltip": {
         "expensesDay": "Día",
         "expensesAmount": "Gastos"
@@ -53,7 +55,11 @@
     },
     "userProfile.dashboard.monthlyTimeline": {
         "title": "Comparación Mensual de Gastos",
-        "noData": "No hay datos para mostrar"
+        "subtitle": "Evolución de gastos por mes",
+        "noData": "No hay datos para mostrar",
+        "summary": "Resumen Anual",
+        "totalExpenses": "Total de Gastos",
+        "averageMonthly": "Promedio Mensual"
     },
 
     "userProfile.incomes.filter.placeholder": "Selecciona mes",

@@ -18,6 +18,8 @@ import {
   ResponsiveContainer,
   ReferenceLine
 } from 'recharts';
+import { Card } from 'antd';
+import { BarChartOutlined, DollarOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import useIsMobile from '../hooks/useIsMobile';
 import { useTranslation } from 'react-i18next';
@@ -26,6 +28,10 @@ import { getDailyLimit } from '../utils/limits';
 import 'dayjs/locale/es';
 import 'dayjs/locale/en';
 
+function formatCompactNumber(value) {
+  return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value);
+}
+
 const DailyExpensesChart = ({ userId }) => {
   const [data, setData] = useState([]);
   const scrollRef = useRef(null);
@@ -33,6 +39,7 @@ const DailyExpensesChart = ({ userId }) => {
   const isMobile = useIsMobile();
   const [expenseLimits, setExpenseLimits] = useState([]);
   const [stats, setStats] = useState(null); // monthly status
+  const [loading, setLoading] = useState(true);
 
   const { i18n } = useTranslation();
   const { t } = useTranslation();
@@ -207,125 +214,217 @@ const DailyExpensesChart = ({ userId }) => {
     );
   };
   
+  // Inyectar CSS personalizado para el fondo transparente
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .custom-daily-expenses-card .ant-card-body {
+        background: transparent !important;
+        padding: 0 !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
   return (
-    <div style={{ position: 'relative' }}>
-      <h3 style={{ marginBottom: 16, marginTop: 10, marginLeft: 15, textAlign: 'left', fontWeight: 700, fontSize: 18 }}>
-        {t('userProfile.dashboard.dailyExpenses.title')} ({currentMonth})
-        <sup> { stats ? (stats.balance >= 0
-            ? <span style={{ fontSize: 12, color: 'green', fontWeight: 700 }}>+${stats.balance}</span>
-            : <span style={{ fontSize: 12, color: 'red', fontWeight: 700 }}>-${Math.abs(stats.balance)}</span>
-        ) : null }
-        </sup>
-      </h3>
-
-      {isMobile ? (
-        <div ref={scrollRef} style={{ overflowX: 'auto', width: '100%', paddingBottom: 12 }}>
-          {/* MOBILE */}
-          <LineChart ref={chartRef} width={chartWidth} height={300} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
-          >
-            {/* Definimos el gradiente */}
-            <defs>
-              <linearGradient id="gradientARS" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="rgb(0, 142, 251)" />
-                <stop offset="50%" stopColor="rgb(0, 117, 209)" />
-                <stop offset="100%" stopColor="rgb(0, 145, 255)" />
-              </linearGradient>
-              <linearGradient id="gradientUSD" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="rgb(0, 202, 169)" />
-                <stop offset="50%" stopColor="rgb(0, 191, 145)" />
-                <stop offset="100%" stopColor="rgb(0, 202, 169)" />
-              </linearGradient>
-            </defs>
-
-            <CartesianGrid strokeDasharray="3 3" />
-            {expenseLimits.map((limit, index) => {
-              const amount = Number(Number(limit.amount).toFixed(2));
-              return (
-                <ReferenceLine
-                  key={index}
-                  y={amount}
-                  label={{
-                    value: `${limit.label || `Limit ${index + 1}`} $${amount}`,
-                    position: 'top',
-                    fill: limit.color || 'red',
-                    fontSize: 12,
-                  }}
-                  stroke={limit.color || 'red'}
-                  strokeDasharray="3 3"
-                  
-                />
-              );
-            })}
-            <XAxis dataKey="day" style={{ fontSize: 12, fontWeight: 600 }} />
-            <YAxis
-              style={{ fontSize: 10, fontWeight: 600 }}
-              tickFormatter={formatShortNumber}
-              domain={
-                expenseLimits.length > 0
-                  ? [0, Math.max(...expenseLimits.map(limit => Number(Number(limit.amount).toFixed(2))))]
-                  : ['auto', 'auto']
-              }
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Line type="monotone" dataKey="ars" stroke="url(#gradientARS)" name={t('userProfile.dashboard.dailyExpenses.tooltip.expensesAmount') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
-            <Line type="monotone" dataKey="usd" name={t('userProfile.dashboard.dailyExpenses.tooltip.expensesAmount') + ' (USD)'} stroke="url(#gradientUSD)" strokeWidth={2} />
-          </LineChart>
+    <Card
+      className="custom-daily-expenses-card"
+      style={{
+        background: 'linear-gradient(135deg, #2d3748 0%, #1a202c 100%)',
+        border: 'none',
+        borderRadius: '16px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+        overflow: 'hidden',
+        transition: 'all 0.3s ease',
+      }}
+      bodyStyle={{
+        padding: '0',
+        background: 'transparent',
+      }}
+    >
+      {/* Header */}
+      <div style={{
+        padding: '24px 24px 16px 24px',
+        background: 'linear-gradient(135deg, #4a5568 0%, #2d3748 100%)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '8px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(24, 144, 255, 0.3)',
+            }}>
+              <BarChartOutlined style={{ fontSize: '20px', color: 'white' }} />
+            </div>
+            <div>
+              <h3 style={{
+                margin: 0,
+                color: 'white',
+                fontSize: '20px',
+                fontWeight: '700',
+                lineHeight: '1.2',
+              }}>
+                {t('userProfile.dashboard.dailyExpenses.title')}
+              </h3>
+              <p style={{
+                margin: 0,
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: '14px',
+                fontWeight: '500',
+              }}>
+                {currentMonth} - {t('userProfile.dashboard.dailyExpenses.subtitle')}
+              </p>
+            </div>
+          </div>
+          {stats && (
+            <div style={{
+              textAlign: 'right',
+            }}>
+              <div style={{
+                fontSize: '16px',
+                fontWeight: '700',
+                color: stats.balance >= 0 ? '#52c41a' : '#ff4d4f',
+                marginBottom: '4px',
+              }}>
+                {stats.balance >= 0 ? '+' : ''}${formatCompactNumber(Math.abs(stats.balance))}
+              </div>
+              <div style={{
+                fontSize: '12px',
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontWeight: '500',
+              }}>
+                {t('userProfile.dashboard.dailyExpenses.balance')}
+              </div>
+            </div>
+          )}
         </div>
-      ) :
-      (
-        <ResponsiveContainer width="100%" height={300}>
-          {/* DESKTOP */}
-          <LineChart ref={chartRef} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-            {/* Definimos el gradiente */}
-            <defs>
-              <linearGradient id="gradientARS" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="rgb(0, 142, 251)" />
-                <stop offset="50%" stopColor="rgb(0, 117, 209)" />
-                <stop offset="100%" stopColor="rgb(0, 145, 255)" />
-              </linearGradient>
-              <linearGradient id="gradientUSD" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="rgb(0, 202, 169)" />
-                <stop offset="50%" stopColor="rgb(0, 191, 145)" />
-                <stop offset="100%" stopColor="rgb(0, 202, 169)" />
-              </linearGradient>
-            </defs>
+      </div>
 
-            <CartesianGrid strokeDasharray="3 3" />
-            {expenseLimits.map((limit, index) => {
-              const amount = Number(Number(limit.amount).toFixed(2));
-              return (
-                <ReferenceLine
-                  key={index}
-                  y={amount}
-                  label={{
-                    value: `${limit.label || `Limit ${index + 1}`} $${amount}`,
-                    position: 'top',
-                    fill: limit.color || 'red',
-                    fontSize: 12,
-                  }}
-                  stroke={limit.color || 'red'}
-                  strokeDasharray="3 3"
-                />
-              );
-            })}
-            <XAxis dataKey="day" style={{ fontSize: 12, fontWeight: 600 }} />
-            <YAxis
-              style={{ fontSize: 12, fontWeight: 600 }}
-              tickFormatter={formatShortNumber}
-              domain={
-                expenseLimits.length > 0
-                  ? [0, Math.max(...expenseLimits.map(limit => Number(Number(limit.amount).toFixed(2))))]
-                  : ['auto', 'auto']
-              }
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Line type="monotone" dataKey="ars" stroke="url(#gradientARS)" name={t('userProfile.dashboard.dailyExpenses.tooltip.expensesAmount') + ' ($)'} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} />
-            <Line type="monotone" dataKey="usd" name={t('userProfile.dashboard.dailyExpenses.tooltip.expensesAmount') + ' (USD)'} stroke="url(#gradientUSD)" strokeWidth={2} />
-          </LineChart>
-        </ResponsiveContainer>
-      )}
+      {/* Chart Content */}
+      <div style={{ padding: '24px' }}>
+        {isMobile ? (
+          <div ref={scrollRef} style={{ overflowX: 'auto', width: '100%', paddingBottom: 12 }}>
+            {/* MOBILE */}
+            <LineChart ref={chartRef} width={chartWidth} height={300} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
+              {/* Definimos el gradiente */}
+              <defs>
+                <linearGradient id="gradientARS" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="rgb(0, 142, 251)" />
+                  <stop offset="50%" stopColor="rgb(0, 117, 209)" />
+                  <stop offset="100%" stopColor="rgb(0, 145, 255)" />
+                </linearGradient>
+                <linearGradient id="gradientUSD" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="rgb(0, 202, 169)" />
+                  <stop offset="50%" stopColor="rgb(0, 191, 145)" />
+                  <stop offset="100%" stopColor="rgb(0, 202, 169)" />
+                </linearGradient>
+              </defs>
 
-    </div>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+              {expenseLimits.map((limit, index) => {
+                const amount = Number(Number(limit.amount).toFixed(2));
+                return (
+                  <ReferenceLine
+                    key={index}
+                    y={amount}
+                    label={{
+                      value: `${limit.label || `Limit ${index + 1}`} $${amount}`,
+                      position: 'top',
+                      fill: limit.color || 'red',
+                      fontSize: 12,
+                    }}
+                    stroke={limit.color || 'red'}
+                    strokeDasharray="3 3"
+                  />
+                );
+              })}
+              <XAxis 
+                dataKey="day" 
+                style={{ fontSize: 12, fontWeight: 600, fill: 'rgba(255, 255, 255, 0.8)' }} 
+              />
+              <YAxis
+                style={{ fontSize: 10, fontWeight: 600, fill: 'rgba(255, 255, 255, 0.8)' }}
+                tickFormatter={formatCompactNumber}
+                domain={
+                  expenseLimits.length > 0
+                    ? [0, Math.max(...expenseLimits.map(limit => Number(Number(limit.amount).toFixed(2))))]
+                    : ['auto', 'auto']
+                }
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Line type="monotone" dataKey="ars" stroke="url(#gradientARS)" name={t('userProfile.dashboard.dailyExpenses.tooltip.expensesAmount') + ' ($)'} strokeWidth={3} dot={{ r: 4, fill: 'url(#gradientARS)' }} activeDot={{ r: 6, fill: 'url(#gradientARS)' }} />
+              <Line type="monotone" dataKey="usd" name={t('userProfile.dashboard.dailyExpenses.tooltip.expensesAmount') + ' (USD)'} stroke="url(#gradientUSD)" strokeWidth={3} dot={{ r: 4, fill: 'url(#gradientUSD)' }} activeDot={{ r: 6, fill: 'url(#gradientUSD)' }} />
+            </LineChart>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={300}>
+            {/* DESKTOP */}
+            <LineChart ref={chartRef} data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
+              {/* Definimos el gradiente */}
+              <defs>
+                <linearGradient id="gradientARS" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="rgb(0, 142, 251)" />
+                  <stop offset="50%" stopColor="rgb(0, 117, 209)" />
+                  <stop offset="100%" stopColor="rgb(0, 145, 255)" />
+                </linearGradient>
+                <linearGradient id="gradientUSD" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="rgb(0, 202, 169)" />
+                  <stop offset="50%" stopColor="rgb(0, 191, 145)" />
+                  <stop offset="100%" stopColor="rgb(0, 202, 169)" />
+                </linearGradient>
+              </defs>
+
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+              {expenseLimits.map((limit, index) => {
+                const amount = Number(Number(limit.amount).toFixed(2));
+                return (
+                  <ReferenceLine
+                    key={index}
+                    y={amount}
+                    label={{
+                      value: `${limit.label || `Limit ${index + 1}`} $${amount}`,
+                      position: 'top',
+                      fill: limit.color || 'red',
+                      fontSize: 12,
+                    }}
+                    stroke={limit.color || 'red'}
+                    strokeDasharray="3 3"
+                  />
+                );
+              })}
+              <XAxis 
+                dataKey="day" 
+                style={{ fontSize: 12, fontWeight: 600, fill: 'rgba(255, 255, 255, 0.8)' }} 
+              />
+              <YAxis
+                style={{ fontSize: 12, fontWeight: 600, fill: 'rgba(255, 255, 255, 0.8)' }}
+                tickFormatter={formatCompactNumber}
+                domain={
+                  expenseLimits.length > 0
+                    ? [0, Math.max(...expenseLimits.map(limit => Number(Number(limit.amount).toFixed(2))))]
+                    : ['auto', 'auto']
+                }
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Line type="monotone" dataKey="ars" stroke="url(#gradientARS)" name={t('userProfile.dashboard.dailyExpenses.tooltip.expensesAmount') + ' ($)'} strokeWidth={3} dot={{ r: 4, fill: 'url(#gradientARS)' }} activeDot={{ r: 6, fill: 'url(#gradientARS)' }} />
+              <Line type="monotone" dataKey="usd" name={t('userProfile.dashboard.dailyExpenses.tooltip.expensesAmount') + ' (USD)'} stroke="url(#gradientUSD)" strokeWidth={3} dot={{ r: 4, fill: 'url(#gradientUSD)' }} activeDot={{ r: 6, fill: 'url(#gradientUSD)' }} />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+    </Card>
   );
 };
 

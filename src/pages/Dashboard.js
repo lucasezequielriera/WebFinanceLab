@@ -225,32 +225,17 @@ const Dashboard = () => {
               {/* GRAPH + MONTHLY SUMMARY + RECENT MOVEMENTS */}
               <Row className="dashboard-chart" gutter={[16, 16]} style={{ marginTop: 0, marginBottom: 30 }}>
                 <Col xs={24} sm={24} md={24} lg={16}>
-                  <Card>
-                    <DailyExpensesChart userId={currentUser?.uid} />
-                  </Card>
-                  <Card 
-                    style={{ marginTop: 16 }}
-                    title={
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '18px', fontWeight: 'bold' }}>{t('userProfile.dashboard.monthlyTimeline.title')}</span>
-                      </div>
-                    }
-                  >
+                  <DailyExpensesChart userId={currentUser?.uid} />
+                  <div style={{ marginTop: 16 }}>
                     <MiniMonthlyTimeline
                       expensesByMonth={expensesByMonth}
                       onMonthClick={monthKey => console.log('Seleccionaste', monthKey)}
                       selectedMonth={null}
                     />
-                  </Card>
+                  </div>
                 </Col>
                 <Col xs={24} sm={24} md={24} lg={8}>
-                  <Card
-                    className="equal-height-card"
-                    style={{ marginLeft: 0, justifyContent: 'flex-start' }}
-                    id="recent-movements-card"
-                  >
-                    <RecentMovements />
-                  </Card>
+                  <RecentMovements />
                 </Col>
               </Row>
 

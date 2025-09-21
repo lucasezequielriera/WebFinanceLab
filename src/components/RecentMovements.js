@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { List, Tag, Spin, Typography } from 'antd';
+import { Card, Tag, Spin, Typography } from 'antd';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { collection, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import dayjs from 'dayjs';
-import { DollarOutlined, ArrowDownOutlined, ArrowUpOutlined, CreditCardOutlined } from '@ant-design/icons';
+import { DollarOutlined, ArrowDownOutlined, ArrowUpOutlined, CreditCardOutlined, ShoppingOutlined, HistoryOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+
+function formatCompactNumber(value) {
+  return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value);
+}
 
 const RecentMovements = () => {
   const { currentUser } = useAuth();
@@ -134,45 +138,303 @@ const RecentMovements = () => {
   }
 
   return (
-    <Spin spinning={loading}>
-      <div style={{ maxHeight: '100%', padding: 0, overflowY: 'auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <p style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>{t('userProfile.dashboard.recentMovements.title')}</p>
-          <Link to="/daily-expenses" style={{ color: '#1890ff', fontSize: 14 }}>
+    <Card 
+      loading={loading}
+      style={{ 
+        marginBottom: 0,
+        borderRadius: 20,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+        border: 'none',
+        background: 'linear-gradient(135deg, #1a202c 0%, #2d3748 100%)',
+        overflow: 'hidden',
+        position: 'relative',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        transform: 'translateY(0)',
+        cursor: 'pointer',
+        height: '100%'
+      }}
+      bodyStyle={{ 
+        padding: 0,
+        position: 'relative',
+        zIndex: 2,
+        background: 'transparent',
+        height: '100%'
+      }}
+      className="custom-recent-movements-card"
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.18)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.12)';
+      }}
+    >
+      {/* Decorative background element */}
+      <div style={{
+        position: 'absolute',
+        top: -30,
+        right: -30,
+        width: 100,
+        height: 100,
+        background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+        borderRadius: '50%',
+        zIndex: 1,
+        opacity: 0.1
+      }} />
+      
+      {/* Content container with padding */}
+      <div style={{ 
+        padding: '32px 28px 24px 28px',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+        {/* Header section with icon */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 24
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12
+          }}>
+            <div style={{
+              width: 48,
+              height: 48,
+              borderRadius: 14,
+              background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 16px rgba(59, 130, 246, 0.3)'
+            }}>
+              <HistoryOutlined style={{ 
+                color: 'white', 
+                fontSize: '20px' 
+              }} />
+            </div>
+            <div>
+              <h3 style={{
+                color: '#e2e8f0',
+                fontSize: '16px',
+                fontWeight: 600,
+                margin: 0,
+                marginBottom: 4
+              }}>
+                {t('userProfile.dashboard.recentMovements.title')}
+              </h3>
+              <p style={{
+                color: '#94a3b8',
+                fontSize: '12px',
+                margin: 0
+              }}>
+                Últimos movimientos
+              </p>
+            </div>
+          </div>
+          <Link 
+            to="/daily-expenses" 
+            style={{ 
+              color: '#3b82f6', 
+              fontSize: '14px',
+              fontWeight: '500',
+              textDecoration: 'none',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              background: 'rgba(59, 130, 246, 0.1)',
+              border: '1px solid rgba(59, 130, 246, 0.2)',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(59, 130, 246, 0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'rgba(59, 130, 246, 0.1)';
+            }}
+          >
             {t('userProfile.dashboard.recentMovements.viewAll')}
           </Link>
         </div>
-        {days.map(day => (
-          <div key={day}>
-            <Title level={5} style={{ margin: '12px 0 4px 0', color: '#888', fontWeight: 600, fontSize: 15 }}>{getDayLabel(day)}</Title>
-            <List
-              itemLayout="horizontal"
-              dataSource={grouped[day]}
-              renderItem={item => (
-                <List.Item>
-                  <List.Item.Meta
-                    avatar={
-                      item.type === t('userProfile.dashboard.recentMovements.movementType.income') ? <ArrowDownOutlined style={{ color: 'rgb(0, 163, 137)', fontSize: 18 }} />
-                      : item.type === t('userProfile.dashboard.recentMovements.movementType.fixedPayment') ? <CreditCardOutlined style={{ color: '#0071de', fontSize: 18 }} />
-                      : <ArrowUpOutlined style={{ color: item.type === t('userProfile.dashboard.recentMovements.movementType.fixedExpense') ? '#faad14' : 'rgb(207, 0, 0)', fontSize: 18 }} />
-                    }
-                    title={<span>{item.type} <Tag style={{ marginLeft: 5 }} color={item.type === t('userProfile.dashboard.recentMovements.movementType.income') ? 'green' : 'red'}>{item.currency}</Tag></span>}
-                    description={<span>{item.description || <i>{t('userProfile.dashboard.recentMovements.noMovements')}</i>}</span>}
-                  />
-                  <div style={{ minWidth: 90, textAlign: 'right' }}>
-                    <b style={{ color: item.type === t('userProfile.dashboard.recentMovements.movementType.income') ? 'rgb(0, 163, 137)' : item.type === t('userProfile.dashboard.recentMovements.movementType.fixedPayment') ? '#0071de' : item.type === t('userProfile.dashboard.recentMovements.movementType.fixedExpense') ? '#faad14' : 'rgb(207, 0, 0)' }}>
-                      {item.type === t('userProfile.dashboard.recentMovements.movementType.income') ? '+' : '-'}${item.amount.toFixed(2)}
-                    </b>
-                    <div style={{ fontSize: 12, color: '#888' }}>{item.date.format('HH:mm')}</div>
-                  </div>
-                </List.Item>
-              )}
-            />
-          </div>
-        ))}
+
+        {/* Movements list */}
+        <div style={{ 
+          flex: 1,
+          overflowY: 'auto',
+          paddingRight: '8px'
+        }}>
+          {days.map(day => (
+            <div key={day} style={{ marginBottom: '24px' }}>
+              <div style={{
+                color: '#94a3b8',
+                fontSize: '12px',
+                fontWeight: 600,
+                marginBottom: '12px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                padding: '8px 12px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}>
+                {getDayLabel(day)}
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {grouped[day].map((item, index) => {
+                  const isIncome = item.type === t('userProfile.dashboard.recentMovements.movementType.income');
+                  const isFixedPayment = item.type === t('userProfile.dashboard.recentMovements.movementType.fixedPayment');
+                  const isFixedExpense = item.type === t('userProfile.dashboard.recentMovements.movementType.fixedExpense');
+                  
+                  let iconColor = '#ef4444';
+                  let iconBg = 'rgba(239, 68, 68, 0.1)';
+                  let iconBorder = 'rgba(239, 68, 68, 0.2)';
+                  let IconComponent = ArrowUpOutlined;
+                  
+                  if (isIncome) {
+                    iconColor = '#10b981';
+                    iconBg = 'rgba(16, 185, 129, 0.1)';
+                    iconBorder = 'rgba(16, 185, 129, 0.2)';
+                    IconComponent = ArrowDownOutlined;
+                  } else if (isFixedPayment) {
+                    iconColor = '#3b82f6';
+                    iconBg = 'rgba(59, 130, 246, 0.1)';
+                    iconBorder = 'rgba(59, 130, 246, 0.2)';
+                    IconComponent = CreditCardOutlined;
+                  } else if (isFixedExpense) {
+                    iconColor = '#f59e0b';
+                    iconBg = 'rgba(245, 158, 11, 0.1)';
+                    iconBorder = 'rgba(245, 158, 11, 0.2)';
+                    IconComponent = CreditCardOutlined;
+                  } else {
+                    IconComponent = ShoppingOutlined;
+                  }
+
+                  return (
+                    <div
+                      key={index}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '12px 16px',
+                        background: iconBg,
+                        borderRadius: '12px',
+                        border: `1px solid ${iconBorder}`,
+                        transition: 'all 0.2s ease',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = iconBg.replace('0.1', '0.2');
+                        e.currentTarget.style.transform = 'translateX(4px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = iconBg;
+                        e.currentTarget.style.transform = 'translateX(0)';
+                      }}
+                    >
+                      <div style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 10,
+                        background: `linear-gradient(135deg, ${iconColor}, ${iconColor}dd)`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginRight: 12,
+                        boxShadow: `0 2px 8px ${iconColor}40`
+                      }}>
+                        <IconComponent style={{ 
+                          color: 'white', 
+                          fontSize: '16px' 
+                        }} />
+                      </div>
+                      
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          marginBottom: 4
+                        }}>
+                          <span style={{
+                            color: '#e2e8f0',
+                            fontSize: '13px',
+                            fontWeight: 600
+                          }}>
+                            {item.type}
+                          </span>
+                          <Tag 
+                            style={{ 
+                              margin: 0,
+                              fontSize: '10px',
+                              fontWeight: '600',
+                              borderRadius: '4px',
+                              border: 'none'
+                            }} 
+                            color={isIncome ? 'green' : 'red'}
+                          >
+                            {item.currency}
+                          </Tag>
+                        </div>
+                        <div style={{
+                          color: '#94a3b8',
+                          fontSize: '12px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {item.description || <i>{t('userProfile.dashboard.recentMovements.noMovements')}</i>}
+                        </div>
+                      </div>
+                      
+                      <div style={{ 
+                        textAlign: 'right',
+                        minWidth: 80
+                      }}>
+                        <div style={{
+                          color: iconColor,
+                          fontSize: '14px',
+                          fontWeight: 700,
+                          marginBottom: 2
+                        }}>
+                          {isIncome ? '+' : '-'}${formatCompactNumber(item.amount)}
+                        </div>
+                        <div style={{ 
+                          fontSize: '11px', 
+                          color: '#94a3b8',
+                          fontWeight: '500'
+                        }}>
+                          {item.date.format('HH:mm')}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </Spin>
+    </Card>
   );
 };
 
-export default RecentMovements; 
+export default RecentMovements;
+
+// Inject custom CSS to ensure transparent background
+const style = document.createElement('style');
+style.textContent = `
+  .custom-recent-movements-card .ant-card {
+    background: transparent !important;
+  }
+  .custom-recent-movements-card .ant-card-body {
+    background: transparent !important;
+  }
+  .custom-recent-movements-card .ant-card-content {
+    background: transparent !important;
+  }
+`;
+document.head.appendChild(style); 
