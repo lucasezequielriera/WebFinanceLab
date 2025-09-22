@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-import { Form, Layout, Menu, Tag, Modal, Button, notification, Space, DatePicker, Input, Col, Row } from 'antd';
-import { UserOutlined, DashboardOutlined, LogoutOutlined, MenuUnfoldOutlined, MenuFoldOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined, AlertOutlined, PlusOutlined, DollarOutlined, RiseOutlined, FallOutlined, FileTextOutlined, StockOutlined, SettingOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useCallback } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Form, Layout, Modal, Button, notification, Space, DatePicker, Input, Col, Row } from 'antd';
+import { UserOutlined, DashboardOutlined, LogoutOutlined, LoginOutlined, CreditCardOutlined, FlagOutlined, InfoCircleOutlined, DollarOutlined, RiseOutlined, FallOutlined, FileTextOutlined, StockOutlined, SettingOutlined, PlusOutlined } from '@ant-design/icons';
+import CustomDatePicker from './components/CustomDatePicker';
 import Dashboard from './pages/Dashboard';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -28,8 +29,6 @@ import './index.css';
 import './App.css';
 import Admin from './pages/Admin';
 import AdminRoute from './components/AdminRoute';
-import Tasks from './pages/Tasks';
-import Users from './pages/Users';
 import Configuration from './pages/Configuration';
 import DashboardConfig from './pages/DashboardConfig';
 import ProfileConfig from './pages/ProfileConfig';
@@ -43,28 +42,20 @@ import Legal from './pages/Legal';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { DashboardConfigProvider } from './contexts/DashboardConfigContext';
 import PublicRoute from './components/PublicRoute';
+import { Dropdown } from 'antd';
 
 const { Title, Paragraph } = Typography;
-const { Header, Sider, Content } = Layout;
+const { Header, Content } = Layout;
 
-const RedirectIfAuthenticated = ({ children }) => {
-  const { currentUser } = useAuth();
-  
-  if (currentUser) {
-    return <Navigate to="/dashboard" />;
-  }
-  return children;
-};
 
 const AppLayout = ({ children }) => {
   const {currentUser, logout } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [expenses, setExpenses] = useState([]);
-  const [selectedKey, setSelectedKey] = useState('1');
   const [userData, setUserData] = useState();
   const [actionsVisible, setActionsVisible] = useState(false);
   const [incomeModalVisible, setIncomeModalVisible] = useState(false);
+  const [actionModalVisible, setActionModalVisible] = useState(false);
+  const [selectedActionIndex, setSelectedActionIndex] = useState(0);
 
   const [incomeForm] = Form.useForm();
 
@@ -74,6 +65,59 @@ const AppLayout = ({ children }) => {
   const navigate = useNavigate();
 
   const { t } = useTranslation();
+
+  // Hooks for keyboard navigation
+  const openExpense = useCallback(() => {
+    setActionModalVisible(false);
+    setIsModalVisible(true);
+  }, []);
+
+  const openIncome = useCallback(() => {
+    setActionModalVisible(false);
+    setIncomeModalVisible(true);
+    incomeForm.setFieldsValue({ date: dayjs() });
+  }, [incomeForm]);
+
+  const openActionModal = useCallback(() => {
+    setActionModalVisible(true);
+    setSelectedActionIndex(0); // Reset selection when opening
+  }, []);
+
+  const handleKeyDown = useCallback((event) => {
+    if (!actionModalVisible) return;
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        setSelectedActionIndex(prev => (prev + 1) % 2);
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        setSelectedActionIndex(prev => (prev - 1 + 2) % 2);
+        break;
+      case 'Enter':
+        event.preventDefault();
+        if (selectedActionIndex === 0) {
+          openIncome();
+        } else {
+          openExpense();
+        }
+        break;
+      case 'Escape':
+        event.preventDefault();
+        setActionModalVisible(false);
+        break;
+      default:
+        break;
+    }
+  }, [actionModalVisible, selectedActionIndex, openIncome, openExpense]);
+
+  useEffect(() => {
+    if (actionModalVisible && !isMobile) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [actionModalVisible, handleKeyDown, isMobile]);
 
   useEffect(() => {
     const path = location.pathname;
@@ -95,36 +139,6 @@ const AppLayout = ({ children }) => {
     };
 
     console.log('Current path:', path);
-    if (path.startsWith('/dashboard')) {
-      setSelectedKey('1');
-    } else if (path.startsWith('/incomes')) {
-      setSelectedKey('8');
-    } else if (path.startsWith('/fixed-expenses')) {
-      setSelectedKey('5');
-    } else if (path.startsWith('/summary')) {
-      setSelectedKey('12');
-    } else if (path.startsWith('/daily-expenses')) {
-      setSelectedKey('9');
-    } else if (path.startsWith('/general-expenses')) {
-      setSelectedKey('10');
-    } else if (path.startsWith('/debts')) {
-      setSelectedKey('13');
-    } else if (path.startsWith('/profile')) {
-      setSelectedKey('2');
-    } else if (path.startsWith('/financial-goals')) {
-      setSelectedKey('7');
-    } else if (path.startsWith('/configuration')) {
-      console.log('Configuration route detected, setting key to 15');
-      setSelectedKey('15');
-    } else if (path.startsWith('/about-us')) {
-      setSelectedKey('6');
-    } else if (path.startsWith('/signup')) {
-      setSelectedKey('signup');
-    } else if (path.startsWith('/login')) {
-      setSelectedKey('login');
-    } else {
-      setSelectedKey('');
-    }
   
     fetchUserData();
   
@@ -138,9 +152,6 @@ const AppLayout = ({ children }) => {
     return <Landing />;
   }
 
-  const toggle = () => {
-    setCollapsed(!collapsed);
-  };
 
   const handleLogout = async () => {
     try {
@@ -151,25 +162,12 @@ const AppLayout = ({ children }) => {
     }
   };
 
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
 
   const handleCancel = () => {
     setIsModalVisible(false);
   };
 
-  const handleExpenseAdded = (newExpense) => {
-    setExpenses((prevExpenses) => {
-      const updatedExpenses = [...prevExpenses, newExpense];
-      const uniqueExpenses = updatedExpenses.reduce((acc, expense) => {
-        if (!acc.find(e => e.id === expense.id)) {
-          acc.push(expense);
-        }
-        return acc;
-      }, []);
-      return uniqueExpenses;
-    });
+  const handleExpenseAdded = () => {
     setIsModalVisible(false);
   };
 
@@ -223,15 +221,11 @@ const AppLayout = ({ children }) => {
       icon: <SettingOutlined />,
       label: <Link to="/configuration">Configuración</Link>
     },
-    {
-      key: '2',
-      icon: <UserOutlined />,
-      label: <Link to="/profile">{t('userProfile.navbar.profile')}</Link>
-    },
+    { type: 'divider' },
     {
       key: '4',
       icon: <LogoutOutlined />,
-      label: t('userProfile.navbar.logout'),
+      label: <span style={{ color: '#69c0ff', fontWeight: 700 }}>{t('userProfile.navbar.logout')}</span>,
       onClick: handleLogout
     }
   ] : [
@@ -265,20 +259,6 @@ const AppLayout = ({ children }) => {
 
   const filteredMenuItems = menuItems.filter(item => !item.hidden);
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/forgot-password';
-
-  const closeActions = () => setActionsVisible(false);
-  const toggleActions = () => setActionsVisible(v => !v);
-
-  const openExpense = () => {
-    closeActions();
-    setIsModalVisible(true);
-  };
-  
-  const openIncome = () => {
-    closeActions();
-    setIncomeModalVisible(true);
-    incomeForm.setFieldsValue({ date: dayjs() });
-  };
   
   const handleIncomeSubmit = async (values) => {
     try {
@@ -303,101 +283,92 @@ const AppLayout = ({ children }) => {
 
   return (
     <Layout className="main-container" style={{ minHeight: '100vh' }}>
-      <Sider className="desktop-sider" trigger={null} collapsible collapsed={collapsed} breakpoint="md" collapsedWidth="0">
-        {/* APP LOGO NAVBAR DESKTOP */}
-        <div className="user-greeting" style={{ display: 'flex', color: 'white', padding: '10px', textAlign: 'center' }}>
-          <img src={logo} alt="#" style={{ width: 60 }}/>
-          <Title level={3} style={{ display: 'grid', margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center' }}>
-            {currentUser ? (
-              userData?.user_access_level === 0 ? (
-                <Link to="/admin" style={{ color: 'white' }}>
-                  Web
-                  FinanceLab
-                </Link>
-              ) : (
-                <Link to="/dashboard" style={{ color: 'white' }}>
-                  Web
-                  FinanceLab
-                </Link>
-              )
-            ) : (
-              <span style={{ color: 'white' }}>
-                Web
-                FinanceLab
-              </span>
-            )}
-          </Title>
-        </div>
-
-        {/* LOGUED VERTICAL NAVBAR */}
-        <Menu theme="dark" mode="inline" selectedKeys={[selectedKey]} items={filteredMenuItems} />
-
-        {/* IF I'M LOGUED */}
-        {currentUser && (
-          <div className="sidebar-tags">
-            <Tag color="red" className="sidebar-tag" onClick={showModal} style={{ fontSize: 14, color: 'white', fontWeight: 500,
-              background: 'linear-gradient(90deg, rgb(0, 163, 137), rgb(0, 191, 145))', border: '1px solid white !important', borderColor: '#344e6d', textShadow: '0 0 16px black', marginBottom: 10 }}>
-              {t('userProfile.navbar.addExpense')}
-            </Tag>
-            <Tag color="green" className="sidebar-tag" onClick={() => {
-                setActionsVisible(false);
-                openIncome();
-              }} style={{ fontSize: 14, color: 'white', fontWeight: 500, background: 'transparent',
-              border: '1px solid white !important', textShadow: '0 0 16px black', borderColor: '#344e6d', marginBottom: 10 }}>
-              {t('userProfile.navbar.addIncome')}
-            </Tag>
-            <span style={{ color: 'grey', textAlign: 'center', fontSize: 12, marginTop: 10 }}>Version 1.0.2</span>
-          </div>
-        )}
-      </Sider>
+      {/* Sin Sider: navegación arriba */}
 
       <Layout className="site-layout">
-        <Header className="site-layout-background" style={{ padding: 0 }}>
-          {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
-            className: 'trigger',
-            onClick: toggle,
-          })}
-        </Header>
+        {!isMobile && (
+          <Header className="site-layout-background" style={{ padding: 0 }}>
+            <div className="app-header-content">
+              <div className="app-header-left">
+                <img src={logo} alt="#" style={{ width: 50, marginRight: 0 }}/>
+                <Title level={3} style={{ display: 'grid', margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center', whiteSpace: 'nowrap' }}>
+                  {currentUser ? (
+                    userData?.user_access_level === 0 ? (
+                      <Link to="/admin" style={{ color: 'white' }}>WebFinanceLab</Link>
+                    ) : (
+                      <Link to="/dashboard" style={{ color: 'white' }}>WebFinanceLab</Link>
+                    )
+                  ) : (
+                    <span style={{ color: 'white' }}>WebFinanceLab</span>
+                  )}
+                </Title>
+              </div>
+              <div className="app-header-center">
+                <span className="app-header-page-title">{getPageTitle()}</span>
+              </div>
+              <div className="app-header-right">
+                {/* Action Button */}
+                <Button
+                  className="action-btn add-action-btn"
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={openActionModal}
+                  size="middle"
+                  shape="circle"
+                />
+                
+                <Dropdown
+                  placement="bottomRight"
+                  trigger={["click"]}
+                  menu={{ items: filteredMenuItems, className: 'app-nav-dropdown-menu' }}
+                  overlayClassName="app-nav-dropdown"
+                >
+                  <div style={{ cursor: 'pointer' }}>
+                    <AccountTypeBadge type={userData?.user_access_level === 0 ? 'admin'
+                      : userData?.user_access_level === 2 ? 'premium'
+                      : userData?.user_access_level === 3 ? 'gold'
+                      : 'free'} />
+                  </div>
+                </Dropdown>
+              </div>
+            </div>
+          </Header>
+        )}
 
-        <Content style={{ padding: 0, background: isAuthPage ? 'linear-gradient(135deg, #001123, #4094e9)' : 'transparent', maxHeight: '100vh', paddingBottom: 50 }}>
-          { !isAuthPage &&
+        <Content style={{ padding: 0, background: isAuthPage ? 'linear-gradient(135deg, #001123, #4094e9)' : 'transparent', paddingBottom: 50 }}>
+          { !isAuthPage && isMobile && (
           <div className="mobile-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 80, background: 'linear-gradient(90deg, rgb(0 68 121), rgb(0 163 137), rgb(0, 191, 145))', padding: '0px 20px' }}>
             <span style={{ fontSize: '20px', fontWeight: 500, color: 'white', display: 'flex', alignItems: 'center' }}>
               { isMobile ?
                 <div className="user-greeting" style={{ display: 'flex', color: 'white', textAlign: 'center', marginLeft: "-10px" }}>
                   <img src={logo} alt="#" style={{ width: 60 }}/>
-                  <Title level={3} style={{ display: 'grid', margin: 0, fontSize: 20, lineHeight: '18px', textAlign: 'left', alignContent: 'center', width: 110 }}>
-                    {currentUser ? (
-                      userData?.user_access_level === 0 ? (
-                        <Link to="/admin" style={{ color: 'white' }}>
-                          Web
-                          FinanceLab
-                        </Link>
-                      ) : (
-                        <Link to="/dashboard" style={{ color: 'white' }}>
-                          Web
-                          FinanceLab
-                        </Link>
-                      )
-                    ) : (
-                      <span style={{ color: 'white' }}>
-                        Web
-                        FinanceLab
-                      </span>
-                    )}
-                  </Title>
                 </div> :
                 <span style={{ display: 'flex', alignItems: 'center' }}>{getPageTitle()}</span>
               }
             </span>
 
-            <AccountTypeBadge type={userData?.user_access_level === 0 ? 'admin'
-            : userData?.user_access_level === 2 ? 'premium'
-            : userData?.user_access_level === 3 ? 'gold'
-            : 'free'} />
-          </div> }
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AccountTypeBadge type={userData?.user_access_level === 0 ? 'admin'
+              : userData?.user_access_level === 2 ? 'premium'
+              : userData?.user_access_level === 3 ? 'gold'
+              : 'free'} />
+            </div>
+          </div> )}
 
           {children}
+
+          {/* Mobile Floating Action Button */}
+          {currentUser && isMobile && (
+            <div className="mobile-fab-container">
+              <Button
+                className="mobile-fab-button"
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={openActionModal}
+                shape="circle"
+              />
+            </div>
+          )}
 
           {actionsVisible && (
             <Space>
@@ -409,7 +380,14 @@ const AppLayout = ({ children }) => {
           )}
         </Content>
 
-        <Modal open={isModalVisible} onCancel={handleCancel} footer={null}>
+        <Modal 
+          className="add-expense-modal"
+          open={isModalVisible} 
+          onCancel={handleCancel} 
+          footer={null}
+          centered
+          width={480}
+        >
           <AddExpense onExpenseAdded={handleExpenseAdded} />
         </Modal>
 
@@ -428,99 +406,172 @@ const AppLayout = ({ children }) => {
           onClick={() => setActionsVisible(false)}
         />
 
-        {currentUser && isMobile && (
-          <div className={`fab-container ${actionsVisible ? 'open' : ''}`}>
-            <div className="fab-main" onClick={toggleActions}>
-              <PlusOutlined />
-            </div>
-            <Button
-              className="fab-action expense"
-              type="primary"
-              icon={<RiseOutlined style={{ fontSize: 18 }}/>}
-              onClick={() => {
-                setActionsVisible(false);
-                openIncome();
-              }}
-              style={{ width: 100 }}
-            > Ingreso</Button>
-            <Button
-              className="fab-action income"
-              type="primary"
-              shape="circle"
-              icon={<FallOutlined />}
-              onClick={() => {
-                setActionsVisible(false);
-                openExpense()
-              }}
-            > Gasto</Button>
-          </div>
-        )}
 
-        <Modal className="add-expense-modal"
+        <Modal 
+          className="add-income-modal"
           open={incomeModalVisible}
           onCancel={() => setIncomeModalVisible(false)}
           footer={null}
+          centered
+          width={480}
         >
-          <Title level={3} style={{ textAlign: 'center', marginBottom: 8 }}>
-            {t('userProfile.addNewIncome.title')}
-          </Title>
-          <Paragraph type="secondary" style={{ textAlign: 'center', marginBottom: 24 }}>
-            {t('userProfile.addNewIncome.subtitle')}
-          </Paragraph>
+          <div className="income-modal-content">
+            <div className="modal-header">
+              <div className="modal-icon-container income-icon">
+                <RiseOutlined />
+              </div>
+              <div className="modal-title-section">
+                <Title level={3} className="modal-title">
+                  {t('userProfile.addNewIncome.title')}
+                </Title>
+                <Paragraph className="modal-subtitle">
+                  {t('userProfile.addNewIncome.subtitle')}
+                </Paragraph>
+              </div>
+            </div>
 
-          <Form
-            form={incomeForm}
-            layout="vertical"
-            onFinish={handleIncomeSubmit}
-            initialValues={{ date: dayjs(), currency: 'USD' }}
-          >
-            <Form.Item
-              name="date"
-              label={t('userProfile.addNewIncome.date') || "Fecha"}
-              rules={[{ required: true, message: t('userProfile.addNewIncome.errorMessages') || "Seleccione una fecha" }]}
+            <Form
+              form={incomeForm}
+              layout="vertical"
+              onFinish={handleIncomeSubmit}
+              initialValues={{ date: dayjs(), currency: 'USD' }}
+              className="income-form"
             >
-              <DatePicker style={{ width: '100%' }}
-                format={(val) =>
-                  dayjs().isSame(val, 'day')
-                    ? t('userProfile.addNewExpense.defaultDataInputDate')
-                    : val.format('DD/MM/YYYY')
-                } />
-            </Form.Item>
+              <Form.Item
+                name="date"
+                label={t('userProfile.addNewIncome.date') || "Fecha"}
+                rules={[{ required: true, message: t('userProfile.addNewIncome.errorMessages') || "Seleccione una fecha" }]}
+                className="form-item-modern"
+              >
+                <CustomDatePicker
+                  value={incomeForm.getFieldValue('date')}
+                  onChange={(date) => incomeForm.setFieldsValue({ date })}
+                  placeholder={t('userProfile.addNewIncome.date') || "Seleccionar fecha"}
+                />
+              </Form.Item>
 
-            <Form.Item
-              name="title"
-              label={t('userProfile.addNewIncome.description') || "Título"}
-              rules={[{ required: true, message: t('userProfile.addNewIncome.errorMessages.descriptionRequired') }]}
-            >
-              <Input prefix={<FileTextOutlined />} placeholder={'Salary'} />
-            </Form.Item>
+              <Form.Item
+                name="title"
+                label={t('userProfile.addNewIncome.description') || "Título"}
+                rules={[{ required: true, message: t('userProfile.addNewIncome.errorMessages.descriptionRequired') }]}
+                className="form-item-modern"
+              >
+                <Input 
+                  className="modern-input"
+                  prefix={<FileTextOutlined className="input-icon" />} 
+                />
+              </Form.Item>
+              
+              <Row gutter={[16, 16]}>
+                <Col xs={12}>
+                  <Form.Item
+                    name="amount"
+                    label={t('userProfile.addNewIncome.amount') || "Monto"}
+                    rules={[{ required: true, message: t('userProfile.addNewIncome.errorMessages.amountRequired') }]}
+                    className="form-item-modern"
+                  >
+                    <Input
+                      className="modern-input"
+                      type="number"
+                      prefix={<DollarOutlined className="input-icon" />}
+                    />
+                  </Form.Item>
+                </Col>
+
+                <Col xs={12}>
+                  <Form.Item 
+                    name="currency" 
+                    label={t('userProfile.addNewIncome.currency') || "Moneda"} 
+                    rules={[{ required: true, message: t('userProfile.addNewIncome.errorMessages.currencyRequired') }]}
+                    className="form-item-modern"
+                  >
+                    <CurrencyTagPicker />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Button 
+                className="modern-submit-btn income-submit"
+                type="primary" 
+                htmlType="submit" 
+                size="large" 
+                block
+              >
+                <RiseOutlined />
+                {t('userProfile.addNewIncome.saveButton')}
+              </Button>
+            </Form>
+          </div>
+        </Modal>
+
+        {/* Action Selection Modal */}
+        <Modal
+          open={actionModalVisible}
+          onCancel={() => setActionModalVisible(false)}
+          footer={null}
+          className="action-selection-modal"
+          centered
+        >
+          <div className="action-modal-content">
+            <Title level={3} style={{ textAlign: 'center', marginBottom: 24, color: 'white' }}>
+              {t('userProfile.navbar.addAction.title') || 'Agregar Nuevo'}
+            </Title>
+            <Paragraph type="secondary" style={{ textAlign: 'center', marginBottom: 16, color: 'rgba(255,255,255,0.7)' }}>
+              {t('userProfile.navbar.addAction.subtitle') || 'Selecciona qué quieres agregar'}
+            </Paragraph>
+            {!isMobile && (
+              <div style={{ 
+                textAlign: 'center', 
+                marginBottom: 32, 
+                padding: '8px 16px', 
+                background: 'rgba(255,255,255,0.05)', 
+                borderRadius: '8px',
+                border: '1px solid rgba(255,255,255,0.1)',
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.6)'
+              }}>
+                💡 Usa ↑↓ para navegar • Enter para seleccionar • Esc para cerrar
+              </div>
+            )}
             
-            <Row gutter={[16, 16]}>
-              <Col xs={12} style={{ display: 'flex', alignItems: 'center' }}>
-                <Form.Item
-                  name="amount"
-                  label={t('userProfile.addNewIncome.amount') || "Monto"}
-                  rules={[{ required: true, message: t('userProfile.addNewIncome.errorMessages.amountRequired') }]}
-                >
-                  <Input
-                    type="number"
-                    prefix={<DollarOutlined />}
-                    placeholder={'125.50'}
-                  />
-                </Form.Item>
-              </Col>
-
-              <Col span={12}>
-                <Form.Item name="currency" label={t('userProfile.addNewIncome.currency') || "Moneda"} rules={[{ required: true, message: t('userProfile.addNewIncome.errorMessages.currencyRequired') }]}>
-                  <CurrencyTagPicker />
-                </Form.Item>
-              </Col>
-            </Row>
-
-            <Button type="primary" htmlType="submit" size="large" block style={{ marginTop: 10 }}>
-              {t('userProfile.addNewIncome.saveButton')}
-            </Button>
-          </Form>
+            <div className="action-options">
+              <Button
+                className={`action-option-btn income-option ${selectedActionIndex === 0 ? 'selected' : ''}`}
+                type="primary"
+                icon={<RiseOutlined />}
+                onClick={openIncome}
+                size="large"
+                block
+              >
+                <div className="action-option-content">
+                  <div className="action-option-title">
+                    {t('userProfile.navbar.addIncome')}
+                  </div>
+                  <div className="action-option-subtitle">
+                    {t('userProfile.navbar.addAction.incomeDescription') || 'Registrar un ingreso'}
+                  </div>
+                </div>
+              </Button>
+              
+              <Button
+                className={`action-option-btn expense-option ${selectedActionIndex === 1 ? 'selected' : ''}`}
+                type="primary"
+                icon={<FallOutlined />}
+                onClick={openExpense}
+                size="large"
+                block
+              >
+                <div className="action-option-content">
+                  <div className="action-option-title">
+                    {t('userProfile.navbar.addExpense')}
+                  </div>
+                  <div className="action-option-subtitle">
+                    {t('userProfile.navbar.addAction.expenseDescription') || 'Registrar un gasto'}
+                  </div>
+                </div>
+              </Button>
+            </div>
+          </div>
         </Modal>
       </Layout>
     </Layout>

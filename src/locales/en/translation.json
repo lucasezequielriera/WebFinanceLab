@@ -195,6 +195,12 @@
     "userProfile.navbar.addExpense": "Add Expense",
     "userProfile.navbar.addTarget": "Add Target",
     "userProfile.navbar.addStock": "Add Stock",
+    "userProfile.navbar.addAction": {
+        "title": "Add New",
+        "subtitle": "Select what you want to add",
+        "incomeDescription": "Record an income",
+        "expenseDescription": "Record an expense"
+    },
 
     "userProfile.financialGoals.title": "Financial Goals",
     "userProfile.financialGoals.subtitle": "You can check your financial goals here and configure everything.",

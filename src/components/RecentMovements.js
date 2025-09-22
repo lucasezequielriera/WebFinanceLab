@@ -266,7 +266,7 @@ const RecentMovements = () => {
           overflowY: 'auto',
           paddingRight: '8px'
         }}>
-          {days.map(day => (
+        {days.map(day => (
             <div key={day} style={{ marginBottom: '24px' }}>
               <div style={{
                 color: '#94a3b8',
@@ -413,16 +413,16 @@ const RecentMovements = () => {
                     </div>
                   );
                 })}
-              </div>
-            </div>
-          ))}
+                  </div>
+          </div>
+        ))}
         </div>
       </div>
     </Card>
   );
 };
 
-export default RecentMovements;
+export default RecentMovements; 
 
 // Inject custom CSS to ensure transparent background
 const style = document.createElement('style');

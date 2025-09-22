@@ -3,7 +3,8 @@ body {
   font-family: 'system-ui';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  max-height: 100vh;
+  /* Evitar scroll global para mantener visible el menú lateral */
+  overflow: hidden;
 }
 
 code {
@@ -14,9 +15,17 @@ code {
 
 .container-page {
   padding: 10px 20px;
+  /* Alto visible = viewport - header interno (80px) */
   height: calc(100vh - 80px);
-  max-height: calc(100vh - 120px);
-  overflow-y: scroll;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Mobile padding for FAB */
+@media (max-width: 768px) {
+  .container-page {
+    padding-bottom: 100px; /* Espacio para el botón flotante */
+  }
 }
 
 /* Dashboard */
@@ -143,22 +152,60 @@ code {
   margin: 16px;
 }
 
+/* Header principal - estilo moderno y sticky */
 .site-layout-background {
-  background: #fff;
-  display: none;
+  background: linear-gradient(135deg, #0f1c2e 0%, #1a2840 40%, #0f263a 100%);
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.app-header-content {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.app-header-left,
+.app-header-right {
+  display: flex;
+  align-items: center; /* Centrado vertical */
+  gap: 12px;
+}
+
+.app-header-left {
+  gap: 5px;
+}
+
+.app-header-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* evita capturar clics del centro */
+}
+.app-header-center .app-header-page-title {
+  color: #e6f7ff;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.3px;
+}
+
+/* Trigger icon */
 .trigger {
-  padding: 0 24px;
+  padding: 0 16px;
   font-size: 18px;
   line-height: 64px;
   cursor: pointer;
+  color: #e6f7ff;
   transition: color 0.3s;
 }
-
-.trigger:hover {
-  color: #1890ff;
-}
+.trigger:hover { color: #40a9ff; }
 
 /* DASHBOARD*/
 
@@ -209,11 +256,210 @@ code {
   justify-content: center;
 }
 
+/* Ajuste para que el contenido del menú lateral no quede oculto */
+.ant-layout-sider-children {
+  padding-bottom: 120px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  height: 100%;
+}
+
+/* Sider: ocupar todo el viewport y permitir scroll interno, sin desplazarse hacia abajo */
+.ant-layout-sider {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Sider moderno */
+.ant-layout-sider {
+  background: linear-gradient(135deg, #0f1c2e 0%, #1a2840 40%, #0f263a 100%);
+  box-shadow: 6px 0 24px rgba(0,0,0,0.35);
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Menú lateral */
+:where(.ant-menu-dark).ant-menu-root {
+  background: transparent;
+}
+
+.ant-menu-dark .ant-menu-item {
+  margin: 6px 12px;
+  border-radius: 10px;
+  height: 40px;
+  line-height: 40px;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ant-menu-dark .ant-menu-item a,
+.ant-menu-dark .ant-menu-item .ant-menu-title-content {
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.ant-menu-dark .ant-menu-item:hover {
+  background: rgba(24, 144, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(24,144,255,0.25);
+}
+
+.ant-menu-dark .ant-menu-item-selected {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  box-shadow: 0 6px 16px rgba(24,144,255,0.35);
+}
+
+.ant-menu-dark .ant-menu-item-selected a,
+.ant-menu-dark .ant-menu-item-selected .ant-menu-title-content {
+  color: #ffffff !important;
+}
+
+/* Iconos del menú */
+.ant-menu-dark .ant-menu-item .anticon {
+  color: #69c0ff;
+}
+.ant-menu-dark .ant-menu-item-selected .anticon {
+  color: #ffffff;
+}
+
+/* Footer de acciones en el sider */
+.sidebar-tags .sidebar-tag {
+  background: rgba(255,255,255,0.04) !important;
+  color: #e6f7ff !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+}
+.sidebar-tags .sidebar-tag:hover {
+  background: rgba(24,144,255,0.16) !important;
+  border-color: rgba(24,144,255,0.45) !important;
+}
+
+/* Unificar estilo de SubMenu (ej: Gastos) con los items */
+.ant-menu-dark .ant-menu-submenu-title {
+  margin: 6px 12px;
+  border-radius: 10px;
+  height: 40px;
+  line-height: 40px;
+  padding-inline: 12px !important;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ant-menu-dark .ant-menu-submenu-title:hover {
+  background: rgba(24, 144, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(24,144,255,0.25);
+}
+
+/* Icono flecha del submenu */
+.ant-menu-dark .ant-menu-submenu-title .ant-menu-submenu-arrow::before,
+.ant-menu-dark .ant-menu-submenu-title .ant-menu-submenu-arrow::after {
+  background: #69c0ff;
+}
+
+/* Submenu abierto: resalte el título */
+.ant-menu-dark .ant-menu-submenu-open > .ant-menu-submenu-title {
+  background: rgba(24, 144, 255, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(24,144,255,0.25);
+}
+
+/* Items internos del submenu */
+.ant-menu-dark .ant-menu-sub .ant-menu-item {
+  margin: 6px 20px;
+  border-radius: 8px;
+}
+
+/* Estado seleccionado tanto en item como en submenu */
+.ant-menu-dark .ant-menu-item-selected,
+.ant-menu-dark .ant-menu-sub .ant-menu-item-selected {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  box-shadow: 0 6px 16px rgba(24,144,255,0.35);
+}
+
+.ant-menu-dark .ant-menu-sub .ant-menu-item-selected .anticon,
+.ant-menu-dark .ant-menu-sub .ant-menu-item-selected .ant-menu-title-content,
+.ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title,
+.ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title .anticon {
+  color: #ffffff !important;
+}
+
+/* Ajustes de alineación cuando el menú está colapsado */
+.ant-menu-inline-collapsed .ant-menu-item {
+  margin: 6px 8px;
+  padding: 0 !important;
+  text-align: center;
+}
+.ant-menu-inline-collapsed .ant-menu-item .anticon {
+  margin: 0 auto !important;
+  display: block;
+}
+.ant-menu-inline-collapsed .ant-menu-item .ant-menu-title-content {
+  display: none;
+}
+
+/* Submenu colapsado (centrar icono y ocultar flecha) */
+.ant-menu-inline-collapsed .ant-menu-submenu-title {
+  margin: 6px 8px;
+  padding: 0 !important;
+  width: calc(100% - 16px);
+  height: 40px;
+  line-height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.ant-menu-inline-collapsed .ant-menu-submenu-title .ant-menu-submenu-arrow {
+  display: none !important;
+}
+.ant-menu-inline-collapsed .ant-menu-submenu-title > .anticon {
+  margin: 0 auto !important;
+}
+
+/* Submenu colapsado: posicionar el icono un poco hacia la derecha */
+.ant-menu-inline-collapsed .ant-menu-submenu-title {
+  justify-content: flex-start;
+  padding-left: 21px !important; /* desplazamiento mayor hacia la derecha */
+}
+.ant-menu-inline-collapsed .ant-menu-submenu-title > .anticon {
+  margin-left: 0 !important;
+}
+
+/* Colores y tipografía del SubMenu igual a los items */
+.ant-menu-dark .ant-menu-submenu-title .ant-menu-title-content {
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.ant-menu-dark .ant-menu-submenu-title .anticon {
+  color: #69c0ff;
+}
+/* Estado seleccionado del SubMenu (titulo e icono blancos) */
+.ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title .ant-menu-title-content,
+.ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title .anticon {
+  color: #ffffff !important;
+}
+/* En menú colapsado, mantener mismos colores del icono del SubMenu */
+.ant-menu-inline-collapsed .ant-menu-submenu-title > .anticon {
+  color: #69c0ff;
+}
+.ant-menu-inline-collapsed .ant-menu-submenu-selected > .ant-menu-submenu-title > .anticon {
+  color: #ffffff !important;
+}
+
 @media (max-width: 768px) {
+  /* Permitir scroll en mobile */
+  body {
+    overflow: auto;
+  }
+  /* El contenido debe poder scrollear normalmente en mobile */
   .container-page {
-    height: calc(100vh - 80px - 62px);
-    max-height: calc(100vh - 80px - 62px);
-    overflow-y: initial;
+    height: auto;
+    min-height: calc(100vh - 62px);
+    overflow-y: auto;
+  }
+  /* Ocultar/flexibilizar el sider en mobile y evitar sticky */
+  .ant-layout-sider {
+    position: static;
+    height: auto;
+    overflow: visible;
+    display: none !important;
   }
   .mobile-header {
     position: sticky;
@@ -328,5 +574,1660 @@ code {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
+}
+
+/* Mobile header - estilo moderno consistente con desktop */
+@media (max-width: 768px) {
+  .mobile-header {
+    background: linear-gradient(135deg, #0f1c2e 0%, #1a2840 40%, #0f263a 100%) !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .mobile-header .user-greeting img {
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35));
+  }
+  .mobile-header h3,
+  .mobile-header span {
+    color: #e6f7ff !important;
+  }
+}
+
+/* Dropdown de navegación del header - estilo consistente con cards */
+.app-nav-dropdown .ant-dropdown-menu,
+.app-nav-dropdown-menu {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+  border: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  padding: 8px;
+  border-radius: 14px;
+}
+.app-nav-dropdown .ant-dropdown-menu-item,
+.app-nav-dropdown-menu .ant-dropdown-menu-item {
+  color: rgba(255,255,255,0.9);
+  font-weight: 600;
+  border-radius: 10px;
+  height: 40px;
+  line-height: 40px;
+  padding-inline: 12px;
+  transition: background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+/* Enlaces dentro de los items */
+.app-nav-dropdown .ant-dropdown-menu-item a,
+.app-nav-dropdown-menu .ant-dropdown-menu-item a {
+  color: rgba(255,255,255,0.9);
+}
+/* Hover/active */
+.app-nav-dropdown .ant-dropdown-menu-item:hover,
+.app-nav-dropdown-menu .ant-dropdown-menu-item:hover,
+.app-nav-dropdown .ant-dropdown-menu-item-active,
+.app-nav-dropdown-menu .ant-dropdown-menu-item-active {
+  background: rgba(24, 144, 255, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(24,144,255,0.35);
+}
+/* Iconos */
+.app-nav-dropdown .ant-dropdown-menu-item .anticon,
+.app-nav-dropdown-menu .ant-dropdown-menu-item .anticon {
+  color: #69c0ff;
+}
+.app-nav-dropdown-menu .ant-dropdown-menu-item-divider {
+  height: 1px;
+  margin: 8px 4px;
+  background: rgba(255,255,255,0.12);
+}
+/* Item de logout (estilo de peligro) */
+.app-nav-dropdown-menu .ant-dropdown-menu-item:last-child span {
+  color: #ff4d4f;
+}
+
+/* Forzar tipografía clara en dropdown */
+.app-nav-dropdown .ant-dropdown-menu,
+.app-nav-dropdown-menu {
+  color: rgba(255,255,255,0.92) !important;
+}
+.app-nav-dropdown .ant-dropdown-menu-item,
+.app-nav-dropdown-menu .ant-dropdown-menu-item,
+.app-nav-dropdown .ant-dropdown-menu-item a,
+.app-nav-dropdown-menu .ant-dropdown-menu-item a,
+.app-nav-dropdown .ant-dropdown-menu-submenu-title,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu-title,
+.app-nav-dropdown .ant-dropdown-menu-submenu .ant-dropdown-menu-item,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu .ant-dropdown-menu-item,
+.app-nav-dropdown .ant-dropdown-menu-submenu .ant-dropdown-menu-item a,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu .ant-dropdown-menu-item a {
+  color: rgba(255,255,255,0.92) !important;
+}
+
+/* Submenu (ej: Gastos) dentro del dropdown: tipografía e iconos */
+.app-nav-dropdown .ant-dropdown-menu-submenu-title,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu-title {
+  color: rgba(255,255,255,0.92) !important;
+  font-weight: 600;
+}
+.app-nav-dropdown .ant-dropdown-menu-submenu-title .anticon,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu-title .anticon {
+  color: #69c0ff !important;
+}
+/* Flecha del submenu en azul claro */
+.app-nav-dropdown .ant-dropdown-menu-submenu-title .ant-dropdown-menu-submenu-expand-icon,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu-title .ant-dropdown-menu-submenu-expand-icon {
+  color: #69c0ff !important;
+}
+/* Items dentro del submenu: mismo scheme */
+.app-nav-dropdown .ant-dropdown-menu-submenu .ant-dropdown-menu-item,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu .ant-dropdown-menu-item {
+  color: rgba(255,255,255,0.92) !important;
+}
+.app-nav-dropdown .ant-dropdown-menu-submenu .ant-dropdown-menu-item a,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu .ant-dropdown-menu-item a {
+  color: rgba(255,255,255,0.92) !important;
+}
+
+/* Forzar todos los iconos del dropdown a azul */
+.app-nav-dropdown .ant-dropdown-menu .anticon,
+.app-nav-dropdown-menu .ant-dropdown-menu .anticon,
+.app-nav-dropdown .ant-dropdown-menu-item .anticon,
+.app-nav-dropdown-menu .ant-dropdown-menu-item .anticon,
+.app-nav-dropdown .ant-dropdown-menu-submenu-title .anticon,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu-title .anticon,
+.app-nav-dropdown .ant-dropdown-menu-submenu-expand-icon,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu-expand-icon,
+.app-nav-dropdown .ant-dropdown-menu-item:hover .anticon,
+.app-nav-dropdown-menu .ant-dropdown-menu-item:hover .anticon,
+.app-nav-dropdown .ant-dropdown-menu-item-active .anticon,
+.app-nav-dropdown-menu .ant-dropdown-menu-item-active .anticon {
+  color: #69c0ff !important;
+}
+
+/* Submenu en dropdown: hover/seleccionado igual que los items principales */
+.app-nav-dropdown .ant-dropdown-menu-submenu-title:hover,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu-title:hover,
+.app-nav-dropdown .ant-dropdown-menu-submenu .ant-dropdown-menu-item:hover,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu .ant-dropdown-menu-item:hover {
+  background: rgba(24, 144, 255, 0.18) !important;
+  box-shadow: inset 0 0 0 1px rgba(24,144,255,0.35) !important;
+}
+
+.app-nav-dropdown .ant-dropdown-menu-submenu-title-selected,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu-title-selected,
+.app-nav-dropdown .ant-dropdown-menu-submenu .ant-dropdown-menu-item-selected,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu .ant-dropdown-menu-item-selected {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%) !important;
+  box-shadow: 0 6px 16px rgba(24,144,255,0.35) !important;
+}
+
+.app-nav-dropdown .ant-dropdown-menu-submenu-title-selected,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu-title-selected,
+.app-nav-dropdown .ant-dropdown-menu-submenu .ant-dropdown-menu-item-selected a,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu .ant-dropdown-menu-item-selected a,
+.app-nav-dropdown .ant-dropdown-menu-submenu .ant-dropdown-menu-item-selected .ant-dropdown-menu-title-content,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu .ant-dropdown-menu-item-selected .ant-dropdown-menu-title-content,
+.app-nav-dropdown .ant-dropdown-menu-submenu .ant-dropdown-menu-item-selected span,
+.app-nav-dropdown-menu .ant-dropdown-menu-submenu .ant-dropdown-menu-item-selected span {
+  color: #ffffff !important;
+}
+
+/* FORZAR estilo del popup del SUBMENÚ (ej: Gastos) */
+.ant-dropdown-menu-submenu > .ant-dropdown-menu,
+.ant-dropdown .ant-dropdown-menu-submenu > .ant-dropdown-menu,
+.ant-dropdown-menu-submenu .ant-dropdown-menu {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+  border: none !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35) !important;
+  padding: 8px !important;
+  border-radius: 14px !important;
+  color: rgba(255,255,255,0.92) !important;
+}
+/* Items del submenú */
+.ant-dropdown-menu-submenu .ant-dropdown-menu-item {
+  color: rgba(255,255,255,0.92) !important;
+  border-radius: 10px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+}
+.ant-dropdown-menu-submenu .ant-dropdown-menu-item a,
+.ant-dropdown-menu-submenu .ant-dropdown-menu-item span {
+  color: rgba(255,255,255,0.92) !important;
+}
+.ant-dropdown-menu-submenu .ant-dropdown-menu-item:hover {
+  background: rgba(24, 144, 255, 0.18) !important;
+  box-shadow: inset 0 0 0 1px rgba(24,144,255,0.35) !important;
+}
+/* Título/trigger del submenú dentro del dropdown */
+.ant-dropdown-menu-submenu-title {
+  color: rgba(255,255,255,0.92) !important;
+  font-weight: 600 !important;
+}
+.ant-dropdown-menu-submenu-title .anticon,
+.ant-dropdown-menu-submenu-title .ant-dropdown-menu-submenu-expand-icon {
+  color: #69c0ff !important;
+}
+
+/* Forzar negrita con mayor especificidad en dropdown */
+.app-nav-dropdown .ant-dropdown-menu .ant-dropdown-menu-item .ant-dropdown-menu-title-content,
+.app-nav-dropdown-menu .ant-dropdown-menu .ant-dropdown-menu-item .ant-dropdown-menu-title-content,
+.app-nav-dropdown .ant-dropdown-menu .ant-dropdown-menu-item a,
+.app-nav-dropdown-menu .ant-dropdown-menu .ant-dropdown-menu-item a,
+.app-nav-dropdown .ant-dropdown-menu .ant-dropdown-menu-submenu-title .ant-dropdown-menu-title-content,
+.app-nav-dropdown-menu .ant-dropdown-menu .ant-dropdown-menu-submenu-title .ant-dropdown-menu-title-content,
+.app-nav-dropdown .ant-dropdown-menu .ant-dropdown-menu-submenu .ant-dropdown-menu-item .ant-dropdown-menu-title-content,
+.app-nav-dropdown-menu .ant-dropdown-menu .ant-dropdown-menu-submenu .ant-dropdown-menu-item .ant-dropdown-menu-title-content,
+.app-nav-dropdown .ant-dropdown-menu .ant-dropdown-menu-submenu .ant-dropdown-menu-item a,
+.app-nav-dropdown-menu .ant-dropdown-menu .ant-dropdown-menu-submenu .ant-dropdown-menu-item a {
+  font-weight: 700 !important;
+  color: rgba(255,255,255,0.92) !important;
+}
+
+/* Fondo oscuro del área de contenido (combina con el nuevo tema) */
+.ant-layout-content {
+  background: linear-gradient(135deg, #0f1c2e 0%, #1a2840 40%, #0f263a 100%) !important;
+}
+
+/* Contenedor de página sobre el fondo oscuro */
+.container-page {
+  background: transparent; /* deja ver el gradiente del content */
+}
+
+/* Modern card container */
+.modern-card {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+.modern-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.modern-card-header-left { display: flex; align-items: center; gap: 12px; }
+.modern-card-title { color: #e6f7ff; font-weight: 700; font-size: 16px; }
+.modern-card-header-right { display: flex; align-items: center; gap: 10px; }
+
+/* Icon badge */
+.modern-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.modern-icon.blue { background: linear-gradient(135deg, #1890ff, #40a9ff); color: white; }
+
+/* Table dark theme */
+.modern-table .ant-table {
+  background: transparent !important;
+  color: rgba(255,255,255,0.92);
+}
+.modern-table .ant-table-container,
+.modern-table .ant-table-content {
+  background: transparent !important;
+}
+.modern-table .ant-table-thead > tr > th {
+  background: rgba(255,255,255,0.04) !important;
+  color: rgba(255,255,255,0.85) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+}
+.modern-table .ant-table-tbody > tr > td {
+  background: transparent !important;
+  color: rgba(255,255,255,0.92) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+}
+.modern-table .ant-table-tbody > tr:hover > td {
+  background: rgba(255,255,255,0.03) !important;
+}
+.modern-table .ant-pagination .ant-pagination-item a,
+.modern-table .ant-pagination .ant-pagination-next .ant-pagination-item-link,
+.modern-table .ant-pagination .ant-pagination-prev .ant-pagination-item-link {
+  color: rgba(255,255,255,0.9) !important;
+}
+
+/* Footer totals */
+.modern-card-footer {
+  padding: 12px 20px 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.modern-card-footer .totals { display: flex; align-items: center; gap: 10px; }
+.modern-card-footer .total-label { 
+  color: rgba(255,255,255,0.7) !important; 
+  font-weight: 600 !important; 
+  font-size: 16px !important;
+}
+.modern-card-footer .total-value { 
+  color: #69c0ff !important; 
+  font-weight: 700 !important; 
+  font-size: 18px !important;
+}
+.modern-card-footer .divider { color: rgba(255,255,255,0.3); }
+
+/* Select override */
+.modern-select .ant-select-selector { background: rgba(255,255,255,0.06) !important; border: 1px solid rgba(255,255,255,0.12) !important; color: #e6f7ff !important; }
+.modern-select .ant-select-selection-item { color: #e6f7ff !important; font-weight: 600; }
+.modern-select .ant-select-arrow { color: #69c0ff !important; }
+
+/* Modern grid table (custom) */
+.modern-grid-table { width: 100%; }
+.modern-grid-header, .modern-grid-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 140px 120px 140px;
+  gap: 8px;
+  align-items: center;
+}
+.modern-grid-header { padding: 12px 16px; color: rgba(255,255,255,0.85); font-weight: 700; background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.1); }
+.modern-grid-body .modern-grid-row { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.92); }
+.modern-grid-body .modern-grid-row:hover { background: rgba(255,255,255,0.03); }
+.modern-grid-row .col-desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Action chips */
+.action-chip { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; margin-right: 8px; transition: transform .15s ease, box-shadow .2s ease; }
+.action-chip:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+.action-chip.edit { background: linear-gradient(135deg, #1890ff, #40a9ff); color: white; }
+.action-chip.delete { background: linear-gradient(135deg, #ff4d4f, #ff7875); color: white; }
+
+@media (max-width: 900px) {
+  .modern-grid-header, .modern-grid-row { grid-template-columns: 120px 1fr 120px 100px 120px; }
+}
+
+/* Modern grid table refinements */
+.modern-grid-table { width: 100%; }
+.modern-grid-header { position: sticky; top: 0; z-index: 1; text-transform: none; letter-spacing: .2px; }
+.modern-grid-header .col { opacity: .95; }
+
+/* Rows: zebra, hover accent and micro-elevation */
+.modern-grid-body .modern-grid-row:nth-child(even) { background: rgba(255,255,255,0.02); }
+.modern-grid-body .modern-grid-row { transition: background .2s ease, transform .12s ease, box-shadow .2s ease; border-radius: 8px; margin: 2px 6px; padding: 12px 16px; }
+.modern-grid-body .modern-grid-row:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.18); background: rgba(255,255,255,0.03); }
+
+/* Column cosmetics */
+.modern-grid-row .col-date { color: rgba(255,255,255,0.8); font-weight: 600; }
+.modern-grid-row .col-desc { color: #e6f7ff; font-weight: 700; }
+.modern-grid-row .col-amt { font-variant-numeric: tabular-nums; font-weight: 800; background: linear-gradient(135deg,#69c0ff,#1890ff); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 18px rgba(24,144,255,.18); }
+.modern-grid-row .col-cur { justify-self: start; }
+
+/* Currency as pill without cambiar markup */
+.modern-grid-row .col-cur { display: inline-block; padding: 6px 10px; border-radius: 999px; font-weight: 800; letter-spacing: .2px; color: white; background: linear-gradient(135deg,#13c2c2,#36cfc9); }
+.modern-grid-row .col-cur:contains('ARS') { background: linear-gradient(135deg,#52c41a,#73d13d); }
+
+/* Actions spacing */
+.modern-grid-row .col-act { display: flex; align-items: center; gap: 8px; }
+
+/* Header/Section subtle separator glow */
+.modern-card-header { box-shadow: inset 0 -1px 0 rgba(255,255,255,0.06); }
+
+/* Improve select look on hover/focus */
+.modern-select .ant-select-selector:hover { border-color: rgba(24,144,255,.6) !important; }
+.modern-select .ant-select-focused .ant-select-selector { box-shadow: 0 0 0 2px rgba(24,144,255,.25) !important; border-color: #1890ff !important; }
+
+/* Responsive tweaks */
+@media (max-width: 720px) {
+  .modern-grid-header, .modern-grid-row { grid-template-columns: 100px 1fr 110px 90px 110px; }
+  .modern-card-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .modern-card-header-right { width: 100%; }
+}
+
+/* Global override para dropdowns/submenús de Ant: aplicar el nuevo diseño oscuro */
+.ant-dropdown .ant-dropdown-menu {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+  border: none !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35) !important;
+  padding: 8px !important;
+  border-radius: 14px !important;
+}
+.ant-dropdown .ant-dropdown-menu-item,
+.ant-dropdown .ant-dropdown-menu-submenu-title {
+  color: rgba(255,255,255,0.92) !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  padding-inline: 12px !important;
+}
+.ant-dropdown .ant-dropdown-menu-item a,
+.ant-dropdown .ant-dropdown-menu-submenu-title a,
+.ant-dropdown .ant-dropdown-menu-item span,
+.ant-dropdown .ant-dropdown-menu-submenu-title span {
+  color: rgba(255,255,255,0.92) !important;
+  font-weight: 700 !important;
+}
+.ant-dropdown .ant-dropdown-menu-item:hover,
+.ant-dropdown .ant-dropdown-menu-submenu-title:hover,
+.ant-dropdown .ant-dropdown-menu-item-active {
+  background: rgba(24,144,255,0.18) !important;
+  box-shadow: inset 0 0 0 1px rgba(24,144,255,0.35) !important;
+}
+.ant-dropdown .ant-dropdown-menu-item .anticon,
+.ant-dropdown .ant-dropdown-menu-submenu-title .anticon,
+.ant-dropdown .ant-dropdown-menu-submenu-expand-icon {
+  color: #69c0ff !important;
+}
+.ant-dropdown .ant-dropdown-menu-item-divider { height: 1px; margin: 8px 4px; background: rgba(255,255,255,0.12) !important; }
+
+/* Ant Select dropdown (meses) - tema oscuro */
+.ant-select-dropdown,
+:where(.ant-select-dropdown) {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+  border: none !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35) !important;
+  padding: 6px !important;
+  border-radius: 12px !important;
+}
+.ant-select-dropdown .ant-select-item,
+:where(.ant-select-dropdown) .ant-select-item {
+  color: rgba(255,255,255,0.92) !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  height: 38px !important;
+  line-height: 38px !important;
+  padding-inline: 10px !important;
+}
+.ant-select-dropdown .ant-select-item-option-active,
+:where(.ant-select-dropdown) .ant-select-item-option-active {
+  background: rgba(24,144,255,0.18) !important;
+  box-shadow: inset 0 0 0 1px rgba(24,144,255,0.35) !important;
+}
+.ant-select-dropdown .ant-select-item-option-selected,
+:where(.ant-select-dropdown) .ant-select-item-option-selected {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%) !important;
+  color: #ffffff !important;
+}
+.ant-select-dropdown .ant-select-item-option-selected .ant-select-item-option-content,
+:where(.ant-select-dropdown) .ant-select-item-option-selected .ant-select-item-option-content {
+  color: #ffffff !important;
+}
+.ant-select-dropdown .ant-select-item-option-content,
+:where(.ant-select-dropdown) .ant-select-item-option-content { color: rgba(255,255,255,0.92) !important; }
+
+/* Centrar texto del selector de mes (solo el usado en ingresos) */
+.modern-select.ant-select-single .ant-select-selector .ant-select-selection-item {
+  display: block !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+:where(.ant-select-dropdown) .ant-select-item-option-content {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+/* Centrado VERTICAL del selector de mes */
+.modern-select.ant-select-single .ant-select-selector {
+  display: flex !important;
+  align-items: center !important; /* centra de arriba a abajo */
+  height: 40px !important;
+}
+.modern-select.ant-select-single .ant-select-selector .ant-select-selection-item {
+  display: flex !important;
+  align-items: center !important; /* centra de arriba a abajo */
+  width: 100% !important;
+  height: 100% !important;
+}
+:where(.ant-select-dropdown) .ant-select-item-option-content {
+  display: flex !important;
+  align-items: center !important; /* centra de arriba a abajo */
+  justify-content: center !important;
+}
+
+/* Centrar verticalmente el icono (sufijo) del Select */
+.modern-select .ant-select-suffix {
+  display: flex !important;
+  align-items: center !important; /* centra de arriba a abajo */
+  height: 100% !important;
+}
+.modern-select .ant-select-selection-search {
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Fix vertical centering for Select suffix icon */
+.modern-select.ant-select-single .ant-select-selector {
+  height: 40px !important;
+  line-height: 40px !important; /* asegura alineación del contenido */
+}
+.modern-select .ant-select-suffix {
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important; /* centra de arriba a abajo */
+  right: 11px; /* respeta padding visual */
+}
+.modern-select .ant-select-selection-item,
+.modern-select .ant-select-selection-placeholder {
+  line-height: 40px !important; /* alinea texto con el alto del selector */
+}
+
+/* Centrado vertical definitivo del icono del Select (calendar) */
+.modern-select.ant-select-single .ant-select-selector {
+  height: 40px !important;
+  line-height: 40px !important;
+}
+.modern-select .ant-select-arrow,
+.modern-select .ant-select-suffix {
+  position: absolute !important;
+  top: 80% !important;
+  transform: translateY(-50%) !important;
+  right: 11px !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 16px !important;
+}
+.modern-select .ant-select-selection-item,
+.modern-select .ant-select-selection-placeholder {
+  line-height: 40px !important;
+}
+
+/* Alineación vertical del título de submenú (e.g., 'Gastos') en dropdown */
+.ant-dropdown .ant-dropdown-menu-submenu-title {
+  display: flex !important;
+  align-items: center !important; /* centra de arriba a abajo */
+  height: 40px !important;
+  line-height: 40px !important;
+}
+.ant-dropdown .ant-dropdown-menu-submenu-title .ant-dropdown-menu-title-content {
+  display: flex !important;
+  align-items: center !important;
+}
+.ant-dropdown .ant-dropdown-menu-submenu-title .anticon,
+.ant-dropdown .ant-dropdown-menu-submenu-title .ant-dropdown-menu-submenu-expand-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+/* Header Action Button (Desktop) */
+.action-btn.add-action-btn {
+  height: 40px !important;
+  width: 40px !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 50%, #69c0ff 100%) !important;
+  color: white !important;
+  margin-right: 8px !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.action-btn.add-action-btn::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+  transition: left 0.5s !important;
+}
+
+.action-btn.add-action-btn:hover {
+  background: linear-gradient(135deg, #096dd9 0%, #1890ff 50%, #40a9ff 100%) !important;
+  transform: translateY(-2px) scale(1.05) !important;
+  box-shadow: 0 8px 24px rgba(24, 144, 255, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.action-btn.add-action-btn:hover::before {
+  left: 100% !important;
+}
+
+.action-btn.add-action-btn:active {
+  transform: translateY(-1px) scale(1.02) !important;
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.3) !important;
+}
+
+.action-btn.add-action-btn .anticon {
+  font-size: 18px !important;
+  margin: 0 !important;
+  position: relative !important;
+  z-index: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: transform 0.3s ease !important;
+}
+
+.action-btn.add-action-btn:hover .anticon {
+  transform: rotate(90deg) !important;
+}
+
+/* Mobile Floating Action Button */
+.mobile-fab-container {
+  position: fixed !important;
+  bottom: 24px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 1000 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.mobile-fab-button {
+  height: 56px !important;
+  width: 56px !important;
+  border-radius: 16px !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2), 0 6px 16px rgba(24, 144, 255, 0.3), 0 0 0 0 rgba(24, 144, 255, 0.4) !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 50%, #69c0ff 100%) !important;
+  color: white !important;
+  position: relative !important;
+  overflow: hidden !important;
+  animation: fabPulse 2s infinite !important;
+}
+
+.mobile-fab-button::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent) !important;
+  transition: left 0.6s !important;
+}
+
+.mobile-fab-button::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  transition: all 0.3s ease !important;
+}
+
+.mobile-fab-button:hover {
+  background: linear-gradient(135deg, #096dd9 0%, #1890ff 50%, #40a9ff 100%) !important;
+  transform: translateX(-50%) translateY(-4px) scale(1.1) !important;
+  box-shadow: 0 16px 40px rgba(24, 144, 255, 0.5), 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 0 8px rgba(24, 144, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  animation: none !important;
+}
+
+.mobile-fab-button:hover::before {
+  left: 100% !important;
+}
+
+.mobile-fab-button:hover::after {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.mobile-fab-button:active {
+  transform: translateX(-50%) translateY(-2px) scale(1.05) !important;
+  box-shadow: 0 8px 24px rgba(24, 144, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.mobile-fab-button .anticon {
+  font-size: 20px !important;
+  margin: 0 !important;
+  position: relative !important;
+  z-index: 2 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: transform 0.3s ease !important;
+}
+
+.mobile-fab-button:hover .anticon {
+  transform: rotate(90deg) scale(1.1) !important;
+}
+
+/* Pulse Animation */
+@keyframes fabPulse {
+  0% {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2), 0 6px 16px rgba(24, 144, 255, 0.3), 0 0 0 0 rgba(24, 144, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2), 0 6px 16px rgba(24, 144, 255, 0.3), 0 0 0 8px rgba(24, 144, 255, 0.1);
+  }
+  100% {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2), 0 6px 16px rgba(24, 144, 255, 0.3), 0 0 0 0 rgba(24, 144, 255, 0.4);
+  }
+}
+
+/* Action Selection Modal */
+.action-selection-modal .ant-modal-content {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+  border: none !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35) !important;
+}
+
+.action-selection-modal .ant-modal-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 16px 16px 0 0 !important;
+}
+
+.action-selection-modal .ant-modal-body {
+  padding: 32px !important;
+  background: transparent !important;
+}
+
+.action-modal-content {
+  text-align: center;
+}
+
+.action-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.action-option-btn {
+  height: 80px !important;
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 0 24px !important;
+  text-align: left !important;
+}
+
+.action-option-btn.income-option {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%) !important;
+  color: white !important;
+  border: 1px solid rgba(24, 144, 255, 0.3) !important;
+}
+
+.action-option-btn.income-option:hover {
+  background: linear-gradient(135deg, #096dd9 0%, #1890ff 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4) !important;
+  border-color: rgba(24, 144, 255, 0.6) !important;
+}
+
+.action-option-btn.expense-option {
+  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.action-option-btn.expense-option:hover {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Keyboard selection styles - Desktop only */
+@media (min-width: 768px) {
+  .action-option-btn.selected {
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 8px 24px rgba(24, 144, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    position: relative !important;
+  }
+
+  .action-option-btn.selected::before {
+    content: '✓' !important;
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    width: 24px !important;
+    height: 24px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    color: white !important;
+    z-index: 3 !important;
+  }
+
+  .action-option-btn.income-option.selected {
+    background: linear-gradient(135deg, #096dd9 0%, #1890ff 50%, #40a9ff 100%) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  .action-option-btn.expense-option.selected {
+    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+  }
+}
+
+/* Add Income Modal Styles */
+.add-income-modal .ant-modal-content {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  overflow: hidden !important;
+}
+
+.income-modal-content {
+  padding: 0 !important;
+}
+
+.modal-header {
+  display: flex !important;
+  align-items: center !important;
+  margin-bottom: 32px !important;
+  padding: 24px 24px 0 24px !important;
+}
+
+.modal-icon-container {
+  width: 64px !important;
+  height: 64px !important;
+  border-radius: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-right: 20px !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.modal-icon-container.income-icon {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 50%, #69c0ff 100%) !important;
+  box-shadow: 0 8px 24px rgba(24, 144, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.modal-icon-container::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%) !important;
+  transform: translateX(-100%) !important;
+  transition: transform 0.6s ease !important;
+}
+
+.modal-icon-container:hover::before {
+  transform: translateX(100%) !important;
+}
+
+.modal-icon-container .anticon {
+  font-size: 28px !important;
+  color: white !important;
+  z-index: 2 !important;
+  position: relative !important;
+}
+
+.modal-title-section {
+  flex: 1 !important;
+}
+
+.modal-title {
+  color: white !important;
+  margin: 0 !important;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+}
+
+.modal-subtitle {
+  color: rgba(255, 255, 255, 0.7) !important;
+  margin: 8px 0 0 0 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
+
+.income-form {
+  padding: 0 24px 24px 24px !important;
+}
+
+.form-item-modern {
+  margin-bottom: 24px !important;
+}
+
+.form-item-modern .ant-form-item-label > label {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  margin-bottom: 8px !important;
+}
+
+.modern-input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  color: white !important;
+  font-size: 16px !important;
+  height: 48px !important;
+  transition: all 0.3s ease !important;
+}
+
+.modern-input:hover {
+  border-color: rgba(24, 144, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.modern-input:focus {
+  border-color: #1890ff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+
+.input-icon {
+  color: rgba(24, 144, 255, 0.8) !important;
+  font-size: 16px !important;
+}
+
+.modern-date-picker {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  height: 48px !important;
+}
+
+.modern-date-picker .ant-picker-input > input {
+  color: white !important;
+  background: transparent !important;
+}
+
+
+.modern-date-picker .ant-picker-suffix {
+  color: rgba(24, 144, 255, 0.8) !important;
+}
+
+.modern-date-picker:hover {
+  border-color: rgba(24, 144, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.modern-date-picker.ant-picker-focused {
+  border-color: #1890ff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+.modern-submit-btn {
+  height: 56px !important;
+  border-radius: 16px !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  margin-top: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.modern-submit-btn.income-submit {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 50%, #69c0ff 100%) !important;
+  box-shadow: 0 8px 24px rgba(24, 144, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.modern-submit-btn.income-submit:hover {
+  background: linear-gradient(135deg, #096dd9 0%, #1890ff 50%, #40a9ff 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 32px rgba(24, 144, 255, 0.4), 0 6px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+.modern-submit-btn.income-submit:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.modern-submit-btn::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+  transition: left 0.6s ease !important;
+}
+
+.modern-submit-btn:hover::before {
+  left: 100% !important;
+}
+
+.modern-submit-btn .anticon {
+  font-size: 18px !important;
+  margin: 0 !important;
+}
+
+/* Add Expense Modal Styles */
+.add-expense-modal .ant-modal-content {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  overflow: hidden !important;
+}
+
+.expense-modal-content {
+  padding: 0 !important;
+}
+
+.modal-icon-container.expense-icon {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 50%, #ffa39e 100%) !important;
+  box-shadow: 0 8px 24px rgba(255, 77, 79, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.modern-submit-btn.expense-submit {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 50%, #ffa39e 100%) !important;
+  box-shadow: 0 8px 24px rgba(255, 77, 79, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.modern-submit-btn.expense-submit:hover {
+  background: linear-gradient(135deg, #d9363e 0%, #ff4d4f 50%, #ff7875 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 32px rgba(255, 77, 79, 0.4), 0 6px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+.modern-submit-btn.expense-submit:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 4px 16px rgba(255, 77, 79, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.expense-form {
+  padding: 0 24px 24px 24px !important;
+}
+
+/* Additional modern form elements */
+.modern-select .ant-select-selector {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  color: white !important;
+  height: 48px !important;
+  box-shadow: none !important;
+}
+
+.modern-select:hover .ant-select-selector {
+  border-color: rgba(24, 144, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: none !important;
+}
+
+.modern-select.ant-select-focused .ant-select-selector {
+  border-color: #1890ff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+.modern-select .ant-select-selection-item {
+  color: white !important;
+}
+
+.modern-select .ant-select-arrow {
+  color: rgba(24, 144, 255, 0.8) !important;
+}
+
+.modern-select .ant-select-selection-search {
+  color: white !important;
+}
+
+.modern-select .ant-select-selection-placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Remove any additional shadows or borders */
+.modern-select {
+  box-shadow: none !important;
+}
+
+.modern-select .ant-select-selector::before,
+.modern-select .ant-select-selector::after {
+  display: none !important;
+}
+
+.modern-checkbox {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.modern-checkbox .ant-checkbox-inner {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px !important;
+}
+
+.modern-checkbox .ant-checkbox-checked .ant-checkbox-inner {
+  background: #1890ff !important;
+  border-color: #1890ff !important;
+}
+
+.modern-textarea {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  color: white !important;
+  resize: vertical !important;
+}
+
+.modern-textarea:hover {
+  border-color: rgba(24, 144, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.modern-textarea:focus {
+  border-color: #1890ff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+.modern-file-input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  color: white !important;
+  height: 48px !important;
+}
+
+.modern-file-input:hover {
+  border-color: rgba(24, 144, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.modern-file-input:focus {
+  border-color: #1890ff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* Modern Category Tag Picker Styles */
+.modern-category-tag {
+  transition: all 0.3s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.modern-category-tag:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.2), 0 3px 8px rgba(0, 0, 0, 0.1) !important;
+  border-color: rgba(24, 144, 255, 0.5) !important;
+}
+
+.modern-category-tag.selected {
+  position: relative !important;
+}
+
+.modern-category-tag.selected::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+  transition: left 0.6s ease !important;
+}
+
+.modern-category-tag.selected:hover::before {
+  left: 100% !important;
+}
+
+.modern-add-category-tag:hover {
+  background: rgba(24, 144, 255, 0.2) !important;
+  border-color: rgba(24, 144, 255, 0.6) !important;
+  color: #40a9ff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2), 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.modern-category-input {
+  transition: all 0.3s ease !important;
+}
+
+.modern-category-input:hover {
+  border-color: rgba(24, 144, 255, 0.7) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.modern-category-input:focus {
+  border-color: #1890ff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+.modern-category-input::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Custom DatePicker Styles - Now handled by CustomDatePicker component */
+
+/* Modern File Upload Styles */
+.modern-file-upload-container {
+  position: relative;
+  width: 100%;
+}
+
+.modern-file-input-hidden {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+.modern-file-upload-button {
+  display: flex !important;
+  align-items: center !important;
+  padding: 16px 20px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 2px dashed rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  width: 100% !important;
+  min-height: 64px !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.modern-file-upload-button:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(24, 144, 255, 0.5) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(24, 144, 255, 0.1) !important;
+}
+
+.modern-file-upload-button:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.file-upload-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 50%, #ffa39e 100%) !important;
+  border-radius: 10px !important;
+  margin-right: 16px !important;
+  color: white !important;
+  font-size: 18px !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3) !important;
+}
+
+.file-upload-content {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.file-upload-title {
+  color: white !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+}
+
+.file-upload-subtitle {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1.3 !important;
+}
+
+.file-upload-arrow {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 24px !important;
+  height: 24px !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 12px !important;
+  transition: all 0.3s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.modern-file-upload-button:hover .file-upload-arrow {
+  color: #69c0ff !important;
+  transform: translateX(4px) !important;
+}
+
+/* File upload shimmer effect */
+.modern-file-upload-button::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent) !important;
+  transition: left 0.6s !important;
+}
+
+.modern-file-upload-button:hover::before {
+  left: 100% !important;
+}
+
+/* Selected state */
+.modern-file-upload-button.has-file {
+  border-color: rgba(24, 144, 255, 0.5) !important;
+  background: rgba(24, 144, 255, 0.05) !important;
+}
+
+.modern-file-upload-button.has-file .file-upload-icon {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 50%, #69c0ff 100%) !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3) !important;
+}
+
+.modern-file-upload-button.has-file .file-upload-title {
+  color: #69c0ff !important;
+}
+
+.modern-file-upload-button.has-file .file-upload-subtitle {
+  color: rgba(105, 192, 255, 0.8) !important;
+}
+
+/* Modal close button styles */
+.ant-modal-close {
+  color: white !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.ant-modal-close:hover {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: scale(1.1) !important;
+}
+
+.ant-modal-close:focus {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  outline: none !important;
+}
+
+.ant-modal-close .ant-modal-close-x {
+  color: white !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+}
+
+.ant-modal-close:hover .ant-modal-close-x {
+  color: white !important;
+}
+
+/* Modern Bank Add Input Styles */
+.bank-add-container {
+  padding: 12px 16px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  margin-top: 8px !important;
+}
+
+.bank-add-input-wrapper {
+  display: flex !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+.bank-add-input {
+  flex: 1 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  color: white !important;
+  font-size: 13px !important;
+  padding: 8px 12px !important;
+  height: 36px !important;
+  transition: all 0.3s ease !important;
+}
+
+.bank-add-input:hover {
+  border-color: rgba(24, 144, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.bank-add-input:focus {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+  outline: none !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.bank-add-input::placeholder {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.bank-add-icon {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 14px !important;
+  margin-right: 8px !important;
+}
+
+.bank-add-button {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 50%, #69c0ff 100%) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  height: 36px !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3) !important;
+}
+
+.bank-add-button:hover {
+  background: linear-gradient(135deg, #096dd9 0%, #1890ff 50%, #40a9ff 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4) !important;
+}
+
+.bank-add-button:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3) !important;
+}
+
+.bank-add-button .anticon {
+  font-size: 14px !important;
+  margin: 0 !important;
+}
+
+/* Edit Income Modal Styles */
+.edit-income-modal .ant-modal-content {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  overflow: hidden !important;
+}
+
+.edit-income-modal-content {
+  padding: 0 !important;
+}
+
+.edit-income-modal .modal-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 24px 24px 20px 24px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  margin-bottom: 24px !important;
+}
+
+.edit-income-modal .modal-icon-container.income-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 48px !important;
+  height: 48px !important;
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 50%, #69c0ff 100%) !important;
+  border-radius: 12px !important;
+  color: white !important;
+  font-size: 20px !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3) !important;
+}
+
+.edit-income-modal .modal-title-section {
+  flex: 1 !important;
+}
+
+.edit-income-modal .modal-title {
+  color: white !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+}
+
+.edit-income-modal .modal-subtitle {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  margin: 4px 0 0 0 !important;
+  line-height: 1.4 !important;
+}
+
+.edit-income-form {
+  padding: 0 24px 24px 24px !important;
+}
+
+.edit-income-form .form-item-modern {
+  margin-bottom: 24px !important;
+}
+
+.edit-income-form .form-item-modern .ant-form-item-label > label {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  margin-bottom: 8px !important;
+}
+
+.edit-income-form .modern-input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  color: white !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  padding: 12px 16px !important;
+  height: 48px !important;
+  transition: all 0.3s ease !important;
+}
+
+.edit-income-form .modern-input:hover {
+  border-color: rgba(24, 144, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.edit-income-form .modern-input:focus {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+  outline: none !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.edit-income-form .input-icon {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 16px !important;
+  margin-right: 12px !important;
+}
+
+.edit-income-form .modern-submit-btn.income-submit {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 50%, #69c0ff 100%) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  color: white !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3) !important;
+  margin-top: 8px !important;
+}
+
+.edit-income-form .modern-submit-btn.income-submit:hover {
+  background: linear-gradient(135deg, #096dd9 0%, #1890ff 50%, #40a9ff 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.4) !important;
+}
+
+.edit-income-form .modern-submit-btn.income-submit:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3) !important;
+}
+
+.action-option-btn .anticon {
+  font-size: 24px !important;
+  margin-right: 16px !important;
+  margin-left: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.action-option-content {
+  flex: 1;
+  text-align: left;
+}
+
+.action-option-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: white !important;
+  margin-bottom: 4px !important;
+  line-height: 1.2 !important;
+}
+
+.action-option-subtitle {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  line-height: 1.2 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .action-options {
+    max-width: 100%;
+  }
+  
+  .action-option-btn {
+    height: 70px !important;
+    padding: 0 20px !important;
+  }
+  
+  .action-option-btn .anticon {
+    font-size: 20px !important;
+    margin-right: 12px !important;
+  }
+  
+  .action-option-title {
+    font-size: 16px !important;
+  }
+  
+  .action-option-subtitle {
+    font-size: 13px !important;
+  }
+}
+
+/* Estilos para modales de transacciones */
+.dark-modal .ant-modal-content {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark-modal .ant-modal-header {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px 12px 0 0 !important;
+  padding: 16px 20px !important;
+}
+
+.dark-modal .ant-modal-title {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.dark-modal .ant-modal-close {
+  color: #ffffff !important;
+}
+
+.dark-modal .ant-modal-close:hover {
+  color: #60a5fa !important;
+}
+
+.dark-modal .ant-modal-body {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%) !important;
+  border-radius: 0 0 12px 12px !important;
+  padding: 20px !important;
 }
 

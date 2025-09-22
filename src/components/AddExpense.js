@@ -3,7 +3,8 @@ import {
   Form, Input, Button, Select, notification, Spin,
   Typography, Row, Col, Card, DatePicker, Checkbox
 } from 'antd';
-import { DollarOutlined, FileTextOutlined, BankOutlined, PlusOutlined } from '@ant-design/icons';
+import { DollarOutlined, FileTextOutlined, BankOutlined, PlusOutlined, FallOutlined, RightOutlined } from '@ant-design/icons';
+import CustomDatePicker from './CustomDatePicker';
 import { db, storage } from '../firebase';
 import {
   collection, addDoc, Timestamp,
@@ -302,23 +303,34 @@ const AddExpense = ({ onExpenseAdded }) => {
   /* ---------- render ---------- */
   return (
     <Spin spinning={loading}>
-      <Card className="add-expense-modal" style={{ borderRadius: 12 }}>
-        <Title level={3} style={{ textAlign: 'center', marginBottom: 8 }}>
-          {t('userProfile.addNewExpense.title')}
-        </Title>
-        <Paragraph type="secondary" style={{ textAlign: 'center', marginBottom: 24 }}>
-          {t('userProfile.addNewExpense.subtitle')}
-        </Paragraph>
+      <div className="expense-modal-content">
+        <div className="modal-header">
+          <div className="modal-icon-container expense-icon">
+            <FallOutlined />
+          </div>
+          <div className="modal-title-section">
+            <Title level={3} className="modal-title">
+              {t('userProfile.addNewExpense.title')}
+            </Title>
+            <Paragraph className="modal-subtitle">
+              {t('userProfile.addNewExpense.subtitle')}
+            </Paragraph>
+          </div>
+        </div>
 
-        <Form layout="vertical" form={form} onFinish={handleSubmit}>
+        <Form layout="vertical" form={form} onFinish={handleSubmit} className="expense-form">
           {/* EXPENSE TYPE */}
           <Form.Item
             name="expenseType"
             label={t('userProfile.addNewExpense.expenseTypes.label')}
             initialValue="daily"
             rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.expenseTypeRequired') }]}
+            className="form-item-modern"
           >
-            <Select onChange={(value) => setExpenseType(value)}>
+            <Select 
+              className="modern-select"
+              onChange={(value) => setExpenseType(value)}
+            >
               <Option value="daily">{t('userProfile.addNewExpense.expenseTypes.daily')}</Option>
               <Option value="fixed">{t('userProfile.addNewExpense.expenseTypes.fixed')}</Option>
             </Select>
@@ -332,14 +344,12 @@ const AddExpense = ({ onExpenseAdded }) => {
             label={t('userProfile.addNewExpense.date')}
             initialValue={dayjs()}
             rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.dateRequired') }]}
+            className="form-item-modern"
           >
-            <DatePicker
-              style={{ width: '100%' }}
-              format={(val) =>
-                dayjs().isSame(val, 'day')
-                  ? t('userProfile.addNewExpense.defaultDataInputDate')
-                  : val.format('DD/MM/YYYY')
-              }
+            <CustomDatePicker
+              value={form.getFieldValue('date')}
+              onChange={(date) => form.setFieldsValue({ date })}
+              placeholder={t('userProfile.addNewExpense.date') || "Seleccionar fecha"}
             />
           </Form.Item>
 
@@ -348,8 +358,12 @@ const AddExpense = ({ onExpenseAdded }) => {
             name="description"
             label={t('userProfile.addNewExpense.description')}
             rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.descriptionRequired') }]}
+            className="form-item-modern"
           >
-            <Input prefix={<FileTextOutlined />} placeholder="Uber to work" />
+            <Input 
+              className="modern-input"
+              prefix={<FileTextOutlined className="input-icon" />} 
+            />
           </Form.Item>
 
           {/* AMOUNT + CURRENCY */}
@@ -359,16 +373,22 @@ const AddExpense = ({ onExpenseAdded }) => {
                 name="amount"
                 label={t('userProfile.addNewExpense.amount')}
                 rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.amountRequired') }]}
+                className="form-item-modern"
               >
-                <Input type="number" prefix={<DollarOutlined />} placeholder="125.50" />
+                <Input 
+                  className="modern-input"
+                  type="number" 
+                  prefix={<DollarOutlined className="input-icon" />} 
+                />
               </Form.Item>
             </Col>
-            <Col xs={12} style={{ display: 'flex', alignItems: 'center' }}>
+            <Col xs={12}>
               <Form.Item
                 name="currency"
+                label={t('userProfile.addNewExpense.currency') || "Moneda"}
                 initialValue={lastCurrency}
                 rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.currencyRequired') }]}
-                style={{ marginBottom: 0 }}
+                className="form-item-modern"
               >
                 <CurrencyTagPicker />
               </Form.Item>
@@ -380,8 +400,10 @@ const AddExpense = ({ onExpenseAdded }) => {
             name="paymentMethod"
             label={t('userProfile.addNewExpense.paymentMethod')}
             rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.paymentMethodRequired') }]}
+            className="form-item-modern"
           >
             <Select
+              className="modern-select"
               placeholder="Seleccioná método"
               onChange={(val) => {
                 setPaymentMethod(val);
@@ -419,8 +441,10 @@ const AddExpense = ({ onExpenseAdded }) => {
                   name="bank"
                   label={t('userProfile.addNewExpense.bank')}
                   rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.bankRequired') }]}
+                  className="form-item-modern"
                 >
                   <Select
+                    className="modern-select"
                     placeholder="Seleccioná banco"
                     value={form.getFieldValue('bank')}
                     onChange={handleBankChange}
@@ -428,23 +452,27 @@ const AddExpense = ({ onExpenseAdded }) => {
                       <>
                         {menu}
                         {/* separador + input para nuevo banco */}
-                        <div style={{ display: 'flex', gap: 8, padding: 8 }}>
-                          <Input
-                            size="small"
-                            placeholder="Agregar banco"
-                            value={newBank}
-                            onChange={(e) => setNewBank(e.target.value)}
-                            onPressEnter={(e) => {
-                              e.preventDefault();    // evita que el Select procese el Enter
-                              e.stopPropagation();
-                              addNewBank();
-                            }}
-                          />
-                          <Button
-                            type="text"
-                            icon={<PlusOutlined />}
-                            onClick={addNewBank}
-                          />
+                        <div className="bank-add-container">
+                          <div className="bank-add-input-wrapper">
+                            <Input
+                              className="modern-input bank-add-input"
+                              placeholder="Agregar banco"
+                              value={newBank}
+                              onChange={(e) => setNewBank(e.target.value)}
+                              onPressEnter={(e) => {
+                                e.preventDefault();    // evita que el Select procese el Enter
+                                e.stopPropagation();
+                                addNewBank();
+                              }}
+                              prefix={<BankOutlined className="bank-add-icon" />}
+                            />
+                            <Button
+                              className="bank-add-button"
+                              type="primary"
+                              icon={<PlusOutlined />}
+                              onClick={addNewBank}
+                            />
+                          </div>
                         </div>
                       </>
                     )}
@@ -463,8 +491,12 @@ const AddExpense = ({ onExpenseAdded }) => {
                 name="cardType"
                 label={t('userProfile.addNewExpense.cardType')}
                 rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.cardTypeRequired') }]}
+                className="form-item-modern"
               >
-                <Select placeholder="Seleccioná tipo">
+                <Select 
+                  className="modern-select"
+                  placeholder="Seleccioná tipo"
+                >
                   {(() => {
                     const bk   = form.getFieldValue('bank');
                     const info =
@@ -496,6 +528,7 @@ const AddExpense = ({ onExpenseAdded }) => {
             rules={[
               { required: true, message: t('userProfile.addNewExpense.errorMessages.categoryRequired') },
             ]}
+            className="form-item-modern"
           >
             <CategoryTagPicker
               categories={categories}
@@ -512,14 +545,12 @@ const AddExpense = ({ onExpenseAdded }) => {
                 label={t('userProfile.addNewExpense.date')}
                 initialValue={dayjs()}
                 rules={[{ required: true, message: t('userProfile.addNewExpense.errorMessages.dateRequired') }]}
+                className="form-item-modern"
               >
-                <DatePicker
-                  style={{ width: '100%' }}
-                  format={(val) =>
-                    dayjs().isSame(val, 'day')
-                      ? t('userProfile.addNewExpense.defaultDataInputDate')
-                      : val.format('DD/MM/YYYY')
-                  }
+                <CustomDatePicker
+                  value={form.getFieldValue('date')}
+                  onChange={(date) => form.setFieldsValue({ date })}
+                  placeholder={t('userProfile.addNewExpense.date') || "Seleccionar fecha"}
                 />
               </Form.Item>
               
@@ -528,8 +559,12 @@ const AddExpense = ({ onExpenseAdded }) => {
                 name="title"
                 label="Título"
                 rules={[{ required: true, message: 'Ingrese un título' }]}
+                className="form-item-modern"
               >
-                <Input prefix={<FileTextOutlined />} placeholder="Alquiler" />
+                <Input 
+                  className="modern-input"
+                  prefix={<FileTextOutlined className="input-icon" />} 
+                />
               </Form.Item>
 
               {/* AMOUNT ARS + USD */}
@@ -539,6 +574,7 @@ const AddExpense = ({ onExpenseAdded }) => {
                     name="amountARS"
                     label="Monto ARS"
                     rules={[{ required: true, message: 'Ingrese un monto' }]}
+                    className="form-item-modern"
                   >
                     <NumericFormat
                       customInput={Input}
@@ -549,7 +585,7 @@ const AddExpense = ({ onExpenseAdded }) => {
                       decimalSeparator={i18n.language === 'es' ? ',' : '.'}
                       prefix={"$"}
                       style={{ width: '100%' }}
-                      placeholder={i18n.language === 'es' ? '0,00' : '0.00'}
+                      className="modern-input"
                       onValueChange={vals => form.setFieldsValue({ amountARS: vals.floatValue ?? '' })}
                       value={form.getFieldValue('amountARS')}
                     />
@@ -560,6 +596,7 @@ const AddExpense = ({ onExpenseAdded }) => {
                     name="amountUSD"
                     label="Monto USD"
                     rules={[{ required: true, message: 'Ingrese un monto' }]}
+                    className="form-item-modern"
                   >
                     <NumericFormat
                       customInput={Input}
@@ -570,7 +607,7 @@ const AddExpense = ({ onExpenseAdded }) => {
                       decimalSeparator={i18n.language === 'es' ? ',' : '.'}
                       prefix={"$"}
                       style={{ width: '100%' }}
-                      placeholder={i18n.language === 'es' ? '0,00' : '0.00'}
+                      className="modern-input"
                       onValueChange={vals => form.setFieldsValue({ amountUSD: vals.floatValue ?? '' })}
                       value={form.getFieldValue('amountUSD')}
                     />
@@ -583,42 +620,69 @@ const AddExpense = ({ onExpenseAdded }) => {
                 name="paid"
                 valuePropName="checked"
                 initialValue={false}
+                className="form-item-modern"
               >
-                <Checkbox>Pago realizado</Checkbox>
+                <Checkbox className="modern-checkbox">Pago realizado</Checkbox>
               </Form.Item>
 
               {/* NOTES */}
               <Form.Item
                 name="notes"
                 label="Información adicional"
+                className="form-item-modern"
               >
-                <Input.TextArea rows={4} placeholder="Agregar información adicional..." />
+                <Input.TextArea 
+                  className="modern-textarea"
+                  rows={4} 
+                />
               </Form.Item>
 
               {/* PDF UPLOAD */}
               <Form.Item
                 label="Archivo PDF"
+                className="form-item-modern"
               >
-                <Input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handlePdfChange}
-                />
+                <div className="modern-file-upload-container">
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handlePdfChange}
+                    className="modern-file-input-hidden"
+                    id="pdf-upload"
+                  />
+                  <label htmlFor="pdf-upload" className={`modern-file-upload-button ${pdfFile ? 'has-file' : ''}`}>
+                    <div className="file-upload-icon">
+                      <FileTextOutlined />
+                    </div>
+                    <div className="file-upload-content">
+                      <div className="file-upload-title">
+                        {pdfFile ? pdfFile.name : 'Seleccionar archivo PDF'}
+                      </div>
+                      <div className="file-upload-subtitle">
+                        {pdfFile ? 'Archivo seleccionado' : 'Haz clic para subir un PDF'}
+                      </div>
+                    </div>
+                    <div className="file-upload-arrow">
+                      <RightOutlined />
+                    </div>
+                  </label>
+                </div>
               </Form.Item>
             </>
           )}
 
           <Button
+            className="modern-submit-btn expense-submit"
             type="primary"
             htmlType="submit"
             size="large"
             block
-            style={{ marginTop: 10 }}
           >
-            {t('userProfile.addNewExpense.addExpenseButton')}
+            <FallOutlined />
+            Agregar Gasto
           </Button>
         </Form>
-      </Card>
+      </div>
     </Spin>
   );
 };

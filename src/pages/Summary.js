@@ -1,5 +1,5 @@
 import React, { useState, useEffect }                                   from 'react';
-import { Spin, Empty, DatePicker, message, Modal, Typography } from 'antd';
+import { Spin, Empty, DatePicker, message, Modal, Typography, Select } from 'antd';
 import { doc, onSnapshot, updateDoc, collection, getDoc, query, where } from 'firebase/firestore';
 import { db }                                                           from '../firebase';
 import { useAuth }                                                      from '../contexts/AuthContext';
@@ -8,21 +8,240 @@ import moment                                                           from 'mo
 import dayjs                                                            from 'dayjs';
 import 'dayjs/locale/es';
 import 'dayjs/locale/en';
-import enUS from 'antd/es/date-picker/locale/en_US';
-import esES from 'antd/es/date-picker/locale/es_ES';
 import useMonthlyMovements                                              from '../hooks/useMonthlyMovements';
 import ExpenseList                                                      from '../components/ExpenseList';
 import TransactionsTable                                                from '../components/TransactionsTable';
 // Styles
 import '../styles/Expenses.css';
-import { EditOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
+import { EditOutlined, FilterOutlined, SearchOutlined, CalendarOutlined } from '@ant-design/icons';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
+import { 
+  FaBus, 
+  FaHome, 
+  FaHeartbeat, 
+  FaShoppingCart, 
+  FaGift, 
+  FaCreditCard, 
+  FaTrophy, 
+  FaCamera, 
+  FaCut, 
+  FaTrain, 
+  FaSpotify,
+  FaCoffee,
+  FaCookieBite,
+  FaDumbbell,
+  FaWineGlass,
+  FaWifi,
+  FaShoppingBag,
+  FaUtensils,
+  FaTshirt
+} from 'react-icons/fa';
+
+// Función para generar colores aleatorios para los iconos (copiada de ExpenseList)
+const getRandomColor = (category) => {
+  const colors = [
+    'linear-gradient(135deg, #ff4757, #ff3742)', // Rojo vibrante
+    'linear-gradient(135deg, #3742fa, #2f3542)', // Azul oscuro
+    'linear-gradient(135deg, #ff9ff3, #f368e0)', // Rosa magenta
+    'linear-gradient(135deg, #ffa502, #ff6348)', // Naranja brillante
+    'linear-gradient(135deg, #5f27cd, #341f97)', // Púrpura profundo
+    'linear-gradient(135deg, #00d2d3, #54a0ff)', // Cian azul
+    'linear-gradient(135deg, #ff9f43, #ff6b6b)', // Naranja rojo
+    'linear-gradient(135deg, #a55eea, #26de81)', // Púrpura verde
+    'linear-gradient(135deg, #fd79a8, #fdcb6e)', // Rosa amarillo
+    'linear-gradient(135deg, #6c5ce7, #a29bfe)', // Púrpura claro
+    'linear-gradient(135deg, #00b894, #00cec9)', // Verde turquesa
+    'linear-gradient(135deg, #e17055, #d63031)', // Rojo coral
+    'linear-gradient(135deg, #74b9ff, #0984e3)', // Azul cielo
+    'linear-gradient(135deg, #fdcb6e, #e17055)', // Amarillo naranja
+    'linear-gradient(135deg, #fd79a8, #e84393)', // Rosa fucsia
+    'linear-gradient(135deg, #00b894, #00cec9)', // Verde esmeralda
+    'linear-gradient(135deg, #6c5ce7, #a29bfe)', // Púrpura índigo
+    'linear-gradient(135deg, #fdcb6e, #e17055)', // Dorado
+    'linear-gradient(135deg, #fd79a8, #fdcb6e)', // Rosa dorado
+    'linear-gradient(135deg, #00d2d3, #54a0ff)', // Turquesa azul
+  ];
+  
+  // Usar el nombre de la categoría para generar un índice consistente
+  let hash = 0;
+  for (let i = 0; i < category.length; i++) {
+    hash = category.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
+};
+
+// Función para detectar el tipo de categoría y asignar ícono (versión completa de ExpenseList)
+const getCategoryIcon = (category) => {
+  const categoryLower = category.toLowerCase();
+  
+  // Transporte - Bus
+  if (categoryLower.includes('auto') || categoryLower.includes('carro') || categoryLower.includes('vehiculo') || 
+      categoryLower.includes('gasolina') || categoryLower.includes('nafta') || categoryLower.includes('taxi') || 
+      categoryLower.includes('uber') || categoryLower.includes('transporte') || categoryLower.includes('bus') ||
+      categoryLower.includes('transport')) {
+    return <FaBus style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Tren
+  if (categoryLower.includes('tren') || categoryLower.includes('train') || categoryLower.includes('metro') ||
+      categoryLower.includes('subte') || categoryLower.includes('ferrocarril')) {
+    return <FaTrain style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Hogar
+  if (categoryLower.includes('casa') || categoryLower.includes('hogar') || categoryLower.includes('alquiler') || 
+      categoryLower.includes('renta') || categoryLower.includes('hipoteca') || categoryLower.includes('luz') || 
+      categoryLower.includes('agua') || categoryLower.includes('gas') || categoryLower.includes('electricidad') ||
+      categoryLower.includes('apartment')) {
+    return <FaHome style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Salud
+  if (categoryLower.includes('salud') || categoryLower.includes('medico') || categoryLower.includes('farmacia') || 
+      categoryLower.includes('hospital') || categoryLower.includes('clinica') || categoryLower.includes('medicina') || 
+      categoryLower.includes('doctor') || categoryLower.includes('dentista')) {
+    return <FaHeartbeat style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Supermercado
+  if (categoryLower.includes('supermercado') || categoryLower.includes('supermarket') || 
+      categoryLower.includes('mercado') || categoryLower.includes('grocery')) {
+    return <FaShoppingCart style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Café
+  if (categoryLower.includes('cafe') || categoryLower.includes('coffee') || categoryLower.includes('cafeteria') ||
+      categoryLower.includes('cappuccino') || categoryLower.includes('latte') || categoryLower.includes('espresso') ||
+      categoryLower.includes('café') || categoryLower.includes('cafetería') || categoryLower.includes('barista') ||
+      categoryLower.includes('americano') || categoryLower.includes('mocha') || categoryLower.includes('macchiato')) {
+    return <FaCoffee style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Restaurante
+  if (categoryLower.includes('restaurant') || categoryLower.includes('restaurante') || 
+      categoryLower.includes('comida afuera') || categoryLower.includes('lunch') || 
+      categoryLower.includes('dinner') || categoryLower.includes('breakfast') || categoryLower.includes('comida afuera') ||
+      categoryLower.includes('fuera') || categoryLower.includes('out') || categoryLower.includes('takeaway') ||
+      categoryLower.includes('delivery') || categoryLower.includes('pedido')) {
+    return <FaUtensils style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Comida general
+  if (categoryLower.includes('comida') || categoryLower.includes('food') || 
+      categoryLower.includes('almuerzo') || categoryLower.includes('cena') || categoryLower.includes('desayuno')) {
+    return <FaShoppingCart style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Cosas dulces
+  if (categoryLower.includes('dulce') || categoryLower.includes('sweet') || categoryLower.includes('postre') ||
+      categoryLower.includes('helado') || categoryLower.includes('torta') || categoryLower.includes('cake') ||
+      categoryLower.includes('sweet') || categoryLower.includes('candy') || categoryLower.includes('galleta') ||
+      categoryLower.includes('cookie')) {
+    return <FaCookieBite style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Bebidas
+  if (categoryLower.includes('bebida') || categoryLower.includes('drink') || categoryLower.includes('agua') ||
+      categoryLower.includes('jugo') || categoryLower.includes('zumo') || categoryLower.includes('cerveza') ||
+      categoryLower.includes('beer') || categoryLower.includes('vino') || categoryLower.includes('wine') ||
+      categoryLower.includes('cocktail') || categoryLower.includes('coctel')) {
+    return <FaWineGlass style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Ropa y accesorios
+  if (categoryLower.includes('ropa') || categoryLower.includes('clothes') || categoryLower.includes('vestimenta') ||
+      categoryLower.includes('zapatos') || categoryLower.includes('shoes') || categoryLower.includes('calzado') ||
+      categoryLower.includes('bolso') || categoryLower.includes('bag') || categoryLower.includes('zapatos de lujo') ||
+      categoryLower.includes('designer') || categoryLower.includes('marca') || categoryLower.includes('brand') ||
+      categoryLower.includes('exclusivo') || categoryLower.includes('exclusive') || categoryLower.includes('premium')) {
+    return <FaTshirt style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Internet/Conectividad
+  if (categoryLower.includes('internet') || categoryLower.includes('wifi') || categoryLower.includes('conectividad') ||
+      categoryLower.includes('red') || categoryLower.includes('network') || categoryLower.includes('conexion')) {
+    return <FaWifi style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Streaming & Apps
+  if (categoryLower.includes('streaming') || categoryLower.includes('app') || categoryLower.includes('aplicacion') ||
+      categoryLower.includes('spotify') || categoryLower.includes('music') || categoryLower.includes('musica') || 
+      categoryLower.includes('entretenimiento') || categoryLower.includes('plataforma') || categoryLower.includes('servicio') || 
+      categoryLower.includes('subscription') || categoryLower.includes('netflix') || categoryLower.includes('youtube')) {
+    return <FaSpotify style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Finanzas
+  if (categoryLower.includes('banco') || categoryLower.includes('tarjeta') || categoryLower.includes('credito') || 
+      categoryLower.includes('debito') || categoryLower.includes('pago') || categoryLower.includes('cuota') || 
+      categoryLower.includes('prestamo') || categoryLower.includes('inversion')) {
+    return <FaCreditCard style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Gym
+  if (categoryLower.includes('gym') || categoryLower.includes('fitness') || categoryLower.includes('ejercicio') ||
+      categoryLower.includes('musculacion') || categoryLower.includes('pesas') || categoryLower.includes('entrenamiento') ||
+      categoryLower.includes('crossfit') || categoryLower.includes('spinning') || categoryLower.includes('yoga')) {
+    return <FaDumbbell style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Deportes
+  if (categoryLower.includes('deporte') || categoryLower.includes('correr') || categoryLower.includes('futbol') || 
+      categoryLower.includes('tenis') || categoryLower.includes('natacion') || categoryLower.includes('basquet') ||
+      categoryLower.includes('volley') || categoryLower.includes('handball')) {
+    return <FaTrophy style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Belleza
+  if (categoryLower.includes('corte') || categoryLower.includes('pelo') || categoryLower.includes('peluqueria') ||
+      categoryLower.includes('belleza') || categoryLower.includes('estetica') || categoryLower.includes('barberia') ||
+      categoryLower.includes('salon')) {
+    return <FaCut style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Viajes
+  if (categoryLower.includes('viaje') || categoryLower.includes('travel') || categoryLower.includes('vacaciones') || 
+      categoryLower.includes('hotel') || categoryLower.includes('avion') || categoryLower.includes('vuelo') ||
+      categoryLower.includes('turismo') || categoryLower.includes('trip')) {
+    return <FaCamera style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Otros
+  if (categoryLower.includes('other') || categoryLower.includes('otros') || categoryLower.includes('otro') ||
+      categoryLower.includes('misc') || categoryLower.includes('miscelaneo') || categoryLower.includes('varios') ||
+      categoryLower.includes('diversos') || categoryLower.includes('general')) {
+    return <FaGift style={{ color: 'white', fontSize: '16px' }} />;
+  }
+  
+  // Por defecto, ícono de compras
+  return <FaShoppingBag style={{ color: 'white', fontSize: '16px' }} />;
+};
+
+// Generate months for selector
+const generateMonths = (i18n) => {
+  const monthsList = [];
+  const currentDate = dayjs();
+  
+  // Generate 12 months (current + 11 previous)
+  for (let i = 0; i < 12; i++) {
+    const month = currentDate.subtract(i, 'month');
+    monthsList.push({
+      value: month.format('YYYY-MM'),
+      label: month.locale(i18n.language).format('MMMM YYYY'),
+      date: month
+    });
+  }
+  
+  return monthsList;
+};
 
 const Summary = () => {
   const [loading, setLoading]             = useState(true);
   const [cards, setCards]                 = useState([]);
   const [expenses, setExpenses]           = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(dayjs());
+  const [months, setMonths] = useState([]);
   const [modalVisible, setModalVisible]   = useState(false);
   const [selectedCard, setSelectedCard]   = useState(null);
   const [cardTransactions, setCardTransactions] = useState([]);
@@ -42,6 +261,11 @@ const Summary = () => {
     'American Express': 'linear-gradient(135deg,rgb(61, 158, 255),rgb(158, 239, 255))',
     Cash: 'linear-gradient(135deg,rgb(0, 201, 104),rgb(105, 255, 175))',
   };
+
+  // Initialize months
+  useEffect(() => {
+    setMonths(generateMonths(i18n));
+  }, [i18n]);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -226,9 +450,17 @@ const Summary = () => {
       return card;
     });
 
+    // Filtrar cards que tengan al menos un monto mayor a 0 y que no sean vacías
+    const filteredCards = cardsData.filter(card => {
+      const hasValidAmounts = card.amounts.some(amount => parseFloat(amount.amount) > 0);
+      const hasValidBank = card.bank && card.bank !== 'N/A' && card.bank.trim() !== '';
+      const hasValidCardType = card.cardType && card.cardType.trim() !== '';
+      return hasValidAmounts && hasValidBank && hasValidCardType;
+    });
+
     // Ordenar las tarjetas alfabéticamente por el nombre del banco
-    cardsData.sort((a, b) => a.bank.localeCompare(b.bank));
-    setCards(cardsData);
+    filteredCards.sort((a, b) => a.bank.localeCompare(b.bank));
+    setCards(filteredCards);
 
     // Actualiza el array global creditCards SOLO para tarjetas de crédito
     const userDocRef = doc(db, "users", currentUser.uid);
@@ -475,10 +707,10 @@ const Summary = () => {
         <div 
           style={{
             position: 'absolute',
-            top: -10,
-            right: -10,
-            width: 50,
-            height: 50,
+            top: 10,
+            right: 18,
+            width: 40,
+            height: 40,
             background: 'linear-gradient(135deg, #1890ff30, #40a9ff30)',
             borderRadius: '50%',
             zIndex: 10,
@@ -503,7 +735,7 @@ const Summary = () => {
           }}
         >
           <SearchOutlined style={{ 
-            color: '#1890ff', 
+            color: '#60a5fa', 
             fontSize: '16px',
             fontWeight: 'bold',
             pointerEvents: 'none',
@@ -658,7 +890,7 @@ const Summary = () => {
                   }} />
                   <span style={{ 
                     color: '#e2e8f0', 
-                    fontSize: '10px', 
+                    fontSize: '14px', 
                     fontWeight: '600',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -668,7 +900,7 @@ const Summary = () => {
                 </div>
                 <span style={{ 
                   color: '#4d8cff', 
-                  fontSize: '16px',
+                  fontSize: '20px',
                   fontWeight: '700'
                 }}>
                   ${totalARS.toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US')}
@@ -694,7 +926,7 @@ const Summary = () => {
                   }} />
                   <span style={{ 
                     color: '#e2e8f0', 
-                    fontSize: '10px', 
+                    fontSize: '14px', 
                     fontWeight: '600',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -704,7 +936,7 @@ const Summary = () => {
                 </div>
                 <span style={{ 
                   color: '#6be6b2', 
-                  fontSize: '16px',
+                  fontSize: '20px',
                   fontWeight: '700'
                 }}>
                   ${totalUSD.toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US')}
@@ -789,17 +1021,39 @@ const Summary = () => {
                 color: '#1890ff',
                 marginRight: '8px'
               }} />
-              <DatePicker
-                key={i18n.language}
-                picker="month"
-                value={selectedMonth}
-                onChange={val => setSelectedMonth(val || dayjs())}
-                format={i18n.language === 'en' ? 'MMM YYYY' : 'MMMM YYYY'}
-                locale={i18n.language === 'en' ? enUS : esES}
+              <Select
+                className="modern-select"
+                value={selectedMonth.format('YYYY-MM')}
+                onChange={(value) => {
+                  const selectedMonthData = months.find(m => m.value === value);
+                  if (selectedMonthData) {
+                    setSelectedMonth(selectedMonthData.date);
+                  }
+                }}
+                options={months}
                 style={{ width: '100%' }}
-                className={i18n.language === 'es' ? 'datepicker-capitalize' : ''}
+                placeholder="Seleccionar mes"
+                suffixIcon={<CalendarOutlined />}
               />
             </div>
+
+            {/* Métodos de Pago */}
+            {cards.length > 0 && (
+              <div style={{ marginTop: 24, marginBottom: 16 }}>
+                <h2 style={{ 
+                  fontSize: '20px', 
+                  fontWeight: 'bold', 
+                  color: 'white', 
+                  marginBottom: 16,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12
+                }}>
+                  <span>💳</span>
+                  <span>Métodos de Pago</span>
+                </h2>
+              </div>
+            )}
 
             {/* Card */}
             <div
@@ -857,14 +1111,14 @@ const Summary = () => {
                 <h2 style={{ 
                   fontSize: '20px', 
                   fontWeight: 'bold', 
-                  color: '#000000', 
+                  color: 'white', 
                   marginBottom: 16,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 12
                 }}>
                   <span>📊</span>
-                  <span>Resumen por Categorías</span>
+                  <span>Categorías</span>
                 </h2>
                 <ExpenseList 
                   expenses={expenses} 
@@ -912,14 +1166,17 @@ const Summary = () => {
         }}
         className="dark-modal"
         bodyStyle={{ 
-          padding: '12px',
-          background: '#1a1a1a',
-          color: '#ffffff'
+          padding: '20px',
+          background: 'linear-gradient(135deg, #1a202c 0%, #2d3748 100%)',
+          color: '#ffffff',
+          borderRadius: '0 0 12px 12px'
         }}
         headerStyle={{
-          background: '#2d3748',
-          borderBottom: '1px solid #4a5568',
-          color: '#ffffff'
+          background: 'linear-gradient(135deg, #2d3748 0%, #1a202c 100%)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          color: '#ffffff',
+          borderRadius: '12px 12px 0 0',
+          padding: '16px 20px'
         }}
         destroyOnClose
       >
@@ -935,7 +1192,18 @@ const Summary = () => {
       <Modal
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <SearchOutlined style={{ color: '#1890ff', fontSize: '20px' }} />
+            <div style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              background: selectedCategory ? getRandomColor(selectedCategory) : 'linear-gradient(135deg, #1890ff, #40a9ff)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+            }}>
+              {selectedCategory ? getCategoryIcon(selectedCategory) : <SearchOutlined style={{ color: 'white', fontSize: '16px' }} />}
+            </div>
             <Typography.Title level={4} style={{ margin: 0, color: '#ffffff' }}>
               {selectedCategory || 'Categoría'}
             </Typography.Title>
@@ -954,14 +1222,17 @@ const Summary = () => {
         }}
         className="dark-modal"
         bodyStyle={{ 
-          padding: '12px',
-          background: '#1a1a1a',
-          color: '#ffffff'
+          padding: '20px',
+          background: 'linear-gradient(135deg, #1a202c 0%, #2d3748 100%)',
+          color: '#ffffff',
+          borderRadius: '0 0 12px 12px'
         }}
         headerStyle={{
-          background: '#2d3748',
-          borderBottom: '1px solid #4a5568',
-          color: '#ffffff'
+          background: 'linear-gradient(135deg, #2d3748 0%, #1a202c 100%)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          color: '#ffffff',
+          borderRadius: '12px 12px 0 0',
+          padding: '16px 20px'
         }}
         destroyOnClose
       >

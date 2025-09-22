@@ -6,35 +6,63 @@ import {
   FaHome, 
   FaHeartbeat, 
   FaShoppingCart, 
-  FaBirthdayCake, 
   FaGift, 
   FaCreditCard, 
-  FaPhone, 
-  FaBook, 
   FaTrophy, 
   FaCamera, 
-  FaUser, 
   FaCut, 
   FaTrain, 
   FaSpotify,
-  FaVideo,
-  FaYoutube,
-  FaMusic,
   FaCoffee,
   FaCookieBite,
   FaDumbbell,
   FaWineGlass,
   FaWifi,
-  FaBeer,
-  FaCocktail,
   FaShoppingBag,
   FaUtensils,
   FaTshirt,
-  FaGem
+  FaGem,
+  FaPhone,
+  FaMusic,
+  FaBook
 } from 'react-icons/fa';
 import '../styles/ExpenseList.css';
 
 const ExpenseList = ({ expenses, onCategoryClick }) => {
+  // Función para generar colores aleatorios para los iconos
+  const getRandomColor = (category) => {
+    const colors = [
+      'linear-gradient(135deg, #ff4757, #ff3742)', // Rojo vibrante
+      'linear-gradient(135deg, #3742fa, #2f3542)', // Azul oscuro
+      'linear-gradient(135deg, #ff9ff3, #f368e0)', // Rosa magenta
+      'linear-gradient(135deg, #ffa502, #ff6348)', // Naranja brillante
+      'linear-gradient(135deg, #5f27cd, #341f97)', // Púrpura profundo
+      'linear-gradient(135deg, #00d2d3, #54a0ff)', // Cian azul
+      'linear-gradient(135deg, #ff9f43, #ff6b6b)', // Naranja rojo
+      'linear-gradient(135deg, #a55eea, #26de81)', // Púrpura verde
+      'linear-gradient(135deg, #fd79a8, #fdcb6e)', // Rosa amarillo
+      'linear-gradient(135deg, #6c5ce7, #a29bfe)', // Púrpura claro
+      'linear-gradient(135deg, #00b894, #00cec9)', // Verde turquesa
+      'linear-gradient(135deg, #e17055, #d63031)', // Rojo coral
+      'linear-gradient(135deg, #74b9ff, #0984e3)', // Azul cielo
+      'linear-gradient(135deg, #fdcb6e, #e17055)', // Amarillo naranja
+      'linear-gradient(135deg, #fd79a8, #e84393)', // Rosa fucsia
+      'linear-gradient(135deg, #00b894, #00cec9)', // Verde esmeralda
+      'linear-gradient(135deg, #6c5ce7, #a29bfe)', // Púrpura índigo
+      'linear-gradient(135deg, #fdcb6e, #e17055)', // Dorado
+      'linear-gradient(135deg, #fd79a8, #fdcb6e)', // Rosa dorado
+      'linear-gradient(135deg, #00d2d3, #54a0ff)', // Turquesa azul
+    ];
+    
+    // Usar el nombre de la categoría para generar un índice consistente
+    let hash = 0;
+    for (let i = 0; i < category.length; i++) {
+      hash = category.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+  };
+
   // Función para detectar el tipo de categoría y asignar ícono
   const getCategoryIcon = (category) => {
     const categoryLower = category.toLowerCase();
@@ -278,9 +306,9 @@ const ExpenseList = ({ expenses, onCategoryClick }) => {
               style={{ 
                 marginBottom: 0,
                 borderRadius: 16,
-                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                border: 'none',
-                background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                background: 'linear-gradient(135deg, #2d3748 0%, #1a202c 100%)',
                 overflow: 'hidden',
                 position: 'relative',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -299,7 +327,7 @@ const ExpenseList = ({ expenses, onCategoryClick }) => {
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.18)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.4)';
                 // Efecto en el ícono
                 const iconElement = e.currentTarget.querySelector('.category-icon');
                 if (iconElement) {
@@ -309,7 +337,7 @@ const ExpenseList = ({ expenses, onCategoryClick }) => {
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)';
                 // Restaurar el ícono
                 const iconElement = e.currentTarget.querySelector('.category-icon');
                 if (iconElement) {
@@ -361,12 +389,12 @@ const ExpenseList = ({ expenses, onCategoryClick }) => {
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  background: 'linear-gradient(135deg, #1890ff, #40a9ff)',
+                  background: getRandomColor(category),
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginRight: 10,
-                  boxShadow: '0 4px 12px rgba(24, 144, 255, 0.3)'
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
                 }}>
                         {getCategoryIcon(category)}
                 </div>
@@ -374,7 +402,7 @@ const ExpenseList = ({ expenses, onCategoryClick }) => {
                   <div style={{ 
                     fontSize: '15px', 
                     fontWeight: '700', 
-                    color: '#1a202c',
+                    color: 'white',
                     marginBottom: 2,
                     lineHeight: 1.2
                   }}>
@@ -382,7 +410,7 @@ const ExpenseList = ({ expenses, onCategoryClick }) => {
                   </div>
                   <div style={{ 
                     fontSize: '12px', 
-                    color: '#64748b',
+                    color: 'rgba(255, 255, 255, 0.7)',
                     fontWeight: '500'
                   }}>
                     Categoría
@@ -394,7 +422,7 @@ const ExpenseList = ({ expenses, onCategoryClick }) => {
               <div style={{ marginBottom: 16, position: 'relative', zIndex: 3 }}>
                 <div style={{
                   fontSize: '12px',
-                  color: '#64748b',
+                  color: 'rgba(255, 255, 255, 0.7)',
                   fontWeight: '600',
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px',
@@ -405,20 +433,20 @@ const ExpenseList = ({ expenses, onCategoryClick }) => {
                 <div style={{
                   fontSize: '24px',
                   fontWeight: '800',
-                  color: '#1a202c',
+                  color: 'white',
                   lineHeight: 1,
                   display: 'flex',
                   alignItems: 'baseline',
                   gap: 4
                 }}>
-                  <DollarOutlined style={{ fontSize: '18px', color: '#1890ff' }} />
+                  <DollarOutlined style={{ fontSize: '18px', color: '#69c0ff' }} />
                   {total.toLocaleString('es-AR', { 
                     minimumFractionDigits: 2, 
                     maximumFractionDigits: 2 
                   })}
                   <span style={{ 
                     fontSize: '14px', 
-                    color: '#64748b',
+                    color: 'rgba(255, 255, 255, 0.7)',
                     fontWeight: '600',
                     marginLeft: 4
                   }}>
@@ -433,9 +461,9 @@ const ExpenseList = ({ expenses, onCategoryClick }) => {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '12px 16px',
-                background: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)',
+                background: 'rgba(255, 255, 255, 0.05)',
                 borderRadius: 12,
-                border: '1px solid #bae6fd',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
                 position: 'relative',
                 zIndex: 3
               }}>
@@ -449,7 +477,7 @@ const ExpenseList = ({ expenses, onCategoryClick }) => {
                   }} />
                   <span style={{ 
                     fontSize: '13px', 
-                    color: '#065f46',
+                    color: 'rgba(255, 255, 255, 0.8)',
                     fontWeight: '600'
                   }}>
                     {count} {count === 1 ? 'transacción' : 'transacciones'}

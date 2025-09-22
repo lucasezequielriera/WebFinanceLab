@@ -195,6 +195,12 @@
     "userProfile.navbar.addExpense": "Agregar Gasto",
     "userProfile.navbar.addTarget": "Agregar Objetivo",
     "userProfile.navbar.addStock": "Agregar Acción",
+    "userProfile.navbar.addAction": {
+        "title": "Agregar Nuevo",
+        "subtitle": "Selecciona qué quieres agregar",
+        "incomeDescription": "Registrar un ingreso",
+        "expenseDescription": "Registrar un gasto"
+    },
 
     "userProfile.financialGoals.title": "Mis Objetivos Financieros",
     "userProfile.financialGoals.subtitle": "Aquí puedes fijar tus objetivos financieros y configurarlo todo. Nosotros te ayudamos a que puedas mantener tus finanzas y tener la capacidad de ahorro que tanto buscas.",

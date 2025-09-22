@@ -400,18 +400,7 @@ const ProfileConfig = () => {
                                         placeholder="Phone"
                                     />
                                 </Col>
-                                <Col span={12}>
-                                    <label className="label-small">{t('userProfile.profile.language.label')}</label>
-                                    <Select
-                                        style={{ width: '100%', marginTop: 3 }}
-                                        value={userData.language}
-                                        onChange={(value) => setUserData(prev => ({ ...prev, language: value }))}
-                                        options={[
-                                            { value: 'en', label: t('userProfile.profile.language.en') },
-                                            { value: 'es', label: t('userProfile.profile.language.es') }
-                                        ]}
-                                    />
-                                </Col>
+                                {/* Language selector removed; managed in Configuration */}
                             </Row>
                         </div>
                     </div>
