@@ -12,7 +12,7 @@
             "fixedExpenses": "Monthly Expenses",
             "payments": "Payments",
             "financialGoals": "My Goals",
-            "profile": "Profile",
+            "configuration": "Configuration",
             "logout": "Log Out"
         }
     },
