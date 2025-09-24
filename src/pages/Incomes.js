@@ -15,6 +15,7 @@ import dayjs                                                      from 'dayjs';
 import { useTranslation }                                         from 'react-i18next';
 import CurrencyTagPicker                                          from '../components/CurrencyTagPicker';
 import ModernDeleteConfirm                                        from '../components/ModernDeleteConfirm';
+import useIsMobile                                                from '../hooks/useIsMobile';
 
 const Income = () => {
   const [loading, setLoading]                   = useState(true);
@@ -33,6 +34,7 @@ const Income = () => {
   const { Title, Paragraph } = Typography;
 
   const currentLocale = i18n.language === 'en' ? enUS : es;
+  const isMobile = useIsMobile();
 
   const handleMonthChange = m => setSelectedMonth(m);
 
@@ -216,71 +218,159 @@ const Income = () => {
           {/* Incomes Table */}
           {filtered.length > 0 ? (
             <>
-              {/* Custom modern table (no AntD Table) */}
-              <div className="modern-grid-table">
-                <div className="modern-grid-header">
-                  <div className="col col-date">{t('userProfile.incomes.table.date')}</div>
-                  <div className="col col-desc">{t('userProfile.incomes.table.description')}</div>
-                  <div className="col col-amt">{t('userProfile.incomes.table.amount')}</div>
-                  <div className="col col-cur">{t('userProfile.incomes.table.currency')}</div>
-                  <div className="col col-act">{t('userProfile.incomes.table.actions')}</div>
+              {/* Desktop/tablet: tabla moderna */}
+              {!isMobile && (
+                <div className="modern-grid-table">
+                  <div className="modern-grid-header">
+                    <div className="col col-date">{t('userProfile.incomes.table.date')}</div>
+                    <div className="col col-desc">{t('userProfile.incomes.table.description')}</div>
+                    <div className="col col-amt">{t('userProfile.incomes.table.amount')}</div>
+                    <div className="col col-cur">{t('userProfile.incomes.table.currency')}</div>
+                    <div className="col col-act">{t('userProfile.incomes.table.actions')}</div>
+                  </div>
+                  <div className="modern-grid-body">
+                    {filtered
+                      .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
+                      .map((rec) => {
+                        const dt = new Date(rec.timestamp.seconds * 1000);
+                        const dateStr = format(dt, i18n.language === 'en' ? 'MM/dd/yyyy' : 'dd/MM/yyyy', { locale: currentLocale });
+                        return (
+                          <div className="modern-grid-row" key={rec.id}>
+                            <div className="col col-date">{dateStr}</div>
+                            <div className="col col-desc" title={rec.title}>{rec.title}</div>
+                            <div className="col col-amt">${Number(rec.amount).toFixed(2)}</div>
+                            <div className="col col-cur">{rec.currency}</div>
+                            <div className="col col-act">
+                              <span
+                                className="action-chip edit"
+                                onClick={() => {
+                                  setEditingIncome(rec);
+                                  form.setFieldsValue({
+                                    ...rec,
+                                    timestamp: dayjs(rec.timestamp.toDate()),
+                                  });
+                                  setEditModalVisible(true);
+                                }}
+                              >
+                                <EditOutlined />
+                              </span>
+                              <ModernDeleteConfirm
+                                title={t('userProfile.incomes.table.deleteIncome.ask')}
+                                description="Esta acción no se puede deshacer."
+                                okText="Eliminar"
+                                cancelText="Cancelar"
+                                onConfirm={async () => {
+                                  try {
+                                    await deleteDoc(doc(db, `users/${currentUser.uid}/incomes`, rec.id));
+                                    await updateDoc(doc(db, 'users', currentUser.uid), { lastActivity: Timestamp.now() });
+                                    notification.success({ message: t('userProfile.incomes.table.deleteIncome.deleted') });
+                                  } catch {
+                                    notification.error({ message: t('userProfile.incomes.table.deleteIncome.error') });
+                                  }
+                                }}
+                              >
+                                <span className="action-chip delete"><DeleteOutlined /></span>
+                              </ModernDeleteConfirm>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
                 </div>
-                <div className="modern-grid-body">
+              )}
+
+              {/* Mobile: tarjetas apiladas */}
+              {isMobile && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {filtered
                     .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
                     .map((rec) => {
                       const dt = new Date(rec.timestamp.seconds * 1000);
                       const dateStr = format(dt, i18n.language === 'en' ? 'MM/dd/yyyy' : 'dd/MM/yyyy', { locale: currentLocale });
                       return (
-                        <div className="modern-grid-row" key={rec.id}>
-                          <div className="col col-date">{dateStr}</div>
-                          <div className="col col-desc" title={rec.title}>{rec.title}</div>
-                          <div className="col col-amt">${Number(rec.amount).toFixed(2)}</div>
-                          <div className="col col-cur">{rec.currency}</div>
-                          <div className="col col-act">
-                            <span
-                              className="action-chip edit"
-                              onClick={() => {
-                                setEditingIncome(rec);
-                                form.setFieldsValue({
-                                  ...rec,
-                                  timestamp: dayjs(rec.timestamp.toDate()),
-                                });
-                                setEditModalVisible(true);
-                              }}
-                            >
-                              <EditOutlined />
-                            </span>
-                            <ModernDeleteConfirm
-                              title={t("userProfile.incomes.table.deleteIncome.ask")}
-                              description="Esta acción no se puede deshacer."
-                              okText="Eliminar"
-                              cancelText="Cancelar"
-                              onConfirm={async () => {
-                                try {
-                                  await deleteDoc(doc(db, `users/${currentUser.uid}/incomes`, rec.id));
-                                  await updateDoc(doc(db, 'users', currentUser.uid), { lastActivity: Timestamp.now() });
-                                  notification.success({ message: t("userProfile.incomes.table.deleteIncome.deleted") });
-                                } catch {
-                                  notification.error({ message: t("userProfile.incomes.table.deleteIncome.error") });
-                                }
-                              }}
-                            >
-                              <span className="action-chip delete"><DeleteOutlined /></span>
-                            </ModernDeleteConfirm>
+                        <div
+                          key={rec.id}
+                          style={{
+                            background: 'linear-gradient(135deg, #2d3748 0%, #1a202c 100%)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: 12,
+                            padding: 12,
+                            boxShadow: '0 6px 18px rgba(0,0,0,0.25)'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ color: '#e2e8f0', fontSize: 12 }}>{dateStr}</div>
+                            <div style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 8
+                            }}>
+                              <span style={{
+                                background: rec.currency === 'USD' ? 'rgba(107, 230, 178, 0.12)' : 'rgba(105, 192, 255, 0.12)',
+                                color: rec.currency === 'USD' ? '#6be6b2' : '#69c0ff',
+                                border: '1px solid rgba(255,255,255,0.12)',
+                                borderRadius: 8,
+                                padding: '4px 8px',
+                                fontSize: 12,
+                                fontWeight: 600
+                              }}>
+                                {rec.currency}
+                              </span>
+                            </div>
+                          </div>
+                          <div style={{ marginTop: 6, color: '#fff', fontWeight: 600, fontSize: 14 }} title={rec.title}>
+                            {rec.title}
+                          </div>
+                          <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ color: rec.currency === 'USD' ? '#6be6b2' : '#69c0ff', fontSize: 16, fontWeight: 700 }}>
+                              ${Number(rec.amount).toFixed(2)}
+                            </div>
+                            <div style={{ display: 'flex', gap: 10 }}>
+                              <span
+                                className="action-chip edit"
+                                onClick={() => {
+                                  setEditingIncome(rec);
+                                  form.setFieldsValue({
+                                    ...rec,
+                                    timestamp: dayjs(rec.timestamp.toDate()),
+                                  });
+                                  setEditModalVisible(true);
+                                }}
+                                style={{ cursor: 'pointer' }}
+                              >
+                                <EditOutlined />
+                              </span>
+                              <ModernDeleteConfirm
+                                title={t('userProfile.incomes.table.deleteIncome.ask')}
+                                description="Esta acción no se puede deshacer."
+                                okText="Eliminar"
+                                cancelText="Cancelar"
+                                onConfirm={async () => {
+                                  try {
+                                    await deleteDoc(doc(db, `users/${currentUser.uid}/incomes`, rec.id));
+                                    await updateDoc(doc(db, 'users', currentUser.uid), { lastActivity: Timestamp.now() });
+                                    notification.success({ message: t('userProfile.incomes.table.deleteIncome.deleted') });
+                                  } catch {
+                                    notification.error({ message: t('userProfile.incomes.table.deleteIncome.error') });
+                                  }
+                                }}
+                              >
+                                <span className="action-chip delete" style={{ cursor: 'pointer' }}><DeleteOutlined /></span>
+                              </ModernDeleteConfirm>
+                            </div>
                           </div>
                         </div>
                       );
                     })}
                 </div>
-              </div>
+              )}
 
               <div className="modern-card-footer">
                 <div className="totals">
-                  <span className="total-label">{t('userProfile.incomes.table.totalARS')}</span>
+                  <span className="total-label" style={{ textTransform: 'uppercase', fontSize: 12 }}>{t('userProfile.incomes.table.totalARS')}</span>
                   <span className="total-value">${totalARS.toFixed(2)}</span>
                   <span className="divider">|</span>
-                  <span className="total-label">{t('userProfile.incomes.table.totalUSD')}</span>
+                  <span className="total-label" style={{ textTransform: 'uppercase', fontSize: 12 }}>{t('userProfile.incomes.table.totalUSD')}</span>
                   <span className="total-value">${totalUSD.toFixed(2)}</span>
                 </div>
               </div>

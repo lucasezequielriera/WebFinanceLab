@@ -1040,7 +1040,7 @@ const Summary = () => {
             {/* Métodos de Pago */}
             {cards.length > 0 && (
               <div style={{ marginTop: 24, marginBottom: 16 }}>
-                <h2 style={{ 
+                <h2 className="summary-section-title payment-methods-title" style={{ 
                   fontSize: '20px', 
                   fontWeight: 'bold', 
                   color: 'white', 
@@ -1108,7 +1108,7 @@ const Summary = () => {
             {/* ExpenseList Component - Vista de categorías */}
             {expenses.length > 0 && (
               <div style={{ marginTop: 32 }}>
-                <h2 style={{ 
+                <h2 className="summary-section-title categories-title" style={{ 
                   fontSize: '20px', 
                   fontWeight: 'bold', 
                   color: 'white', 

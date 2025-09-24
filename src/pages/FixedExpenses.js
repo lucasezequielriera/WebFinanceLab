@@ -1,5 +1,5 @@
 import React, { useState, useEffect }                                   from 'react';
-import { Spin, Empty, Table, Button, Input, Checkbox, Popconfirm, Form, message, Tag, AutoComplete, Modal, Tooltip, DatePicker } from 'antd';
+import { Spin, Empty, Button, Input, Checkbox, Form, message, Tag, AutoComplete, Modal, Tooltip, DatePicker, Typography, Row, Col } from 'antd';
 import { doc, onSnapshot, setDoc }                                      from 'firebase/firestore';
 import { db }                                                           from '../firebase';
 import { storage }                                                      from '../firebase';
@@ -11,9 +11,11 @@ import useMonthlyMovements                                              from '..
 // Styles
 import '../styles/Expenses.css';
 import { EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, FileTextOutlined, InfoCircleOutlined, SettingOutlined, FilePdfOutlined, FilterOutlined } from '@ant-design/icons';
+import ModernDeleteConfirm                                          from '../components/ModernDeleteConfirm';
 import { NumericFormat } from 'react-number-format';
 import enUS from 'antd/es/date-picker/locale/en_US';
 import esES from 'antd/es/date-picker/locale/es_ES';
+import useIsMobile                                                     from '../hooks/useIsMobile';
 
 const FixedExpenses = () => {
   const [loading, setLoading]             = useState(true);
@@ -26,10 +28,14 @@ const FixedExpenses = () => {
   const [uploading, setUploading] = useState(false);
   const [pdfFile, setPdfFile] = useState(null);
   const [confirmPdfModal, setConfirmPdfModal] = useState({ visible: false, id: null, row: null, oldPdfUrl: null });
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editingPayment, setEditingPayment] = useState(null);
+  const [updating, setUpdating] = useState(false);
 
   const { currentUser } = useAuth();
   const { t, i18n } = useTranslation();
   const { hasExpenses } = useMonthlyMovements();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -139,6 +145,32 @@ const FixedExpenses = () => {
         return;
       }
       message.error(t("userProfile.expenses.fixedExpenses.table.error"));
+    }
+  };
+
+  const openEditModal = (record) => {
+    setEditingPayment(record);
+    form.setFieldsValue({
+      title: record.title ?? '',
+      amountARS: record.amountARS ?? 0,
+      amountUSD: record.amountUSD ?? 0,
+      paid: !!record.paid,
+      notes: record.notes ?? ''
+    });
+    setEditModalVisible(true);
+  };
+
+  const handleEditSubmit = async () => {
+    try {
+      setUpdating(true);
+      const values = await form.validateFields();
+      await save(editingPayment.id, values);
+      setEditModalVisible(false);
+      setEditingPayment(null);
+    } catch (e) {
+      // validation handled by antd
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -359,10 +391,16 @@ const FixedExpenses = () => {
               </>
             ) : (
               <>
-                <Tag icon={<EditOutlined />} onClick={() => edit(record)} style={{ cursor: 'pointer', margin: 0 }} />
-                <Popconfirm title={t("userProfile.expenses.fixedExpenses.table.delete.ask")} onConfirm={() => handleDelete(record.id)}>
+                <Tag icon={<EditOutlined />} onClick={() => openEditModal(record)} style={{ cursor: 'pointer', margin: 0 }} />
+                <ModernDeleteConfirm
+                  title={t('userProfile.expenses.fixedExpenses.table.delete.ask')}
+                  description={t('userProfile.expenses.fixedExpenses.table.delete.description')}
+                  okText={t('userProfile.expenses.fixedExpenses.table.delete.confirmButton')}
+                  cancelText={t('userProfile.expenses.fixedExpenses.table.delete.cancelButton')}
+                  onConfirm={() => handleDelete(record.id)}
+                >
                   <Tag icon={<DeleteOutlined />} color="red" style={{ cursor: 'pointer', margin: 0 }} />
-                </Popconfirm>
+                </ModernDeleteConfirm>
               </>
             )}
           </div>
@@ -380,49 +418,158 @@ const FixedExpenses = () => {
 
   const EditableTable = () => (
     <Form form={form} component={false}>
-      <Table
-        bordered
-        dataSource={monthlyPayments}
-        columns={columns}
-        rowKey="id"
-        loading={mpLoading}
-        pagination={{ pageSize: 8 }}
-        scroll={{ x: true }}
-        size="medium"
-        locale={{
-          emptyText: <Empty description={t("userProfile.expenses.fixedExpenses.noFixedExpenses")} />
-        }}
-      />
-      {/* Totales debajo de la tabla */}
-      {savedPayments.length > 0 && (
-        <div
-          style={{
-            textAlign: 'left',
-            marginTop: 0,
-            marginLeft: 2,
-            borderRadius: 10,
-            background: '#fff',
-            boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
-            padding: '14px 20px',
-            maxWidth: 240,
-            border: '1px solid #f0f0f0',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 0
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', fontWeight: 500, fontSize: 16, color: '#222' }}>
-            Total ARS:
-            <span style={{ marginLeft: 8, fontWeight: 700, fontSize: 16, color: '#0071de' }}>
-              ${totalARS.toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US', { minimumFractionDigits: 2 })}
-            </span>
+      {!isMobile && (
+        <div className="modern-grid-table fixed-grid-table">
+          <div className="modern-grid-header">
+            <div className="col">{t("userProfile.incomes.table.description")}</div>
+            <div className="col">{t("userProfile.expenses.fixedExpenses.table.amountArs")}</div>
+            <div className="col">{t("userProfile.expenses.fixedExpenses.table.amountUsd")}</div>
+            <div className="col" style={{ textAlign: 'center' }}>{t("userProfile.expenses.fixedExpenses.table.paid")}</div>
+            <div className="col" style={{ textAlign: 'center' }}>{t("userProfile.expenses.fixedExpenses.table.pdf")}</div>
+            <div className="col" style={{ textAlign: 'center' }}>{t("userProfile.expenses.fixedExpenses.table.info")}</div>
+            <div className="col" style={{ textAlign: 'center' }}>{t('userProfile.incomes.table.actions')}</div>
+          </div>
+          <div className="modern-grid-body">
+            {monthlyPayments.map((record) => (
+              <div className="modern-grid-row" key={record.id}>
+                <div className="col">
+                  {isEditing(record) ? (
+                    <Form.Item name="title" style={{ margin: 0 }} rules={[{ required: true, message: 'Ingrese un nombre' }]}> 
+                      <AutoComplete
+                        style={{ width: 180 }}
+                        value={form.getFieldValue('title')}
+                        onChange={v => form.setFieldsValue({ title: v || '' })}
+                        placeholder={t('userProfile.incomes.table.description')}
+                        options={titlesList.filter(Boolean).map(tit => ({ value: tit, label: tit }))}
+                        filterOption={(inputValue, option) => option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1}
+                      />
+                    </Form.Item>
+                  ) : (
+                    record.title
+                  )}
+                </div>
+                <div className="col">
+                  {isEditing(record) ? (
+                    <Form.Item name="amountARS" style={{ margin: 0 }} rules={[{ required: true, message: 'Ingrese un monto' }]}> 
+                      <NumericFormat customInput={Input} allowNegative={false} decimalScale={2} fixedDecimalScale thousandSeparator={i18n.language === 'es' ? '.' : ','} decimalSeparator={i18n.language === 'es' ? ',' : '.'} prefix={'$'} placeholder={i18n.language === 'es' ? '0,00' : '0.00'} onValueChange={vals => form.setFieldsValue({ amountARS: vals.floatValue ?? '' })} value={form.getFieldValue('amountARS')} />
+                    </Form.Item>
+                  ) : (
+                    record.amountARS ? `$${Number(record.amountARS).toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US', { minimumFractionDigits: 2 })}` : '$0,00'
+                  )}
+                </div>
+                <div className="col">
+                  {isEditing(record) ? (
+                    <Form.Item name="amountUSD" style={{ margin: 0 }} rules={[{ required: true, message: 'Ingrese un monto' }]}> 
+                      <NumericFormat customInput={Input} allowNegative={false} decimalScale={2} fixedDecimalScale thousandSeparator={i18n.language === 'es' ? '.' : ','} decimalSeparator={i18n.language === 'es' ? ',' : '.'} prefix={'$'} placeholder={i18n.language === 'es' ? '0,00' : '0.00'} onValueChange={vals => form.setFieldsValue({ amountUSD: vals.floatValue ?? '' })} value={form.getFieldValue('amountUSD')} />
+                    </Form.Item>
+                  ) : (
+                    record.amountUSD ? `$${Number(record.amountUSD).toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US', { minimumFractionDigits: 2 })}` : '$0,00'
+                  )}
+                </div>
+                <div className="col" style={{ textAlign: 'center' }}>
+                  {isEditing(record) ? (
+                    <Form.Item name="paid" valuePropName="checked" style={{ margin: 0 }}>
+                      <Checkbox />
+                    </Form.Item>
+                  ) : (
+                    record.paid ? <CheckOutlined style={{ color: '#52c41a', fontSize: 16 }} /> : <CloseOutlined style={{ color: 'red', fontSize: 16 }} />
+                  )}
+                </div>
+                <div className="col" style={{ textAlign: 'center' }}>
+                  {isEditing(record) ? (
+                    <label style={{ cursor: 'pointer' }}>
+                      <FilePdfOutlined style={{ color: (pdfFile || record.pdfUrl) ? '#d4380d' : '#d9d9d9', fontSize: 18, verticalAlign: 'middle' }} />
+                      <input type="file" accept="application/pdf" onChange={handlePdfChange} disabled={uploading} style={{ display: 'none' }} />
+                    </label>
+                  ) : (
+                    record.pdfUrl ? <a href={record.pdfUrl} target="_blank" rel="noopener noreferrer"><FilePdfOutlined style={{ color: '#d4380d', fontSize: 18, cursor: 'pointer' }} /></a> : null
+                  )}
+                </div>
+                <div className="col" style={{ textAlign: 'center' }}>
+                  {isEditing(record) ? (
+                    <>
+                      <Form.Item name="notes" style={{ display: 'none' }} />
+                      <span onClick={() => openNoteModal(record)} style={{ cursor: 'pointer' }}>
+                        <InfoCircleOutlined style={{ color: record.notes && record.notes.trim() !== '' ? '#1890ff' : '#d9d9d9', fontSize: 16 }} />
+                      </span>
+                    </>
+                  ) : (
+                    record.notes && record.notes.trim() !== '' ? (
+                      <Tooltip title={record.notes} placement="top">
+                        <InfoCircleOutlined style={{ color: '#1890ff', fontSize: 16 }} />
+                      </Tooltip>
+                    ) : null
+                  )}
+                </div>
+                <div className="col" style={{ textAlign: 'center', display: 'flex', gap: 8, justifyContent: 'center' }}>
+                  {isEditing(record) ? (
+                    <>
+                      <Tag icon={<CheckOutlined />} onClick={() => save(record.id)} style={{ cursor: 'pointer', margin: 0 }} />
+                      <Tag icon={<CloseOutlined />} onClick={cancel} style={{ cursor: 'pointer', margin: 0 }} />
+                      <Tag icon={<FileTextOutlined />} onClick={() => openNoteModal(record)} style={{ cursor: 'pointer', margin: 0 }} />
+                    </>
+                  ) : (
+                    <>
+                      <span className="action-chip edit" onClick={() => openEditModal(record)}><EditOutlined /></span>
+                      <ModernDeleteConfirm
+                        title={t('userProfile.expenses.fixedExpenses.table.delete.ask')}
+                        description={t('userProfile.expenses.fixedExpenses.table.delete.description')}
+                        okText={t('userProfile.expenses.fixedExpenses.table.delete.confirmButton')}
+                        cancelText={t('userProfile.expenses.fixedExpenses.table.delete.cancelButton')}
+                        onConfirm={() => handleDelete(record.id)}
+                      >
+                        <span className="action-chip delete"><DeleteOutlined /></span>
+                      </ModernDeleteConfirm>
+                    </>
+                  )}
+                </div>
               </div>
-          <div style={{ borderTop: '1px solid #f0f0f0', margin: '10px 0 8px 0' }} />
-          <div style={{ display: 'flex', alignItems: 'center', fontWeight: 500, fontSize: 16, color: '#222' }}>
-            Total USD:
-            <span style={{ marginLeft: 8, fontWeight: 700, fontSize: 16, color: '#0071de' }}>
-              ${totalUSD.toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US', { minimumFractionDigits: 2 })}
-            </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {isMobile && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {monthlyPayments.map((record) => (
+            <div key={record.id} style={{ background: 'linear-gradient(135deg, #2d3748 0%, #1a202c 100%)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: 12, boxShadow: '0 6px 18px rgba(0,0,0,0.25)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ color: '#e2e8f0', fontWeight: 700 }}>{record.title}</div>
+                <div>{record.paid ? <CheckOutlined style={{ color: '#52c41a' }} /> : <CloseOutlined style={{ color: 'red' }} />}</div>
+              </div>
+              <div style={{ marginTop: 6, display: 'flex', gap: 12, color: '#69c0ff', fontWeight: 800 }}>
+                <div>ARS ${Number(record.amountARS || 0).toFixed(2)}</div>
+                <div>USD ${Number(record.amountUSD || 0).toFixed(2)}</div>
+              </div>
+              <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ color: '#e2e8f0', opacity: 0.85 }}>{record.notes}</div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <span className="action-chip edit" onClick={() => openEditModal(record)}><EditOutlined /></span>
+                  <ModernDeleteConfirm
+                    title={t('userProfile.expenses.fixedExpenses.table.delete.ask')}
+                    description={t('userProfile.expenses.fixedExpenses.table.delete.description')}
+                    okText={t('userProfile.expenses.fixedExpenses.table.delete.confirmButton')}
+                    cancelText={t('userProfile.expenses.fixedExpenses.table.delete.cancelButton')}
+                    onConfirm={() => handleDelete(record.id)}
+                  >
+                    <span className="action-chip delete" style={{ cursor: 'pointer' }}><DeleteOutlined /></span>
+                  </ModernDeleteConfirm>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Totales debajo */}
+      {savedPayments.length > 0 && (
+        <div className="modern-card-footer">
+          <div className="totals">
+            <span className="total-label" style={{ textTransform: 'uppercase' }}>Total ARS</span>
+            <span className="total-value">${totalARS.toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US', { minimumFractionDigits: 2 })}</span>
+            <span className="divider">|</span>
+            <span className="total-label" style={{ textTransform: 'uppercase' }}>Total USD</span>
+            <span className="total-value">${totalUSD.toLocaleString(i18n.language === 'es' ? 'es-AR' : 'en-US', { minimumFractionDigits: 2 })}</span>
             </div>
         </div>
       )}
@@ -494,7 +641,7 @@ const FixedExpenses = () => {
                 format={i18n.language === 'en' ? 'MMM YYYY' : 'MMMM YYYY'}
                 locale={i18n.language === 'en' ? enUS : esES}
                 style={{ width: '100%' }}
-                className={i18n.language === 'es' ? 'datepicker-capitalize' : ''}
+                className={`${i18n.language === 'es' ? 'datepicker-capitalize ' : ''}modern-month-picker`}
               />
             </div>
 
@@ -510,6 +657,7 @@ const FixedExpenses = () => {
     </div>
 
       <Modal
+        className="dark-modal"
         title={t("userProfile.expenses.fixedExpenses.table.addInfo")}
         open={noteModal.visible}
         onOk={handleNoteSave}
@@ -526,6 +674,7 @@ const FixedExpenses = () => {
       </Modal>
 
       <Modal
+        className="dark-modal"
         open={confirmPdfModal.visible}
         title={t("userProfile.expenses.fixedExpenses.table.keepDocumentModal.title")}
         onCancel={() => setConfirmPdfModal({ visible: false, id: null, row: null, oldPdfUrl: null })}
@@ -539,6 +688,98 @@ const FixedExpenses = () => {
         ]}
       >
         {t("userProfile.expenses.fixedExpenses.table.keepDocumentModal.subtitle")}
+      </Modal>
+
+      {/* Edit Fixed Expense Modal */}
+      <Modal
+        className="edit-income-modal fixed-expense-edit"
+        open={editModalVisible}
+        footer={null}
+        onCancel={() => { setEditModalVisible(false); setEditingPayment(null); }}
+        centered
+        width={520}
+      >
+        <div className="edit-income-modal-content">
+          <div className="modal-header">
+            <div className="modal-icon-container income-icon"><EditOutlined /></div>
+            <div className="modal-title-section">
+              <Typography.Title level={3} className="modal-title">Editar gasto fijo</Typography.Title>
+              <Typography.Paragraph className="modal-subtitle">{t('userProfile.expenses.fixedExpenses.editModal.subtitle') || 'Edita los detalles del gasto fijo'}</Typography.Paragraph>
+            </div>
+          </div>
+
+          <Form form={form} layout="vertical" onFinish={handleEditSubmit} className="edit-income-form">
+            <Form.Item name="title" label={t('userProfile.expenses.fixedExpenses.table.title')} rules={[{ required: true }]} className="form-item-modern">
+              <AutoComplete
+                className="modern-input"
+                options={titlesList.filter(Boolean).map(tit => ({ value: tit, label: tit }))}
+                placeholder={t('userProfile.expenses.fixedExpenses.table.title')}
+              />
+            </Form.Item>
+
+            <Row gutter={[16,16]}>
+              <Col xs={12}>
+                <Form.Item name="amountARS" label={t('userProfile.expenses.fixedExpenses.table.amountArs')} rules={[{ required: true }]} className="form-item-modern">
+                  <NumericFormat customInput={Input} allowNegative={false} decimalScale={2} fixedDecimalScale thousandSeparator={i18n.language === 'es' ? '.' : ','} decimalSeparator={i18n.language === 'es' ? ',' : '.'} prefix={'$'} className="modern-input" />
+                </Form.Item>
+              </Col>
+              <Col xs={12}>
+                <Form.Item name="amountUSD" label={t('userProfile.expenses.fixedExpenses.table.amountUsd')} rules={[{ required: true }]} className="form-item-modern">
+                  <NumericFormat customInput={Input} allowNegative={false} decimalScale={2} fixedDecimalScale thousandSeparator={i18n.language === 'es' ? '.' : ','} decimalSeparator={i18n.language === 'es' ? ',' : '.'} prefix={'$'} className="modern-input" />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Form.Item name="paid" valuePropName="checked" className="form-item-modern">
+              <Checkbox className="modern-checkbox" /> <span className="modern-checkbox-label" style={{ color: '#e6f7ff', verticalAlign: 'super', fontSize: 12, fontWeight: 600 }}>Pago realizado</span>
+            </Form.Item>
+
+            <Form.Item name="notes" label={t('userProfile.expenses.fixedExpenses.table.info')} className="form-item-modern">
+              <Input.TextArea className="modern-textarea" rows={3} />
+            </Form.Item>
+
+            <div className="modal-section-label">
+              {(() => {
+                const base = t('userProfile.expenses.fixedExpenses.table.pdfFile') || 'Archivo PDF';
+                const nameFromState = pdfFile && pdfFile.name ? pdfFile.name : null;
+                let nameFromRecord = null;
+                if (!nameFromState && editingPayment && editingPayment.pdfUrl) {
+                  try {
+                    const url = new URL(editingPayment.pdfUrl);
+                    const path = url.pathname || '';
+                    nameFromRecord = decodeURIComponent(path.substring(path.lastIndexOf('/') + 1)) || null;
+                  } catch (e) {
+                    const raw = editingPayment.pdfUrl;
+                    const q = raw.indexOf('?');
+                    const trimmed = q > -1 ? raw.substring(0, q) : raw;
+                    nameFromRecord = decodeURIComponent(trimmed.substring(trimmed.lastIndexOf('/') + 1)) || null;
+                  }
+                }
+                const currentName = nameFromState || nameFromRecord;
+                const displayName = currentName
+                  ? (currentName.length > 20 ? currentName.slice(0, 20) + '…' : currentName)
+                  : null;
+                const noFile = (t('userProfile.expenses.fixedExpenses.table.noFile') || 'Sin archivo');
+                return `${base} (${displayName || noFile})`;
+              })()}
+            </div>
+            <div className="pdf-upload-card" style={{ marginBottom: 16 }}>
+              <label className="pdf-upload-inner" style={{ cursor: 'pointer' }}>
+                <span className="pdf-icon-tile"><FilePdfOutlined /></span>
+                <div className="pdf-texts">
+                  <div className="pdf-title">Seleccionar archivo PDF</div>
+                  <div className="pdf-subtitle">Haz clic para subir un PDF</div>
+                </div>
+                <span className="pdf-arrow">›</span>
+                <input type="file" accept="application/pdf" onChange={handlePdfChange} disabled={uploading} style={{ display: 'none' }} />
+              </label>
+            </div>
+
+            <Button className="modern-submit-btn income-submit" type="primary" htmlType="submit" size="large" block loading={updating}>
+              <EditOutlined /> {t('userProfile.incomes.table.editIncome.saveButton')}
+            </Button>
+          </Form>
+        </div>
       </Modal>
 
     </>

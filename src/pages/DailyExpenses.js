@@ -1,6 +1,6 @@
 // src/pages/DetailedExpenses.js
 import React, { useState, useEffect, useMemo } from 'react';
-import { Spin, Table, Select, Tag, Popconfirm, notification, Input, InputNumber, Divider, Empty, DatePicker, Tooltip } from 'antd';
+import { Spin, Select, notification, Input, Empty, DatePicker, Tooltip, Modal, Form, Button, Typography, Row, Col } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, Timestamp, deleteDoc, doc, updateDoc } from 'firebase/firestore';
@@ -11,7 +11,10 @@ import { useTranslation } from 'react-i18next';
 import { es as esFns, enUS as enUSFns } from 'date-fns/locale';
 import esES from 'antd/es/locale/es_ES';
 import enUS from 'antd/es/locale/en_US';
-import LocalizedDatePicker from '../components/LocalizedDatePicker';
+import CustomDatePicker from '../components/CustomDatePicker';
+import CurrencyTagPicker from '../components/CurrencyTagPicker';
+import ModernDeleteConfirm from '../components/ModernDeleteConfirm';
+import useIsMobile from '../hooks/useIsMobile';
 // Styles
 import '../styles/ExpensesPage.css';
 
@@ -20,8 +23,10 @@ const { Option } = Select;
 const DailyExpenses = () => {
   const [loading, setLoading] = useState(true);
   const [expenses, setExpenses] = useState([]);
-  const [editingId, setEditingId] = useState(null);
-  const [rowEdits, setRowEdits] = useState({});
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [updating, setUpdating] = useState(false);
+  const [form] = Form.useForm();
   const [dateRange, setDateRange] = useState([
     dayjs().startOf('month'),
     dayjs()
@@ -29,11 +34,12 @@ const DailyExpenses = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedCurrency, setSelectedCurrency] = useState(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
-  const [newCategoryInput, setNewCategoryInput] = useState('');
+  
 
   const { currentUser } = useAuth();
   const { t, i18n } = useTranslation();
   const currentLocale = useMemo(() => i18n.language === 'en' ? enUSFns : esFns, [i18n.language]);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -127,283 +133,285 @@ const DailyExpenses = () => {
     }
   };
 
-  const isEditing = record => record.id === editingId;
-
-  const startEdit = record => {
-    setEditingId(record.id);
-    setRowEdits({
-      description: record.description,
-      amount: record.amount,
-      currency: record.currency,
-      category: record.category,
-      timestamp: dayjs(
-        record.timestamp && record.timestamp.seconds
-          ? new Date(record.timestamp.seconds * 1000)
-          : record.timestamp
-      )
+  const openEditModal = (rec) => {
+    setEditingExpense(rec);
+    form.setFieldsValue({
+      description: rec.description,
+      amount: Number(rec.amount),
+      currency: rec.currency,
+      category: rec.category,
+      timestamp: dayjs(rec.timestamp.seconds ? new Date(rec.timestamp.seconds * 1000) : rec.timestamp)
     });
+    setEditModalVisible(true);
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-    setRowEdits({});
-  };
-
-  const saveEdit = async id => {
+  const handleEditSubmit = async (values) => {
     try {
-      const { description, amount, currency, category, timestamp } = rowEdits;
-      if (!timestamp || !dayjs.isDayjs(timestamp)) {
-        notification.error({ message: t('userProfile.expenses.detailed.invalidDate') });
-        return;
-      }
+      setUpdating(true);
       await updateDoc(
-        doc(db, `users/${currentUser.uid}/expenses`, id),
+        doc(db, `users/${currentUser.uid}/expenses`, editingExpense.id),
         {
-          description,
-          amount: Number(amount),
-          currency,
-          category,
-          timestamp: Timestamp.fromDate(timestamp.toDate())
+          description: values.description,
+          amount: Number(values.amount),
+          currency: values.currency,
+          category: values.category,
+          timestamp: Timestamp.fromDate(values.timestamp.toDate())
         }
       );
       notification.success({ message: t('userProfile.expenses.detailed.updated') });
-      cancelEdit();
+      setEditModalVisible(false);
+      setEditingExpense(null);
+      form.resetFields();
     } catch {
       notification.error({ message: t('userProfile.expenses.detailed.updateError') });
+    } finally {
+      setUpdating(false);
     }
   };
 
-  const onChangeCell = (field, value) => setRowEdits(prev => ({
-    ...prev,
-    [field]: field === 'timestamp'
-      ? (value && dayjs.isDayjs(value) ? value : value ? dayjs(value) : prev.timestamp)
-      : value
-  }));
-
-  const handleNewCategory = (value) => {
-    if (value.trim()) {
-      onChangeCell('category', value.trim());
-      setNewCategoryInput('');
-    }
-  };
-
-            const columns = [
-              {
-      title: t('userProfile.expenses.detailed.colDescription'),
-      dataIndex: 'description',
-      key: 'description',
-      width: '30%',
-      onCell: () => ({
-        style: { minWidth: '343px' }
-      }),
-      sorter: (a, b) => a.description.localeCompare(b.description),
-      sortDirections: ['ascend', 'descend'],
-                render: (_, rec) => isEditing(rec)
-                  ? <Input
-                      value={rowEdits.description}
-                      onChange={e => onChangeCell('description', e.target.value)}
-                    />
-                  : rec.description
-              },
-              {
-      title: t('userProfile.expenses.detailed.colAmount'),
-      dataIndex: 'amount',
-      key: 'amount',
-      width: '15%',
-      onCell: () => ({
-        style: { minWidth: '147px' }
-      }),
-      sorter: (a, b) => a.amount - b.amount,
-      sortDirections: ['descend', 'ascend'],
-      render: (t, rec) => isEditing(rec)
-                  ? <InputNumber
-                      value={rowEdits.amount}
-                      onChange={v => onChangeCell('amount', v)}
-                      prefix="$"
-            style={{ width: '100%' }}
-          />
-        : `$ ${Number(t).toFixed(2)}`
-              },
-              {
-      title: t('userProfile.expenses.detailed.colCurrency'),
-      dataIndex: 'currency',
-      key: 'currency',
-      width: '10%',
-      sorter: (a, b) => (a.currency || '').localeCompare(b.currency || ''),
-      sortDirections: ['ascend', 'descend'],
-      render: (_, rec) => isEditing(rec)
-        ? <Select
-                      value={rowEdits.currency}
-                      onChange={v => onChangeCell('currency', v)}
-            style={{ width: '100%' }}
-                    >
-                      <Option value="ARS">ARS</Option>
-                      <Option value="USD">USD</Option>
-                    </Select>
-                  : rec.currency
-              },
-              {
-      title: t('userProfile.expenses.detailed.colCategory'),
-      dataIndex: 'category',
-      key: 'category',
-      width: '15%',
-      sorter: (a, b) => (a.category || '').localeCompare(b.category || ''),
-      sortDirections: ['ascend', 'descend'],
-      render: (_, rec) => isEditing(rec)
-        ? <Select
-            value={rowEdits.category}
-            onChange={v => onChangeCell('category', v)}
-            style={{ width: '100%' }}
-            showSearch
-            allowClear
-            optionFilterProp="children"
-            filterOption={(input, option) =>
-              (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
-            }
-            dropdownRender={menu => (
-              <>
-                {menu}
-                <Divider style={{ margin: '8px 0' }} />
-                <div style={{ padding: '8px' }}>
-                  <Input
-                    placeholder={t('userProfile.expenses.detailed.newCategory')}
-                    value={newCategoryInput}
-                    onChange={e => setNewCategoryInput(e.target.value)}
-                    onPressEnter={() => handleNewCategory(newCategoryInput)}
-                  />
-                </div>
-              </>
-            )}
-          >
-            {categories.map(cat => (
-              <Option key={cat} value={cat}>{cat}</Option>
-            ))}
-          </Select>
-        : rec.category
-    },
-    {
-      title: t('userProfile.expenses.detailed.colDate'),
-      dataIndex: 'timestamp',
-      key: 'timestamp',
-      width: '10%',
-      sorter: (a, b) => b.timestamp.seconds - a.timestamp.seconds,
-      sortDirections: ['descend', 'ascend'],
-      render: (ts, rec) => {
-        const d = new Date(ts.seconds * 1000);
-        const value = (rowEdits.timestamp && dayjs.isDayjs(rowEdits.timestamp)) ? rowEdits.timestamp : dayjs(rowEdits.timestamp || d);
-        return isEditing(rec)
-          ? <LocalizedDatePicker
-              value={value}
-              onChange={value => onChangeCell('timestamp', value)}
-              style={{ width: '100%' }}
-              showTime={{ format: 'HH:mm' }}
-              format="dd/MM/yyyy HH:mm"
-                      />
-          : <Tooltip title={format(d, 'HH:mm:ss')}>
-              {format(d, i18n.language === 'en' ? 'MM/dd/yyyy' : 'dd/MM/yyyy')}
-                      </Tooltip>;
-                }
-              },
-              {
-      title: t('userProfile.expenses.detailed.colActions'),
-      key: 'actions',
-      width: '10%',
-      onCell: () => ({
-        style: { minWidth: '106px' }
-      }),
-      render: (_, rec) => isEditing(rec)
-                  ? (
-          <div style={{ minWidth: '106px' }}>
-                      <Tag
-                        icon={<CheckOutlined />}
-              onClick={() => saveEdit(rec.id)}
-              style={{ cursor: 'pointer', marginRight: 8 }}
-                      />
-                      <Tag
-                        icon={<CloseOutlined />}
-                        onClick={cancelEdit}
-              style={{ cursor: 'pointer' }}
-                      />
-          </div>
-                  )
-                  : (
-                    <>
-                      <Tag
-                        icon={<EditOutlined />}
-              onClick={() => startEdit(rec)}
-              style={{ cursor: 'pointer', marginRight: 8 }}
-                      />
-            <Popconfirm title={t('userProfile.expenses.detailed.deleteConfirm')} onConfirm={() => handleDelete(rec)}>
-              <Tag icon={<DeleteOutlined />} color="red" style={{ cursor: 'pointer' }} />
-                      </Popconfirm>
-                    </>
-                  )
-              }
-            ];
+  
 
             return (
     <div className="container-page">
       <Spin spinning={loading}>
-        <div style={{ marginBottom: 16, display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="filters-bar">
+          <div className="filters-left">
+            <div className="modern-icon blue"><FilterOutlined /></div>
           <DatePicker.RangePicker
+              className="modern-range-picker"
             value={dateRange}
             onChange={setDateRange}
             allowClear
-            placeholder={['Fecha inicial', 'Fecha final']}
-            style={{ minWidth: 280 }}
+              placeholder={[i18n.language === 'en' ? 'Start date' : 'Fecha inicial', i18n.language === 'en' ? 'End date' : 'Fecha final']}
             clearIcon={<span style={{ fontSize: '16px', padding: '4px' }}>✕</span>}
             format={i18n.language === 'en' ? 'MM/DD/YYYY' : 'DD/MM/YYYY'}
           />
+          </div>
+          <div className="filters-right">
           <Select
-            style={{ minWidth: 180 }}
-            placeholder="Filtrar por categoría"
+              className="modern-select"
+              placeholder={t('userProfile.expenses.detailed.filterCategory')}
             value={selectedCategory}
             onChange={setSelectedCategory}
             allowClear
             options={categories.map(c => ({ value: c, label: c }))}
             clearIcon={<span style={{ fontSize: '16px', padding: '4px' }}>✕</span>}
+              style={{ minWidth: 180 }}
           />
           <Select
-            style={{ minWidth: 140 }}
-            placeholder="Filtrar por moneda"
+              className="modern-select"
+              placeholder={t('userProfile.expenses.detailed.filterCurrency')}
             value={selectedCurrency}
             onChange={setSelectedCurrency}
             allowClear
             options={currencies.map(c => ({ value: c, label: c }))}
             clearIcon={<span style={{ fontSize: '16px', padding: '4px' }}>✕</span>}
+              style={{ minWidth: 140 }}
           />
           <Select
-            style={{ minWidth: 180 }}
-            placeholder="Filtrar por método de pago"
+              className="modern-select"
+              placeholder={t('userProfile.expenses.detailed.filterMethod')}
             value={selectedPaymentMethod}
             onChange={setSelectedPaymentMethod}
             allowClear
             options={paymentMethods.map(m => ({ value: m, label: m }))}
             clearIcon={<span style={{ fontSize: '16px', padding: '4px' }}>✕</span>}
+              style={{ minWidth: 200 }}
           />
+          </div>
         </div>
 
-                <Table
-                  bordered
-          dataSource={filteredExpenses.slice().sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)}
-                  columns={columns}
-                  rowKey="id"
-          pagination={{ 
-            pageSize: 8,
-            showSizeChanger: false
-          }}
-          scroll={{ x: true }}
-          locale={{
-            emptyText: <Empty description={t('userProfile.expenses.detailed.noExpenses')} />
-          }}
-        />
-        {filteredExpenses.length > 0 && (
-          <div className="totals-container">
-            <span style={{ color: '#0071de' }}>Total ARS: <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>${totalPesos.toLocaleString(i18n.language === 'en' ? 'en-US' : 'es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></span>
-            <span style={{ color: '#0071de', opacity: 0.5 }}>|</span>
-            <span style={{ color: '#0071de' }}>Total USD: <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>${totalDollars.toLocaleString(i18n.language === 'en' ? 'en-US' : 'es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></span>
+        {/* Modern grid table (matching Incomes style) */}
+        {filteredExpenses.length > 0 ? (
+          <>
+            {!isMobile && (
+            <div className="modern-grid-table daily-grid-table">
+              <div className="modern-grid-header">
+                <div className="col col-desc">{t('userProfile.expenses.detailed.colDescription')}</div>
+                <div className="col col-amt">{t('userProfile.expenses.detailed.colAmount')}</div>
+                <div className="col col-cur">{t('userProfile.expenses.detailed.colCurrency')}</div>
+                <div className="col col-cat">{t('userProfile.expenses.detailed.colCategory')}</div>
+                <div className="col col-date">{t('userProfile.expenses.detailed.colDate')}</div>
+                <div className="col col-act">{t('userProfile.expenses.detailed.colActions')}</div>
+              </div>
+              <div className="modern-grid-body">
+                {filteredExpenses
+                  .slice()
+                  .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
+                  .map((rec) => {
+                    const d = new Date(rec.timestamp.seconds * 1000);
+                    const dateStr = format(d, i18n.language === 'en' ? 'MM/dd/yyyy' : 'dd/MM/yyyy');
+                    return (
+                      <div className="modern-grid-row" key={rec.id}>
+                        <div className="col col-desc" title={rec.description}>{rec.description}</div>
+                        <div className="col col-amt">{`$ ${Number(rec.amount).toFixed(2)}`}</div>
+                        <div className="col col-cur">{rec.currency}</div>
+                        <div className="col col-cat">{rec.category}</div>
+                        <div className="col col-date"><Tooltip title={format(d, 'HH:mm:ss')}>{dateStr}</Tooltip></div>
+                        <div className="col col-act">
+                          <span className="action-chip edit" onClick={() => openEditModal(rec)}><EditOutlined /></span>
+                          <ModernDeleteConfirm
+                            title={t('userProfile.incomes.table.deleteIncome.ask')}
+                            description="Esta acción no se puede deshacer."
+                            okText="Eliminar"
+                            cancelText="Cancelar"
+                            onConfirm={() => handleDelete(rec)}
+                          >
+                            <span className="action-chip delete"><DeleteOutlined /></span>
+                          </ModernDeleteConfirm>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+            )}
+
+            {isMobile && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {filteredExpenses
+                  .slice()
+                  .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
+                  .map((rec) => {
+                    const d = new Date(rec.timestamp.seconds * 1000);
+                    const dateStr = format(d, i18n.language === 'en' ? 'MM/dd/yyyy' : 'dd/MM/yyyy');
+                    const pillBg = rec.currency === 'USD' ? 'rgba(107, 230, 178, 0.12)' : 'rgba(105, 192, 255, 0.12)';
+                    const pillColor = rec.currency === 'USD' ? '#6be6b2' : '#69c0ff';
+                    return (
+                      <div
+                        key={rec.id}
+                        style={{
+                          background: 'linear-gradient(135deg, #2d3748 0%, #1a202c 100%)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: 12,
+                          padding: 12,
+                          boxShadow: '0 6px 18px rgba(0,0,0,0.25)'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ color: '#e2e8f0', fontSize: 12 }}>{dateStr}</div>
+                          <span style={{
+                            background: pillBg,
+                            color: pillColor,
+                            border: '1px solid rgba(255,255,255,0.12)',
+                            borderRadius: 999,
+                            padding: '4px 10px',
+                            fontSize: 12,
+                            fontWeight: 700
+                          }}>{rec.currency}</span>
+                        </div>
+                        <div style={{ marginTop: 6, color: '#fff', fontWeight: 700, fontSize: 14 }} title={rec.description}>{rec.description}</div>
+                        <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ color: pillColor, fontSize: 16, fontWeight: 800 }}>
+                            ${Number(rec.amount).toFixed(2)}
+                          </div>
+                          <div style={{ display: 'flex', gap: 10 }}>
+                            <span className="action-chip edit" onClick={() => openEditModal(rec)}><EditOutlined /></span>
+                            <ModernDeleteConfirm
+                              title={t('userProfile.incomes.table.deleteIncome.ask')}
+                              description="Esta acción no se puede deshacer."
+                              okText="Eliminar"
+                              cancelText="Cancelar"
+                              onConfirm={() => handleDelete(rec)}
+                            >
+                              <span className="action-chip delete" style={{ cursor: 'pointer' }}><DeleteOutlined /></span>
+                            </ModernDeleteConfirm>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
+
+            <div className="modern-card-footer">
+              <div className="totals">
+                <span className="total-label" style={{ textTransform: 'uppercase' }}>{t('userProfile.incomes.table.totalARS')}</span>
+                <span className="total-value">${totalPesos.toLocaleString(i18n.language === 'en' ? 'en-US' : 'es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="divider">|</span>
+                <span className="total-label" style={{ textTransform: 'uppercase' }}>{t('userProfile.incomes.table.totalUSD')}</span>
+                <span className="total-value">${totalDollars.toLocaleString(i18n.language === 'en' ? 'en-US' : 'es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div style={{ marginTop: 24 }}>
+            <Empty description={t('userProfile.expenses.detailed.noExpenses')} />
                 </div>
         )}
+
+        {/* Edit Expense Modal (modern style) */}
+        <Modal
+          className="edit-income-modal"
+          open={editModalVisible}
+          footer={null}
+          onCancel={() => { setEditModalVisible(false); setEditingExpense(null); form.resetFields(); }}
+          centered
+          width={520}
+        >
+          <div className="edit-income-modal-content">
+            <div className="modal-header">
+              <div className="modal-icon-container income-icon">
+                <EditOutlined />
+              </div>
+              <div className="modal-title-section">
+                <Typography.Title level={3} className="modal-title">
+                  {t('userProfile.expenses.detailed.editTitle') || 'Editar gasto'}
+                </Typography.Title>
+                <Typography.Paragraph className="modal-subtitle">
+                  {t('userProfile.expenses.detailed.editSubtitle') || 'Modifica los datos del gasto'}
+                </Typography.Paragraph>
+              </div>
+            </div>
+
+            <Form form={form} layout="vertical" onFinish={handleEditSubmit} className="edit-income-form">
+              <Row gutter={[16, 16]}>
+                <Col xs={24}>
+                  <Form.Item name="timestamp" label={t('userProfile.incomes.table.editIncome.date')} rules={[{ required: true }]} className="form-item-modern">
+                    <CustomDatePicker
+                      value={form.getFieldValue('timestamp')}
+                      onChange={(date) => form.setFieldsValue({ timestamp: date })}
+                      placeholder={t('userProfile.incomes.table.editIncome.date') || 'Seleccionar fecha'}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col xs={24}>
+                  <Form.Item name="description" label={t('userProfile.expenses.detailed.colDescription')} rules={[{ required: true }]} className="form-item-modern">
+                    <Input className="modern-input" />
+                  </Form.Item>
+                </Col>
+                <Col xs={12}>
+                  <Form.Item name="amount" label={t('userProfile.expenses.detailed.colAmount')} rules={[{ required: true }]} className="form-item-modern">
+                    <Input className="modern-input" type="number" prefix={<DollarOutlined className="input-icon" />} />
+                  </Form.Item>
+                </Col>
+                <Col xs={12}>
+                  <Form.Item name="currency" label={t('userProfile.expenses.detailed.colCurrency')} rules={[{ required: true }]} className="form-item-modern">
+                    <CurrencyTagPicker />
+                  </Form.Item>
+                </Col>
+                <Col xs={24}>
+                  <Form.Item name="category" label={t('userProfile.expenses.detailed.colCategory')} rules={[{ required: true }]} className="form-item-modern">
+                    <Select
+                      className="modern-select"
+                      showSearch
+                      allowClear
+                      style={{ width: '100%' }}
+                      options={categories.map(c => ({ value: c, label: c }))}
+                      placeholder={t('userProfile.expenses.detailed.colCategory')}
+                      optionFilterProp="label"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Button className="modern-submit-btn income-submit" type="primary" htmlType="submit" size="large" block loading={updating}>
+                <EditOutlined />
+                {t('userProfile.incomes.table.editIncome.saveButton')}
+              </Button>
+            </Form>
+          </div>
+        </Modal>
       </Spin>
     </div>
   );

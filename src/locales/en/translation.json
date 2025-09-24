@@ -123,6 +123,8 @@
         "colTime": "Time",
         "colDate": "Date",
         "colActions": "Actions",
+        "editTitle": "Edit Expense",
+        "editSubtitle": "Modify the expense details",
         "deleteConfirm": "Delete?",
         "deleted": "Expense deleted",
         "deleteError": "Error deleting",
@@ -148,12 +150,17 @@
         "totalARS": "Total ARS:",
         "totalUSD": "Total USD:",
         "noFixedExpenses": "No fixed expenses recorded this month.",
+        "editModal": {
+            "subtitle": "Edit the fixed expense details"
+        },
         "table": {
             "title": "Title",
             "amountUsd": "Amount USD",
             "amountArs": "Amount ARS",
             "paid": "Paid",
             "info": "Info",
+            "pdfFile": "PDF File",
+            "noFile": "No file",
             "addInfo": "Add Information",
             "placeHolderInfo": "Fixed expense information",
             "save": "Save",
@@ -167,6 +174,9 @@
             },
             "delete": {
                 "ask": "Delete fixed expense?",
+                "description": "This action cannot be undone.",
+                "confirmButton": "Delete",
+                "cancelButton": "Cancel",
                 "deleted": "Fixed expense deleted",
                 "error": "Error deleting"
             },

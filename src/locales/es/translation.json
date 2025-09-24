@@ -123,6 +123,8 @@
         "colTime": "Hora",
         "colDate": "Fecha",
         "colActions": "Acciones",
+        "editTitle": "Editar gasto",
+        "editSubtitle": "Modifica los datos del gasto",
         "deleteConfirm": "¿Eliminar?",
         "deleted": "Gasto eliminado",
         "deleteError": "Error al eliminar",
@@ -148,12 +150,17 @@
         "totalARS": "Total ARS:",
         "totalUSD": "Total USD:",
         "noFixedExpenses": "No hay gastos fijos registrados en este mes",
+        "editModal": {
+            "subtitle": "Edita los detalles del gasto fijo"
+        },
         "table": {
             "title": "Título",
             "amountUsd": "Monto USD",
             "amountArs": "Monto ARS",
             "paid": "Pago",
             "info": "Info",
+            "pdfFile": "Archivo PDF",
+            "noFile": "Sin archivo",
             "addInfo": "Agregar Información",
             "placeHolderInfo": "Información del gasto fijo",
             "save": "Guardar",
@@ -167,6 +174,9 @@
             },
             "delete": {
                 "ask": "¿Eliminar gasto fijo?",
+                "description": "Esta acción no se puede deshacer.",
+                "confirmButton": "Eliminar",
+                "cancelButton": "Cancelar",
                 "deleted": "Gasto fijo eliminado",
                 "error": "Error al eliminar"
             },

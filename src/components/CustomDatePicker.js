@@ -27,6 +27,15 @@ const CustomDatePicker = ({ value, onChange, placeholder = "Seleccionar fecha", 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Sincronizar cuando cambia la prop "value" (p.ej., al abrir modal de edición)
+  useEffect(() => {
+    if (value) {
+      const d = dayjs(value);
+      setSelectedDate(d);
+      setCurrentMonth(d);
+    }
+  }, [value]);
+
   // Generar días del mes
   const generateDays = () => {
     const startOfMonth = currentMonth.startOf('month');
