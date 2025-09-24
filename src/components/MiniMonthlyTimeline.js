@@ -247,7 +247,7 @@ const MiniMonthlyTimeline = ({ expensesByMonth, onMonthClick, selectedMonth }) =
               <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '12px', marginBottom: '4px' }}>
                 {t('userProfile.dashboard.monthlyTimeline.averageMonthly')}
               </div>
-              <div style={{ color: '#52c41a', fontSize: '16px', fontWeight: '600' }}>
+              <div style={{ color: 'rgb(16, 185, 129)', fontSize: '16px', fontWeight: '600' }}>
                 ${formatCompactNumber(maxTotal / 12)}
               </div>
             </div>

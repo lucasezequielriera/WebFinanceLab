@@ -295,7 +295,7 @@ const DailyExpensesChart = ({ userId }) => {
               <div style={{
                 fontSize: '16px',
                 fontWeight: '700',
-                color: stats.balance >= 0 ? '#52c41a' : '#ff4d4f',
+                color: stats.balance >= 0 ? 'rgb(16, 185, 129)' : 'rgb(239, 68, 68)',
                 marginBottom: '4px',
               }}>
                 {stats.balance >= 0 ? '+' : ''}${formatCompactNumber(Math.abs(stats.balance))}
